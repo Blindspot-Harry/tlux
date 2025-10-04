@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Todos os Modelos — T-Lux{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="card card-tlux p-3 mt-4">
+    <h3 class="gold-text">📱 Todos os Modelos de iPhone</h3>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-gold mb-3">⬅ Voltar</a>
+
+    <div class="row">
+      {% for modelo, preco in modelos.items() %}
+        <div class="col-md-4 mb-3">
+          <div class="card p-3 h-100 shadow-sm">
+            <strong>{{ modelo }}</strong>
+            <div class="text-muted small">Preço: {{ "%.0f"|format(preco) }} MZN</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

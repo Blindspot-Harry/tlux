@@ -1,0 +1,196 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>T-Lux | {% block title %}{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --tlux-blue: #0057b8;
+      --tlux-gold: #ffb81c;
+      --tlux-white: #ffffff;
+      --tlux-dark: #004494;
+    }
+
+    body {
+      background: var(--tlux-white);
+      font-family: "Inter", "Segoe UI", Arial, sans-serif;
+      padding-top: 78px;
+      color: var(--tlux-blue);
+    }
+
+    /* =======================
+       NAVBAR
+    ======================= */
+    .navbar {
+      background: linear-gradient(90deg, var(--tlux-blue), var(--tlux-dark));
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+    .navbar-brand {
+      color: var(--tlux-gold) !important;
+      font-weight: 800;
+      font-size: 1.5rem;
+      letter-spacing: 0.8px;
+    }
+    .nav-link {
+      color: #fff !important;
+      font-weight: 600;
+      transition: color 0.2s ease-in-out;
+    }
+    .nav-link:hover {
+      color: var(--tlux-gold) !important;
+    }
+    .navbar-toggler {
+      border: none;
+    }
+    .navbar-toggler-icon {
+      filter: invert(100%);
+    }
+
+    /* =======================
+       BOTÕES
+    ======================= */
+    .btn-tlux {
+      background: var(--tlux-blue);
+      border: 0;
+      color: #fff;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: .6rem 1rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: all .25s;
+    }
+    .btn-tlux:hover {
+      background: var(--tlux-dark);
+      transform: translateY(-2px);
+    }
+    .btn-outline-gold {
+      border: 2px solid var(--tlux-gold);
+      color: var(--tlux-gold);
+      font-weight: 700;
+      border-radius: 10px;
+      transition: all .25s;
+    }
+    .btn-outline-gold:hover {
+      background: var(--tlux-gold);
+      color: #000;
+      transform: translateY(-2px);
+    }
+
+    /* =======================
+       TEXTO / CABEÇALHOS
+    ======================= */
+    .gold-text { color: var(--tlux-gold); font-weight: 700; }
+    h1,h2,h3,h4,h5 { color: var(--tlux-blue); font-weight: 700; }
+
+    /* =======================
+       CARDS
+    ======================= */
+    .card-tlux {
+      border-radius: 14px;
+      box-shadow: 0 6px 18px rgba(13,110,253,0.08);
+      border: 1px solid #e9ecef;
+      padding: 1.25rem;
+      background: #fff;
+      transition: transform 0.2s ease-in-out;
+    }
+    .card-tlux:hover {
+      transform: translateY(-3px);
+    }
+
+    /* =======================
+       BADGES
+    ======================= */
+    .badge-gold {
+      background: var(--tlux-gold);
+      color: #000;
+      font-weight: 700;
+    }
+
+    /* =======================
+       UTILITÁRIOS
+    ======================= */
+    .small-muted {
+      color: #6c757d;
+      font-size:.9rem;
+    }
+
+    footer {
+      margin-top: 50px;
+      padding: 18px;
+      background: #f8f9fa;
+      text-align: center;
+      font-size: .9rem;
+      color: #6c757d;
+      border-top: 1px solid #e5e5e5;
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('dashboard') }}">⚡ T-Lux</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-center">
+          {% if session.get("user_id") %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Painel</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('verificar_serial') }}">Desbloqueio</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('choose_package') }}">Pacotes</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('services') }}">Serviços</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('orders') }}">Meus Pedidos</a></li>
+            {% if session.get("is_admin") %}
+              <li class="nav-item">
+                <a class="nav-link text-warning fw-bold" href="{{ url_for('admin_orders') }}">
+                  ⚡ Admin - Pedidos
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-warning fw-bold" href="{{ url_for('admin_dashboard') }}">
+                  ⚡ Painel Admin
+                </a>
+              </li>
+            {% endif %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">🚪 Sair</a></li>
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Registrar</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ALERTAS -->
+  <div class="container mt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- CONTEÚDO -->
+  <div class="container my-4">
+    {% block content %}{% endblock %}
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 T-Lux — Blindspot. Todos os direitos reservados.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

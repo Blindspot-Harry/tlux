@@ -1,0 +1,80 @@
+<!-- templates/flutterwave_pay.html -->
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>T-Lux - Pagamento</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://checkout.flutterwave.com/v3.js"></script>
+  <style>
+    body {
+      background: #0a0f2c;
+      color: #fff;
+    }
+    .card {
+      background: #11193f;
+      border-radius: 12px;
+      border: 1px solid #d4af37;
+      text-align: center;
+    }
+    .btn-tlux {
+      background: #d4af37;
+      color: #0a0f2c;
+      font-weight: bold;
+    }
+    .btn-tlux:hover {
+      background: #b9972f;
+      color: white;
+    }
+    h2, h4 {
+      color: #d4af37;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card p-4">
+          <h2 class="mb-3">💳 Pagamento T-Lux</h2>
+          <p>Referência: <strong>{{ tx_ref }}</strong></p>
+          {% if pacote %}
+            <p>Pacote: <strong>{{ pacote }}</strong></p>
+          {% elif modelo %}
+            <p>Desbloqueio: <strong>{{ modelo }}</strong></p>
+          {% endif %}
+          <h4 class="mt-3">Valor: {{ amount }} MZN (~{{ amount // 90 }} USD)</h4>
+
+          <button class="btn btn-tlux w-100 mt-4" id="payBtn">Pagar Agora</button>
+
+          <div class="text-center mt-3">
+            <a href="{{ url_for('dashboard') }}" class="text-warning">⬅ Cancelar e voltar</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("payBtn").addEventListener("click", function () {
+      FlutterwaveCheckout({
+        public_key: "{{ flw_public_key }}",
+        tx_ref: "{{ tx_ref }}",
+        amount: {{ amount }},
+        currency: "MZN",
+        payment_options: "card, mobilemoney, ussd",
+        redirect_url: "{{ redirect_url }}",
+        customer: {
+          email: "{{ user.email if user else 'cliente@tlux.com' }}",
+          name: "{{ user.username if user else 'Cliente T-Lux' }}"
+        },
+        customizations: {
+          title: "T-Lux",
+          description: "Pagamento de {{ pacote if pacote else 'Desbloqueio' }}",
+          logo: "https://i.imgur.com/E0yJ0hT.png"  <!-- podes trocar pelo logo real -->
+        }
+      });
+    });
+  </script>
+</body>
+</html>

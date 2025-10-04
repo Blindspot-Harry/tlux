@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="box-error">
+  <h2>Erro</h2>
+  <p>Ocorreu um problema com a operação. Tenta novamente mais tarde.</p>
+  <a class="btn" href="{{ url_for('index') }}">Voltar</a>
+</div>
+{% endblock %}

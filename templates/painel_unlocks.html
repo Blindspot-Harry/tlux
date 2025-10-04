@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">📱 Meus Desbloqueios</h2>
+
+    <table class="table table-striped table-hover" id="unlock-table">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Modelo</th>
+                <th>IMEI</th>
+                <th>Preço Cliente (USD)</th>
+                <th>Preço Fornecedor (USD)</th>
+                <th>Lucro (USD)</th>
+                <th>Order ID</th>
+                <th>Status</th>
+                <th>Full Signal</th>
+                <th>Criado em</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Linhas preenchidas via JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal de instruções Full Signal -->
+<div class="modal fade" id="fullSignalModal" tabindex="-1" aria-labelledby="fullSignalModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-dark">
+        <h5 class="modal-title" id="fullSignalModalLabel">🔧 Como Restaurar para Full Signal</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Mensagem preenchida dinamicamente -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function atualizarDesbloqueios() {
+    try {
+        const response = await fetch("/painel/unlocks/status");
+        const data = await response.json();
+        const tbody = document.querySelector("#unlock-table tbody");
+        tbody.innerHTML = "";
+
+        data.desbloqueios.forEach(d => {
+            // Badge de status com emojis
+            let badgeClass = "bg-warning text-dark";
+            let statusEmoji = "⏳";
+            if(d.status === "success") {
+                badgeClass = "bg-success";
+                statusEmoji = "✅";
+            } else if(d.status === "failed") {
+                badgeClass = "bg-danger";
+                statusEmoji = "❌";
+            }
+
+            // Badge Full Signal com modal
+            let fullSignalClass = d.full_signal === "Sim" ? "bg-success text-white" : "bg-info text-dark";
+            let fullSignalEmoji = d.full_signal === "Sim" ? "🔓" : "🔧";
+
+            let fullSignalContent = d.full_signal === "Sim"
+                ? `${fullSignalEmoji} ${d.full_signal}`
+                : `<a href="#" data-bs-toggle="modal" data-bs-target="#fullSignalModal" class="badge ${fullSignalClass}" data-message="${d.full_signal_message}">${fullSignalEmoji} ${d.full_signal}</a>`;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${d.tx_id}</td>
+                    <td>${d.modelo}</td>
+                    <td>${d.imei}</td>
+                    <td>$ ${d.preco_cliente?.toFixed(2) || "0.00"}</td>
+                    <td>$ ${d.preco_fornecedor?.toFixed(2) || "0.00"}</td>
+                    <td><strong class="text-success">$ ${d.lucro?.toFixed(2) || "0.00"}</strong></td>
+                    <td>${d.order_id || "-"}</td>
+                    <td>
+                        <span class="badge ${badgeClass}">${statusEmoji} ${d.status}</span>
+                        <br><small>${d.message || ""}</small>
+                    </td>
+                    <td>${fullSignalContent}</td>
+                    <td>${d.created_at}</td>
+                </tr>
+            `;
+        });
+    } catch (err) {
+        console.error("Erro ao atualizar desbloqueios:", err);
+    }
+}
+
+// Atualiza a tabela a cada 10 segundos
+atualizarDesbloqueios();
+setInterval(atualizarDesbloqueios, 10000);
+
+// Popula modal com mensagem correta
+var fullSignalModal = document.getElementById('fullSignalModal')
+fullSignalModal.addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget
+    var message = button.getAttribute('data-message')
+    fullSignalModal.querySelector('.modal-body').innerHTML = `<p>${message}</p>`;
+})
+</script>
+{% endblock %}

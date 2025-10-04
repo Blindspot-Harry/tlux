@@ -1,0 +1,67 @@
+<!-- templates/choose_package.html -->
+{% extends "base.html" %}
+{% block title %}🎁 Escolher Pacote — T-Lux{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+
+  <!-- Cabeçalho -->
+  <div class="text-center mb-4">
+    <h2 class="gold-text fw-bold">🎁 Escolha o seu Pacote</h2>
+    <p class="small-muted">Ative sua conta adquirindo uma <strong>Chave de Acesso</strong> válida.</p>
+  </div>
+
+  <!-- Mensagens de feedback -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="col-12 mb-3">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Lista de pacotes -->
+  <div class="row justify-content-center">
+    {% if pacotes %}
+      {% for nome, info in pacotes.items() %}
+        <div class="col-md-6 col-lg-3 mb-4">
+          <div class="card card-tlux p-3 h-100 shadow-sm border-0">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h4 class="mb-0 text-gold fw-bold">{{ nome }}</h4>
+              <span class="badge bg-warning text-dark">{{ info.duration_days }} dias</span>
+            </div>
+
+            <p class="mt-2 mb-1 fs-5">
+              💵 <strong>${{ "%.2f"|format(info.price) }} USD</strong>
+            </p>
+            <p class="small-muted mb-3">🌍 Pagamento internacional em USD</p>
+            
+            <!-- Botão Stripe -->
+            <form method="POST" action="{{ url_for('pagar_pacote') }}">
+              <input type="hidden" name="pacote" value="{{ nome }}">
+              <button type="submit" class="btn btn-brighton w-100 fw-bold">
+                💳 Ativar {{ nome }}
+              </button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="col-12 text-center">
+        <p class="text-muted">⚠️ Nenhum pacote disponível no momento.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Stripe.js -->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  const stripe = Stripe("{{ publishable_key }}");
+</script>
+{% endblock %}

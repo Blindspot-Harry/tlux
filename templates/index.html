@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>🌍 Bem-vindo ao T-Lux</h2>
+<p>Escolha seu idioma e país para começar:</p>
+<form>
+    <label>Idioma:</label>
+    <select name="language">
+        {% for lang in languages %}
+        <option value="{{lang}}">{{lang.upper()}}</option>
+        {% endfor %}
+    </select>
+    <label>País:</label>
+    <select name="country">
+        {% for country in countries %}
+        <option value="{{country}}">{{country}}</option>
+        {% endfor %}
+    </select>
+</form>
+
+<h3>📱 Modelos de iPhone disponíveis</h3>
+<div>
+    {% for model, price in modelos.items() %}
+        <div class="card">
+            <strong>{{model}}</strong> - 💰 {{price}} MZN
+            {% if session.get('user_id') %}
+                <form action="{{ url_for('unlock', modelo=model) }}" method="POST">
+                    <button class="btn btn-success">Desbloquear 🔓</button>
+                </form>
+            {% else %}
+                <span>Login necessário</span>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

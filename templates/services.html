@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">📋 Serviços Disponíveis</h2>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Grupo</th>
+        <th>Serviço</th>
+        <th>Crédito</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for servico in servicos %}
+      <tr>
+        <td>{{ servico['group_name'] }}</td>
+        <td>{{ servico['nome'] }}</td>
+        <td>{{ servico['credit'] }} USD</td>
+        <td>
+          <a href="{{ url_for('comprar_servico', service_id=servico['id']) }}"
+             class="btn btn-success btn-sm">
+            Comprar
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+

@@ -1,0 +1,39 @@
+<!-- templates/unlock.html -->
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>T-Lux | Desbloqueio de iPhone</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Desbloqueio de iPhone</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('unlock') }}" method="POST">
+            <label for="modelo">Modelo do iPhone:</label>
+            <select name="modelo" id="modelo" required>
+                {% for modelo, preco in modelos.items() %}
+                    <option value="{{ modelo }}">{{ modelo }} - {{ preco }} MZN</option>
+                {% endfor %}
+            </select>
+
+            <label for="imei">IMEI do iPhone:</label>
+            <input type="text" name="imei" id="imei" placeholder="Digite o IMEI" required>
+
+            <button type="submit">Solicitar Desbloqueio</button>
+        </form>
+
+        <br>
+        <a href="{{ url_for('dashboard') }}">⬅ Voltar ao Dashboard</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!-- templates/verificar_serial.html -->
+{% extends "base.html" %}
+{% block title %}📱 Verificar Serial / IMEI — T-Lux{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card card-tlux p-4 shadow-sm">
+        
+        <!-- Cabeçalho -->
+        <h3 class="gold-text mb-3 text-center">📱 Verificar Serial / IMEI</h3>
+        <p class="text-muted text-center mb-4">
+          Digite abaixo o número de série ou IMEI do dispositivo para identificar o modelo e prosseguir com o desbloqueio.
+        </p>
+
+        <!-- Mensagens de feedback -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="mb-3">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Formulário -->
+        <form method="POST" action="{{ url_for('verificar_serial') }}">
+          <div class="mb-3">
+            <label for="serial" class="form-label fw-bold">🔑 Serial / IMEI</label>
+            <input 
+              id="serial" 
+              name="serial" 
+              type="text" 
+              class="form-control" 
+              placeholder="Ex: F2LTXUOTHX9F ou 353915101234567" 
+              required 
+            />
+            <small class="form-text text-muted">
+              Digite a serial ou IMEI do iPhone que deseja verificar.
+            </small>
+          </div>
+
+          <div class="mb-3">
+            <label for="modelo" class="form-label fw-bold">📲 Modelo (opcional)</label>
+            <select id="modelo" name="modelo" class="form-select">
+              <option value="">— Detectar automaticamente —</option>
+              {% if modelos %}
+                {% for modelo, preco in modelos.items() %}
+                  <option value="{{ modelo }}">{{ modelo }} — {{ preco }} USD</option>
+                {% endfor %}
+              {% endif %}
+            </select>
+            <small class="form-text text-muted">
+              Caso saiba o modelo, selecione manualmente. Senão, deixe em "Detectar automaticamente".
+            </small>
+          </div>
+
+          <button class="btn btn-brighton w-100 fw-bold" type="submit">🚀 Verificar e Continuar</button>
+        </form>
+
+        <!-- Voltar -->
+        <div class="text-center mt-3">
+          <a href="{{ url_for('dashboard') }}" class="btn btn-outline-gold">⬅ Voltar ao Dashboard</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

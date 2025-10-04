@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verificação de E-mail — T-Lux</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      padding: 30px 25px;
+      text-align: center;
+    }
+    h2 {
+      color: #d4af37;
+      margin-bottom: 15px;
+    }
+    p {
+      color: #444;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 25px;
+      padding: 14px 28px;
+      background: #d4af37;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    .btn:hover {
+      background: #0d6efd;
+      color: #fff;
+    }
+    .link-alt {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #0d6efd;
+      word-break: break-all;
+    }
+    .footer {
+      margin-top: 35px;
+      font-size: 12px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>✨ Bem-vindo ao <span style="color:#0d6efd;">T-Lux</span></h2>
+    
+    <p>Olá <strong>{{ first_name }}</strong>,</p>
+    <p>
+      Obrigado por se registrar no <strong>T-Lux</strong>!  
+      Para ativar sua conta e ter acesso a todos os recursos, clique no botão abaixo:
+    </p>
+
+    <a href="{{ link_verificacao }}" class="btn">✅ Verificar E-mail</a>
+
+    <p class="link-alt">
+      Se o botão não funcionar, copie e cole este link no seu navegador:<br>
+      {{ link_verificacao }}
+    </p>
+
+    <p class="footer">
+      Este link expira em 48 horas.<br>
+      © 2025 T-Lux — Blindspot.
+    </p>
+  </div>
+</body>
+</html>

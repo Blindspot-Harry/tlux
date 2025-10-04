@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Resultado do Desbloqueio — T-Lux{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="card card-tlux p-4 mt-4 text-center">
+    <h3 class="gold-text">Resultado do Desbloqueio</h3>
+
+    <p><strong>Modelo:</strong> {{ modelo }}</p>
+    <p><strong>IMEI:</strong> {{ imei }}</p>
+
+    <p><strong>Tipo:</strong>
+      {% if sem_sinal %}
+        🔕 SEM SINAL
+      {% else %}
+        📶 COM SINAL
+      {% endif %}
+    </p>
+
+    <p><strong>Preço Pago:</strong> {{ preco }} USD</p>
+
+    <p><strong>Status:</strong>
+      {% if status == "success" %}
+        <span class="badge bg-success">✅ Sucesso</span>
+      {% elif status == "pending" %}
+        <span class="badge bg-warning text-dark">⏳ Pendente</span>
+      {% else %}
+        <span class="badge bg-danger">❌ Falhou</span>
+      {% endif %}
+    </p>
+
+    {% if order_id %}
+      <p><strong>Order ID:</strong> {{ order_id }}</p>
+    {% endif %}
+
+    <p>{{ message }}</p>
+
+    <div class="mt-3 d-flex justify-content-center gap-2">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-tlux">⬅ Voltar ao Painel</a>
+      <a href="{{ url_for('unlock_page') }}" class="btn btn-outline-gold">🔄 Novo Desbloqueio</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

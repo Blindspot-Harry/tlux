@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — T-Lux{% endblock %}
+
+{% block content %}
+<div class="container admin-dashboard">
+  <h2 class="text-gold mb-4">⚡ Painel Administrativo T-Lux</h2>
+
+  <!-- Estatísticas principais -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card card-tlux text-center p-3">
+        <h5 class="text-gold">👥 Usuários</h5>
+        <p class="display-6">{{ total_users }}</p>
+        <small class="small-muted">Registrados</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card card-tlux text-center p-3">
+        <h5 class="text-gold">💳 Transações</h5>
+        <p class="display-6">{{ total_transactions }}</p>
+        <small class="small-muted">No sistema</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card card-tlux text-center p-3">
+        <h5 class="text-gold">🔓 Desbloqueios</h5>
+        <p class="display-6">{{ total_unlocks }}</p>
+        <small class="small-muted">Executados</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card card-tlux text-center p-3">
+        <h5 class="text-gold">💰 Receita</h5>
+        <p class="display-6">{{ receita_total or 0 }} MZN</p>
+        <small class="small-muted">Total arrecadado</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desbloqueios pendentes -->
+  <div class="card card-tlux p-3 mb-4">
+    <h5 class="text-gold mb-3">⚠️ Desbloqueios Pendentes</h5>
+    {% if pendentes %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Usuário</th>
+              <th>Modelo</th>
+              <th>IMEI</th>
+              <th>Status</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in pendentes %}
+              <tr>
+                <td>#{{ u["id"] }}</td>
+                <td>{{ u["user_email"] }}</td>
+                <td>{{ u["modelo"] or "N/A" }}</td>
+                <td>{{ u["imei"] or "—" }}</td>
+                <td><span class="badge bg-warning text-dark">⏳ Pendente</span></td>
+                <td>
+                  <a href="{{ url_for('admin_unlocks') }}" class="btn btn-sm btn-tlux">Processar</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="small-muted">Nenhum desbloqueio pendente.</p>
+    {% endif %}
+  </div>
+
+  <div class="row">
+    <!-- Últimos usuários -->
+    <div class="col-lg-6 mb-4">
+      <div class="card card-tlux p-3 h-100">
+        <h5 class="text-gold mb-3">👤 Últimos Usuários Registrados</h5>
+        {% if ultimos_usuarios %}
+          <ul class="list-group list-group-flush">
+            {% for u in ultimos_usuarios %}
+              <li class="list-group-item d-flex justify-content-between">
+                <div>
+                  <strong>{{ u["first_name"] }} {{ u["last_name"] }}</strong>
+                  <div class="small-muted">{{ u["email"] }}</div>
+                </div>
+                <span class="small-muted">{{ u["created_at"] }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="small-muted">Nenhum usuário encontrado.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Últimos desbloqueios -->
+    <div class="col-lg-6 mb-4">
+      <div class="card card-tlux p-3 h-100">
+        <h5 class="text-gold mb-3">🔓 Últimos Desbloqueios</h5>
+        {% if ultimos_desbloqueios %}
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead><tr><th>Data</th><th>Usuário</th><th>Modelo</th><th>Status</th></tr></thead>
+              <tbody>
+                {% for d in ultimos_desbloqueios %}
+                  <tr>
+                    <td class="small-muted">{{ d["data_hora"] }}</td>
+                    <td>{{ d["user_email"] or "—" }}</td>
+                    <td>{{ d["modelo"] or "N/A" }}</td>
+                    <td>
+                      {% if d["status"] in ["success","successful"] %}
+                        <span class="badge bg-success">✅ Sucesso</span>
+                      {% elif d["status"] == "pending" %}
+                        <span class="badge bg-warning text-dark">⏳ Pendente</span>
+                      {% else %}
+                        <span class="badge bg-danger">❌ Falhou</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="small-muted">Nenhum desbloqueio registrado.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Transações recentes -->
+    <div class="col-lg-6 mb-4">
+      <div class="card card-tlux p-3 h-100">
+        <h5 class="text-gold mb-3">💳 Transações Recentes</h5>
+        {% if ultimas_transacoes %}
+          <ul class="list-group list-group-flush">
+            {% for tx in ultimas_transacoes %}
+              <li class="list-group-item d-flex justify-content-between">
+                <div>
+                  <strong>{{ tx["purpose"]|capitalize }}</strong>
+                  <div class="small-muted">{{ tx["amount"] }} MZN</div>
+                </div>
+                <div class="text-end">
+                  <span class="badge
+                    {% if tx["status"] in ["success","successful"] %}bg-success
+                    {% elif tx["status"] == "pending" %}bg-warning text-dark
+                    {% else %}bg-danger{% endif %}">
+                    {{ tx["status"] }}
+                  </span>
+                  <div class="small-muted">{{ tx["created_at"] }}</div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="small-muted">Nenhuma transação registrada.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Logs do sistema -->
+    <div class="col-lg-6 mb-4">
+      <div class="card card-tlux p-3 h-100">
+        <h5 class="text-gold mb-3">📋 Últimos Logs</h5>
+        {% if ultimos_logs %}
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead><tr><th>Data</th><th>Usuário</th><th>Ação</th></tr></thead>
+              <tbody>
+                {% for log in ultimos_logs %}
+                  <tr>
+                    <td class="small-muted">{{ log["data_hora"] }}</td>
+                    <td>{{ log["user_email"] or "—" }}</td>
+                    <td>{{ log["acao"] or log["status"] }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="small-muted">Nenhum log disponível.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

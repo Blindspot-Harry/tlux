@@ -1,0 +1,28 @@
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Usuário</th>
+        <th>Mensagem</th>
+        <th>Status</th>
+        <th>Ação</th>
+    </tr>
+    {% for req in requests %}
+    <tr>
+        <td>{{ req['id'] }}</td>
+        <td>{{ req['user_email'] }}</td>
+        <td>{{ req['mensagem'] }}</td>
+        <td>{{ req['status'] }}</td>
+        <td>
+            <form method="POST">
+                <input type="hidden" name="request_id" value="{{ req['id'] }}">
+                <select name="status">
+                    <option value="pendente" {% if req['status']=='pendente' %}selected{% endif %}>Pendente</option>
+                    <option value="em andamento" {% if req['status']=='em andamento' %}selected{% endif %}>Em andamento</option>
+                    <option value="concluido" {% if req['status']=='concluido' %}selected{% endif %}>Concluído</option>
+                </select>
+                <button type="submit">Atualizar</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>

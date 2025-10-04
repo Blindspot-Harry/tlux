@@ -1,0 +1,21 @@
+<!-- templates/obter_tecnico.html -->
+{% extends "base.html" %}
+{% block title %}Acesso Técnico{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card card-tlux p-4">
+      <h3 class="gold-text mb-3">Solicitar Acesso Técnico</h3>
+      <p class="small-muted">Descrição: nossa equipa técnica irá analisar seu pedido e entrar em contacto.</p>
+      <form method="POST" action="{{ url_for('obter_tecnico') }}">
+        <div class="mb-3">
+          <label class="form-label">Mensagem (opcional)</label>
+          <textarea name="message" class="form-control" rows="4"></textarea>
+        </div>
+        <button class="btn btn-tlux w-100" type="submit">Enviar Solicitação</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

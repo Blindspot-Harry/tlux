@@ -1,0 +1,202 @@
+/* ===========================
+   Tema T-Lux Brighton
+   Paleta: Branco / Azul / Dourado
+=========================== */
+body {
+    background-color: #ffffff; /* fundo branco */
+    color: #0057b8;           /* texto padrão azul */
+    font-family: "Segoe UI", Arial, sans-serif;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+}
+
+/* ===========================
+   Texto & Cores
+=========================== */
+.text-gold {
+    color: #ffb81c; /* Dourado */
+}
+.text-blue {
+    color: #0057b8; /* Azul */
+}
+.small-muted {
+    color: #6c757d; /* cinza suave */
+    font-size: 0.9rem;
+}
+
+/* ===========================
+   Cabeçalhos
+=========================== */
+h3, h4, h5 {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+h3 {
+    color: #0057b8;
+}
+h4 {
+    color: #ffb81c;
+}
+h5 {
+    color: #0057b8;
+}
+
+/* ===========================
+   Botões estilo App
+=========================== */
+.btn-brighton, .btn-outline-gold, .btn-warning {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 12px;
+    padding: 0.75rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.25s ease-in-out;
+    text-decoration: none !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+/* Botão principal (dourado) */
+.btn-brighton {
+    background-color: #ffb81c;
+    color: #0057b8;
+    border: none;
+}
+.btn-brighton:hover {
+    background-color: #e6a800;
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* Botão contornado dourado */
+.btn-outline-gold {
+    background-color: #ffffff;
+    border: 2px solid #ffb81c;
+    color: #ffb81c;
+}
+.btn-outline-gold:hover {
+    background-color: #ffb81c;
+    color: #0057b8;
+    transform: translateY(-2px);
+}
+
+/* Botão de alerta (aviso) */
+.btn-warning {
+    background-color: #ffb81c;
+    color: #0057b8;
+    border: none;
+}
+.btn-warning:hover {
+    background-color: #e6a800;
+    color: #ffffff;
+}
+
+/* ===========================
+   Cards
+=========================== */
+.card, .login-card {
+    background-color: #ffffff;
+    color: #0057b8;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #eaeaea;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease-in-out;
+}
+.card:hover {
+    transform: translateY(-3px);
+}
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    margin: auto;
+}
+
+/* ===========================
+   Inputs & Labels
+=========================== */
+.form-label {
+    font-weight: 600;
+    color: #0057b8;
+    margin-bottom: 0.3rem;
+    display: block;
+}
+
+.form-control, .form-select {
+    border-radius: 10px;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid #ccc;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    color: #0057b8;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #ffb81c;
+    box-shadow: 0 0 6px rgba(255,184,28,0.5);
+    outline: none;
+}
+
+/* ===========================
+   Badges
+=========================== */
+.badge {
+    padding: 0.5em 0.8em;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+.badge-success {
+    background-color: #28a745;
+    color: #fff;
+}
+.badge-warning {
+    background-color: #ffc107;
+    color: #0057b8;
+}
+.badge-danger {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+/* ===========================
+   Tabelas
+=========================== */
+.table td, .table th {
+    vertical-align: middle;
+    padding: 0.7rem;
+    font-size: 0.9rem;
+}
+.table thead {
+    background-color: #0057b8;
+    color: #ffffff;
+}
+.table-responsive {
+    max-height: 300px;
+    overflow-y: auto;
+    border-radius: 12px;
+    border: 1px solid #eaeaea;
+    background: #fff;
+}
+
+/* ===========================
+   Espaçamento
+=========================== */
+.dashboard-container {
+    padding: 20px;
+}
+
+/* ===========================
+   Responsividade
+=========================== */
+@media (max-width: 768px) {
+    .btn-brighton, .btn-outline-gold, .btn-warning {
+        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
+    }
+    .col-lg-6 { margin-bottom: 1.5rem; }
+}

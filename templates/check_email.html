@@ -1,0 +1,38 @@
+<!-- templates/check_email.html -->
+{% extends "base.html" %}
+{% block title %}📧 Verifique seu E-mail — T-Lux{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card card-tlux p-4 mt-5 shadow text-center">
+      
+      <!-- Título -->
+      <h3 class="gold-text mb-3">📧 Verifique seu E-mail</h3>
+      <p class="small-muted">
+        Enviamos um link de confirmação para:  
+        <strong>{{ session.get("email") }}</strong>
+      </p>
+      <p class="small-muted">
+        Abra sua caixa de entrada e clique no botão <strong>"Verificar E-mail"</strong> para ativar sua conta.
+      </p>
+
+      <!-- Aviso -->
+      <div class="alert alert-warning mt-3 shadow-sm">
+        ⚠️ Caso não encontre, verifique também a pasta <strong>Spam</strong> ou <strong>Lixo Eletrônico</strong>.
+      </div>
+
+      <!-- Ações -->
+      <div class="mt-4 d-flex justify-content-center gap-2 flex-wrap">
+        <a href="{{ url_for('resend_verification') }}" class="btn btn-outline-gold">
+          🔄 Reenviar Link
+        </a>
+        <a href="{{ url_for('logout') }}" class="btn btn-brighton">
+          🚪 Sair
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

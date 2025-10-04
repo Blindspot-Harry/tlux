@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Login — T-Lux{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card card-tlux p-4 mt-4">
+      <h3 class="mb-3 gold-text text-center">🔑 Entrar</h3>
+
+      <!-- Mensagens de feedback -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endwith %}
+
+      <!-- Formulário de login -->
+      <form method="POST" action="{{ url_for('login') }}">
+        {# CSRF token se usares Flask-WTF #}
+        {# {{ csrf_token() }} #}
+
+        <div class="mb-3">
+          <label for="email" class="form-label">E-mail</label>
+          <input id="email" name="email" type="email" class="form-control" 
+                 placeholder="seu@email.com" 
+                 autocomplete="username" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">Senha</label>
+          <input id="password" name="password" type="password" class="form-control" 
+                 placeholder="••••••••" 
+                 autocomplete="current-password" required />
+        </div>
+
+        <button class="btn btn-tlux w-100" type="submit">Entrar</button>
+      </form>
+
+      <!-- Links extras -->
+      <div class="mt-3 text-center small">
+        Não tem conta? <a href="{{ url_for('register') }}">Registrar</a><br>
+        Não recebeu o e-mail de verificação? <a href="{{ url_for('resend_verification') }}">Reenviar</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

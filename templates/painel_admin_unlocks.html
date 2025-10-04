@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">📊 Painel de Desbloqueios - Admin</h2>
+
+    <table class="table table-striped table-hover" id="admin-unlock-table">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Usuário</th>
+                <th>Email</th>
+                <th>Modelo</th>
+                <th>IMEI</th>
+                <th>Preço Cliente (USD)</th>
+                <th>Preço Fornecedor (USD)</th>
+                <th>Lucro (USD)</th>
+                <th>Order ID</th>
+                <th>Status</th>
+                <th>Criado em</th>
+                <th>Atualizado em</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Linhas preenchidas via JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+async function atualizarAdminUnlocks() {
+    try {
+        const response = await fetch("/admin/unlocks/status");
+        const data = await response.json();
+        const tbody = document.querySelector("#admin-unlock-table tbody");
+        tbody.innerHTML = "";
+
+        data.desbloqueios.forEach(d => {
+            // Badge de status
+            let badgeClass = "bg-warning text-dark";
+            let statusEmoji = "⏳";
+            if (d.status === "success") {
+                badgeClass = "bg-success";
+                statusEmoji = "✅";
+            } else if (d.status === "failed") {
+                badgeClass = "bg-danger";
+                statusEmoji = "❌";
+            }
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${d.tx_id}</td>
+                    <td>${d.username || "-"}</td>
+                    <td>${d.email || "-"}</td>
+                    <td>${d.modelo}</td>
+                    <td>${d.imei}</td>
+                    <td>${d.preco_cliente.toFixed(2)}</td>
+                    <td>${d.preco_fornecedor.toFixed(2)}</td>
+                    <td><strong class="text-success">+${d.lucro.toFixed(2)}</strong></td>
+                    <td>${d.order_id || "-"}</td>
+                    <td>
+                        <span class="badge ${badgeClass}">${statusEmoji} ${d.status}</span>
+                    </td>
+                    <td>${d.created_at}</td>
+                    <td>${d.updated_at || "-"}</td>
+                </tr>
+            `;
+        });
+    } catch (err) {
+        console.error("Erro ao atualizar desbloqueios admin:", err);
+    }
+}
+
+// Atualiza a tabela a cada 10 segundos
+atualizarAdminUnlocks();
+setInterval(atualizarAdminUnlocks, 10000);
+</script>
+{% endblock %}

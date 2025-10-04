@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Transações — Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3 class="gold-text mb-3">📊 Histórico de Transações</h3>
+
+  <table class="table table-bordered table-striped table-hover">
+    <thead class="table-dark">
+      <tr>
+        <th>ID</th>
+        <th>Usuário</th>
+        <th>Modelo</th>
+        <th>IMEI</th>
+        <th>Tipo</th>
+        <th>Preço Venda</th>
+        <th>Custo Fornecedor</th>
+        <th>Lucro</th>
+        <th>Status</th>
+        <th>Order ID</th>
+        <th>Data</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tx in transactions %}
+        <tr>
+          <td>{{ tx.id }}</td>
+          <td>{{ tx.email or "N/A" }}</td>
+          <td>{{ tx.modelo }}</td>
+          <td>{{ tx.imei }}</td>
+          <td>
+            {% if tx.sem_sinal %}🔕 SEM SINAL{% else %}📶 COM SINAL{% endif %}
+          </td>
+          <td>{{ tx.preco_venda }} USD</td>
+          <td>{{ tx.preco_fornecedor }} USD</td>
+          <td>
+            {% if tx.lucro >= 0 %}
+              <span class="text-success">+{{ tx.lucro }} USD</span>
+            {% else %}
+              <span class="text-danger">{{ tx.lucro }} USD</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if tx.status == "success" %}
+              <span class="badge bg-success">✅ Sucesso</span>
+            {% elif tx.status == "pending" %}
+              <span class="badge bg-warning text-dark">⏳ Pendente</span>
+            {% else %}
+              <span class="badge bg-danger">❌ {{ tx.status }}</span>
+            {% endif %}
+          </td>
+          <td>{{ tx.order_id or "—" }}</td>
+          <td>{{ tx.created_at }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="mt-3">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-gold">⬅ Voltar ao Painel</a>
+  </div>
+</div>
+{% endblock %}

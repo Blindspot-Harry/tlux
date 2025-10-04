@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}⚡ Admin Unlocks{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">⚡ Painel Admin — Desbloqueios</h2>
+
+    <!-- Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card card-tlux text-center">
+                <div class="card-body">
+                    <h5 class="card-title">💰 Total Faturado</h5>
+                    <p class="display-6 text-success">
+                        ${{ "%.2f"|format(stats.total_receita or 0) }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-tlux text-center">
+                <div class="card-body">
+                    <h5 class="card-title">📦 Custo Fornecedor</h5>
+                    <p class="display-6 text-danger">
+                        ${{ "%.2f"|format(stats.total_fornecedor or 0) }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-tlux text-center">
+                <div class="card-body">
+                    <h5 class="card-title">🏆 Lucro Líquido</h5>
+                    <p class="display-6 text-primary">
+                        ${{ "%.2f"|format(stats.total_lucro or 0) }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pendentes -->
+    <h4 class="mt-5">⏳ Pendentes</h4>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Usuário</th>
+                    <th>Modelo</th>
+                    <th>IMEI</th>
+                    <th>Preço Cliente</th>
+                    <th>Fornecedor</th>
+                    <th>Status</th>
+                    <th>Data</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in pendentes %}
+                <tr>
+                    <td>{{ d.get("id") }}</td>
+                    <td>{{ d.get("user_email") }}</td>
+                    <td>{{ d.get("modelo") or "N/A" }}</td>
+                    <td>{{ d.get("imei") or "—" }}</td>
+                    <td>${{ "%.2f"|format(d.get("amount") or 0) }}</td>
+                    <td>${{ "%.2f"|format(d.get("preco_fornecedor") or 0) }}</td>
+                    <td>
+                        {% if d.get("status") == "pending" %}
+                            <span class="badge bg-warning text-dark">⏳ Pendente</span>
+                        {% elif d.get("status") == "processing" %}
+                            <span class="badge bg-info text-dark">🔄 Processando</span>
+                        {% elif d.get("status") == "failed" %}
+                            <span class="badge bg-danger">❌ Falhou</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ d.get("status") }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="small-muted">{{ d.get("created_at") }}</td>
+                    <td>
+                        <a href="{{ url_for('admin_forcar_status_route', tx_id=d.get('id')) }}" 
+                           class="btn btn-sm btn-outline-primary">🔄 Atualizar</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        Nenhum desbloqueio pendente
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Histórico -->
+    <h4 class="mt-5">📜 Histórico</h4>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Usuário</th>
+                    <th>Modelo</th>
+                    <th>IMEI</th>
+                    <th>Preço Cliente</th>
+                    <th>Fornecedor</th>
+                    <th>Lucro</th>
+                    <th>Status</th>
+                    <th>Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in historico %}
+                <tr>
+                    <td>{{ d.get("id") }}</td>
+                    <td>{{ d.get("user_email") }}</td>
+                    <td>{{ d.get("modelo") or "N/A" }}</td>
+                    <td>{{ d.get("imei") or "—" }}</td>
+                    <td>${{ "%.2f"|format(d.get("amount") or 0) }}</td>
+                    <td>${{ "%.2f"|format(d.get("preco_fornecedor") or 0) }}</td>
+                    <td class="fw-bold text-primary">
+                        ${{ "%.2f"|format(d.get("lucro") or 0) }}
+                    </td>
+                    <td>
+                        {% if d.get("status") in ["success", "successful"] %}
+                            <span class="badge bg-success">✅ Sucesso</span>
+                        {% elif d.get("status") == "failed" %}
+                            <span class="badge bg-danger">❌ Falhou</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ d.get("status") }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="small-muted">{{ d.get("created_at") }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        Nenhum histórico encontrado
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Admin — Gestão{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <h2 class="gold-text mb-4">Área Administrativa</h2>
+  </div>
+
+  <!-- Usuários -->
+  <div class="col-md-6 mb-4">
+    <div class="card card-tlux p-3">
+      <h5>Usuários Registrados</h5>
+      {% if users %}
+        <ul class="list-group list-group-flush">
+          {% for u in users %}
+            <li class="list-group-item">
+              <strong>{{ u.email }}</strong> — Criado em {{ u.created_at }}
+              {% if u.is_admin %}<span class="badge bg-danger ms-2">Admin</span>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="small-muted">Nenhum usuário registrado.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Transações -->
+  <div class="col-md-6 mb-4">
+    <div class="card card-tlux p-3">
+      <h5>Transações</h5>
+      {% if transactions %}
+        <ul class="list-group list-group-flush">
+          {% for tx in transactions %}
+            <li class="list-group-item">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ tx.purpose }}</strong> ({{ tx.modelo or tx.pacote }})  
+                  <div class="small-muted">{{ tx.created_at }}</div>
+                </div>
+                <div>
+                  <span class="badge bg-secondary">{{ tx.status }}</span>
+                  <form method="POST" action="{{ url_for('admin_tx_approve', tx_id=tx.id) }}" class="d-inline">
+                    <button class="btn btn-sm btn-success">✔</button>
+                  </form>
+                  <form method="POST" action="{{ url_for('admin_tx_fail', tx_id=tx.id) }}" class="d-inline">
+                    <button class="btn btn-sm btn-danger">✘</button>
+                  </form>
+                </div>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="small-muted">Nenhuma transação.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Licenças -->
+  <div class="col-md-12">
+    <div class="card card-tlux p-3">
+      <h5>Licenças Emitidas</h5>
+      {% if licenses %}
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Usuário</th>
+              <th>Pacote</th>
+              <th>Chave</th>
+              <th>Expira</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for lic in licenses %}
+              <tr>
+                <td>{{ lic.user_id }}</td>
+                <td>{{ lic.pacote }}</td>
+                <td>{{ lic.license_key }}</td>
+                <td>{{ lic.expires_at }}</td>
+                <td>
+                  <form method="POST" action="{{ url_for('admin_license_revoke', lic_id=lic.id) }}">
+                    <button class="btn btn-sm btn-warning">Revogar</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="small-muted">Nenhuma licença emitida.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

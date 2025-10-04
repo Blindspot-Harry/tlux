@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Admin — Logs{% endblock %}
+
+{% block content %}
+<div class="card card-tlux p-3">
+  <h4 class="gold-text mb-3">Logs do Sistema</h4>
+  {% if logs %}
+    <ul class="list-group list-group-flush">
+      {% for log in logs %}
+        <li class="list-group-item">
+          <div class="fw-bold">{{ log.level }}</div>
+          <div class="small-muted">{{ log.message }}</div>
+          <div class="small-muted">{{ log.created_at }}</div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="small-muted">Nenhum log encontrado.</p>
+  {% endif %}
+</div>
+{% endblock %}

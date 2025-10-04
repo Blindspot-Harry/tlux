@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3>🛒 Comprar Serviço</h3>
+  <p><b>Grupo:</b> {{ servico['group_name'] }}</p>
+  <p><b>Serviço:</b> {{ servico['nome'] }}</p>
+  <p><b>Crédito:</b> {{ servico['credit'] }} USD</p>
+
+  <form method="POST">
+    {% if "iPhone" in servico['nome'] or "iPad" in servico['nome'] and "WiFi" not in servico['nome'] %}
+      <!-- Serviços que pedem IMEI -->
+      <div class="mb-3">
+        <label class="form-label">IMEI (15 dígitos)</label>
+        <input type="text" name="imei" class="form-control" placeholder="Digite o IMEI do dispositivo" required>
+      </div>
+    {% elif "Mac" in servico['nome'] or "Watch" in servico['nome'] or "WiFi" in servico['nome'] %}
+      <!-- Serviços que pedem Serial Number -->
+      <div class="mb-3">
+        <label class="form-label">Serial Number (SN)</label>
+        <input type="text" name="sn" class="form-control" placeholder="Digite o Serial Number do dispositivo" required>
+      </div>
+    {% else %}
+      <!-- Serviços que não precisam de dados -->
+      <p class="text-muted">⚠️ Este serviço não requer IMEI ou Serial Number.</p>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary">Confirmar Pedido</button>
+    <a href="{{ url_for('services') }}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

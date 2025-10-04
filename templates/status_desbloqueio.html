@@ -1,0 +1,58 @@
+<!-- templates/status_desbloqueio.html -->
+{% extends "base.html" %}
+{% block title %}📱 Status do Desbloqueio — T-Lux{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+      <div class="card card-tlux p-4 shadow-sm">
+        
+        <!-- Cabeçalho -->
+        <h3 class="gold-text mb-3 text-center">📱 Status do Desbloqueio</h3>
+        <p class="text-muted text-center mb-4">
+          Acompanhe abaixo as informações atualizadas do seu desbloqueio.
+        </p>
+
+        <!-- Detalhes -->
+        <ul class="list-group list-group-flush mb-3">
+          <li class="list-group-item d-flex justify-content-between">
+            <span><strong>Modelo:</strong></span>
+            <span>{{ modelo }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span><strong>Serial / IMEI:</strong></span>
+            <span>{{ serial }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span><strong>Order ID (iRemoval):</strong></span>
+            <span>{{ order_id }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span><strong>Status:</strong></span>
+            <span>
+              {% if status in ["success","successful"] %}
+                <span class="badge bg-success">✅ Sucesso</span>
+              {% elif status == "failed" %}
+                <span class="badge bg-danger">❌ Falhou</span>
+              {% else %}
+                <span class="badge bg-warning text-dark">⏳ {{ status|capitalize }}</span>
+              {% endif %}
+            </span>
+          </li>
+          <li class="list-group-item">
+            <strong>Mensagem:</strong>
+            <p class="mb-0 mt-1">{{ message }}</p>
+          </li>
+        </ul>
+
+        <!-- Ações -->
+        <div class="d-flex justify-content-between mt-4">
+          <a href="{{ url_for('painel_unlocks') }}" class="btn btn-outline-gold">⬅ Voltar ao Painel</a>
+          <a href="{{ url_for('status_unlock', tx_ref=tx_ref) }}" class="btn btn-brighton">🔄 Atualizar Status</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

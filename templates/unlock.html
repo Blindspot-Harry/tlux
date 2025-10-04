@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Desbloqueio de iPhone — T-Lux{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="card card-tlux p-4 mt-4">
+        <h3 class="gold-text mb-3">🔓 Desbloqueio de iPhone</h3>
+
+        <!-- Feedback -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% endfor %}
+        {% endwith %}
+
+        <form action="{{ url_for('unlock_page') }}" method="POST">
+          <div class="mb-3">
+            <label class="form-label">Modelo:</label>
+            <select name="modelo" class="form-select" required>
+              <option value="">— Selecione o modelo —</option>
+              {% for modelo, preco in modelos.items() %}
+                <option value="{{ modelo }}">{{ modelo }} — {{ preco }} USD</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">IMEI:</label>
+            <input type="text" name="imei" class="form-control" maxlength="15" pattern="\d{15}" placeholder="15 dígitos" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Tipo de desbloqueio:</label>
+            <select name="sem_sinal" class="form-select" required>
+              <option value="1">🔕 SEM SINAL (mais barato)</option>
+              <option value="0">📶 COM SINAL (quando disponível)</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-tlux w-100">Solicitar Desbloqueio</button>
+        </form>
+
+        <div class="mt-3 d-flex justify-content-between">
+          <a href="{{ url_for('dashboard') }}" class="btn btn-outline-gold">⬅ Voltar</a>
+          <a href="{{ url_for('todos_modelos') }}" class="btn btn-outline-gold">📱 Ver modelos</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

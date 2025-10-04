@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}T-Lux{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body{background:#001f3f;color:#fff;}
+    .navbar{background:#0057b8;}
+    .btn-brand{background:#ffcc00;color:#001f3f;font-weight:700;border-radius:10px}
+    .btn-brand:hover{background:#ffd633}
+    .card{background:#012a57;border:1px solid #0a3a74;color:#fff}
+    a, a:hover{color:#ffcc00}
+    .table thead th{color:#ffcc00;border-bottom:2px solid #0a3a74}
+    .badge-success{background:#28a745}
+    .badge-pending{background:#ffc107;color:#001f3f}
+    .badge-failed{background:#dc3545}
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="{{ url_for('dashboard') }}">T-Lux ⚡</a>
+    <div class="d-flex">
+      {% if session.email %}
+      <span class="me-3">👤 {{ session.email }}</span>
+      {% if session.is_admin %}<a class="btn btn-sm btn-light me-2" href="{{ url_for('admin') }}">Admin</a>{% endif %}
+      <a class="btn btn-sm btn-outline-light" href="{{ url_for('logout') }}">Sair</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for cat, msg in messages %}
+        <div class="alert alert-{{ 'danger' if cat=='danger' else ('warning' if cat=='warning' else ('success' if cat=='success' else 'info')) }} shadow-sm" role="alert">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</div>
+</body>
+</html>

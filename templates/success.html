@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="box-success">
+  <h2>Pagamento confirmado</h2>
+  <p>Chave gerada para {{ model }}:</p>
+  <pre class="license">{{ license_key }}</pre>
+  <p>Validade até: {{ expires }}</p>
+  <a class="btn" href="{{ url_for('dashboard') }}">Ir para painel</a>
+</div>
+{% endblock %}

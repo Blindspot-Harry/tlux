@@ -1,0 +1,53 @@
+<!-- templates/resend_verification.html -->
+{% extends "base.html" %}
+{% block title %}📧 Reenviar Verificação — T-Lux{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card card-tlux p-4 mt-5 shadow">
+      
+      <!-- Título -->
+      <h3 class="gold-text mb-3 text-center">📧 Reenviar Verificação</h3>
+      <p class="small-muted text-center">
+        Informe seu e-mail para receber novamente o link de ativação da conta.
+      </p>
+
+      <!-- Feedback -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="mb-3">
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <!-- Form -->
+      <form method="POST" action="{{ url_for('resend_verification') }}">
+        <div class="mb-3">
+          <label class="form-label">E-mail cadastrado</label>
+          <input 
+            type="email" 
+            name="email" 
+            class="form-control" 
+            placeholder="exemplo@dominio.com" 
+            required 
+          />
+        </div>
+        <button type="submit" class="btn btn-brighton w-100">🔄 Reenviar Link</button>
+      </form>
+
+      <!-- Voltar -->
+      <div class="mt-3 text-center small">
+        Já tem conta? <a href="{{ url_for('login') }}">Entrar</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

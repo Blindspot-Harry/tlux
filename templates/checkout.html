@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Pagamento - {{ modelo if modelo else pacote }}</title>
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  <h2>
+    Pagamento - 
+    {% if purpose == "package" %}
+      Pacote {{ pacote }}
+    {% elif purpose == "unlock" %}
+      Desbloqueio {{ modelo }}
+    {% else %}
+      Item desconhecido
+    {% endif %}
+  </h2>
+
+  <p><strong>Preço:</strong> {{ "%.2f"|format(preco_usd) }} USD</p>
+
+  <button id="btn-stripe">💳 Pagar com Stripe</button>
+
+  <script>
+    async function pagarComStripe() {
+      try {
+        const response = await fetch("/create-checkout-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            pacote: "{{ pacote }}",
+            modelo: "{{ modelo }}",
+            purpose: "{{ purpose }}"
+          })
+        });
+
+        const data = await response.json();
+        if (data.url) {
+          window.location.href = data.url; // redireciona para Stripe Checkout
+        } else {
+          alert("⚠️ Erro no Stripe: " + (data.error || "desconhecido"));
+        }
+      } catch (err) {
+        alert("❌ Falha Stripe: " + err.message);
+      }
+    }
+
+    document.getElementById("btn-stripe").addEventListener("click", pagarComStripe);
+  </script>
+</body>
+</html>

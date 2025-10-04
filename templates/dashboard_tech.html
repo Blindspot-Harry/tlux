@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Bem-vindo, Técnico {{ username }}</h2>
+<p>Pacote: {{ package }}</p>
+<p>Chave: {{ license_key }}</p>
+
+<h3>Solicitações de Desbloqueio</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Cliente</th>
+            <th>Modelo</th>
+            <th>Status</th>
+            <th>Ação</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pedido in pedidos %}
+        <tr>
+            <td>{{ pedido['cliente'] }}</td>
+            <td>{{ pedido['modelo'] }}</td>
+            <td>{{ pedido['status'] }}</td>
+            <td><a href="#" class="btn-pay">Executar</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

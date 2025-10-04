@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>📦 Meus Pedidos</h2>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID Interno</th>
+        <th>Serviço</th>
+        <th>Ref. Ordem</th>
+        <th>Status</th>
+        <th>Data</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pedido in pedidos %}
+      <tr>
+        <td>{{ pedido['id'] }}</td>
+        <td>{{ pedido['service_name'] }}</td>
+        <td>{{ pedido['order_ref'] }}</td>
+        <td>{{ pedido['status'] }}</td>
+        <td>{{ pedido['created_at'] }}</td>
+        <td>
+          {% if pedido['order_ref'] %}
+          <a href="{{ url_for('order_status', order_ref=pedido['order_ref']) }}" 
+             class="btn btn-info btn-sm">🔄 Atualizar</a>
+          {% else %}
+          <span class="text-muted">Sem referência</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

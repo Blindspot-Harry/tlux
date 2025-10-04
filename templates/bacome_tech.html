@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Quero ser Técnico — T-Lux{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h3>⚡ Quero ser Técnico T-Lux</h3>
+  <p>Obrigado pelo interesse. Envie-nos uma mensagem para <strong>{{ TECH_EMAIL }}</strong> com seu currículo e requisitos.</p>
+  <a class="btn btn-brighton" href="{{ url_for('dashboard') }}">Voltar ao Painel</a>
+</div>
+{% endblock %}

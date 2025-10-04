@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Admin — Visão Geral{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <h2 class="gold-text mb-4">Visão Geral do Sistema</h2>
+  </div>
+
+  <div class="col-md-4 mb-3">
+    <div class="card card-tlux p-3 text-center">
+      <h4>{{ overview.total_users }}</h4>
+      <p class="small-muted">Usuários</p>
+    </div>
+  </div>
+
+  <div class="col-md-4 mb-3">
+    <div class="card card-tlux p-3 text-center">
+      <h4>{{ overview.total_tx }}</h4>
+      <p class="small-muted">Transações</p>
+    </div>
+  </div>
+
+  <div class="col-md-4 mb-3">
+    <div class="card card-tlux p-3 text-center">
+      <h4>{{ overview.total_licenses }}</h4>
+      <p class="small-muted">Licenças Emitidas</p>
+    </div>
+  </div>
+
+  <div class="col-md-6 mb-3">
+    <div class="card card-tlux p-3 text-center">
+      <h4>{{ overview.pending_tx }}</h4>
+      <p class="small-muted">Pendentes</p>
+    </div>
+  </div>
+
+  <div class="col-md-6 mb-3">
+    <div class="card card-tlux p-3 text-center">
+      <h4>{{ overview.successful_tx }}</h4>
+      <p class="small-muted">Concluídas</p>
+    </div>
+  </div>
+
+  <div class="col-md-6 mb-3">
+    <div class="card card-tlux p-3 text-center">
+      <h4>{{ overview.failed_tx }}</h4>
+      <p class="small-muted">Falhadas</p>
+    </div>
+  </div>
+
+  <div class="col-md-6 mb-3">
+    <div class="card card-tlux p-3 text-center">
+      <h4>{{ overview.expired_licenses }}</h4>
+      <p class="small-muted">Licenças Expiradas</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
