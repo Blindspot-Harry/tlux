@@ -51,7 +51,6 @@ bloodhound==1.8.0
 bluepy==1.3.0
 bottle==0.13.2
 Bottleneck==1.4.2
-Brlapi==0.8.6
 Brotli==1.1.0
 capstone==5.0.6
 cbor==1.0.0
