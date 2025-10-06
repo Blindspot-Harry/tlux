@@ -481,8 +481,43 @@ def processar_desbloqueio(modelo, imei, metodo_pagamento, email):
 # -----------------------
 # Flask app
 # -----------------------
+# Inicialização do Flask
 app = Flask(__name__)
-app.secret_key = APP_SECRET
+app.secret_key = "chave-super-secreta"  # já tens a tua no .env
+
+# ======================================
+# 🌍 SUPORTE MULTILÍNGUE (Flask-Babel 3.x)
+# ======================================
+from flask_babel import Babel, gettext as _
+from flask import session, request, redirect, url_for, flash
+
+# Configurações de idioma
+app.config["BABEL_DEFAULT_LOCALE"] = "en"
+app.config["BABEL_SUPPORTED_LOCALES"] = ["en", "pt"]
+app.config["BABEL_DEFAULT_TIMEZONE"] = "UTC"
+
+# Função que escolhe o idioma ativo
+def get_locale():
+    # Se o usuário escolheu manualmente, usa esse idioma
+    if "lang" in session:
+        return session["lang"]
+    # Caso contrário, tenta detectar do navegador
+    return request.accept_languages.best_match(["en", "pt"])
+
+# Inicializa o Babel com a função de seleção
+babel = Babel(app, locale_selector=get_locale)
+
+# Torna get_locale() acessível dentro dos templates Jinja
+app.jinja_env.globals['get_locale'] = get_locale
+
+# Rota para trocar idioma manualmente (🇬🇧 / 🇵🇹)
+@app.route("/set_lang/<lang>")
+def set_language(lang):
+    if lang not in ["en", "pt"]:
+        lang = "en"
+    session["lang"] = lang
+    flash(_("Language changed successfully!") if lang == "en" else "Idioma alterado com sucesso!", "info")
+    return redirect(request.referrer or url_for("index"))
 
 # -----------------------
 # Idiomas padrão
