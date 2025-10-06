@@ -1,20 +1,34 @@
-# --- Dependências principais do T-Lux ---
+alembic==1.13.2
+babel==2.17.0
+bcrypt==4.1.3
+blinker==1.8.2
+cachelib==0.13.0
+certifi==2025.8.3
+charset-normalizer==3.4.3
+click==8.2.1
+dnspython==2.8.0
+email_validator==2.1.1
 Flask==3.0.3
+flask-babel==3.1.0
+Flask-Cors==4.0.1
 Flask-Login==0.6.3
 Flask-Mail==0.9.1
-Flask-Cors==4.0.1
+Flask-Session==0.8.0
+git-filter-repo==2.47.0
+greenlet==3.2.4
+gunicorn==21.2.0
+idna==3.10
+itsdangerous==2.2.0
+Jinja2==3.1.6
+Mako==1.3.10
+MarkupSafe==3.0.2
+msgspec==0.19.0
+packaging==25.0
 python-dotenv==1.0.1
+pytz==2025.2
 requests==2.31.0
-stripe==10.10.0
-
-# --- Banco de dados e migrações ---
 SQLAlchemy==2.0.29
-alembic==1.13.2
-
-# --- Segurança e hashing ---
-bcrypt==4.1.3
-
-# --- Utilidades ---
-gunicorn==21.2.0   # usado no servidor Render
-email-validator==2.1.1
-blinker==1.8.2
+stripe==10.10.0
+typing_extensions==4.15.0
+urllib3==2.5.0
+Werkzeug==3.1.3
