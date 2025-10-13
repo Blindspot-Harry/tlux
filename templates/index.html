@@ -1,54 +1,143 @@
 {% extends "base.html" %}
-{% block title %}{{ _("Welcome to T-Lux") }}{% endblock %}
-
+{% block title %}{{ _("Welcome to T-Lux Unlock System") }}{% endblock %}
 {% block content %}
-<div class="container text-center">
-  <h2 class="mt-4">🌍 {{ _("Welcome to T-Lux Unlock System") }}</h2>
-  <p>{{ _("Choose your language and country to get started:") }}</p>
 
-  <!-- Formulário de idioma e país -->
-  <form action="{{ url_for('set_language', lang=request.args.get('lang', get_locale())) }}" method="get" class="mb-4">
-    <div class="row justify-content-center">
-      <div class="col-md-4">
-        <label class="form-label">{{ _("Language") }}</label>
-        <select name="lang" class="form-select" onchange="this.form.submit()">
-          {% for code, name in languages.items() %}
-            <option value="{{ code }}" {% if get_locale() == code %}selected{% endif %}>{{ name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-md-4">
-        <label class="form-label">{{ _("Country") }}</label>
-        <select name="country" class="form-select">
-          {% for code, data in countries.items() %}
-            <option value="{{ code }}">{{ data.name }}</option>
-          {% endfor %}
-        </select>
+<!-- =========================
+     HERO SECTION
+========================= -->
+<section class="text-center py-5">
+  <img src="{{ url_for('static', filename='img/logo.png') }}" 
+       alt="T-Lux Logo" 
+       style="height:100px; width:auto;" 
+       class="mb-4 animate__animated animate__fadeInDown">
+  <h1 class="gold-text mb-3 fw-bold animate__animated animate__fadeInUp">
+    ⚡ {{ _("Welcome to T-Lux Unlock System") }}
+  </h1>
+  <p class="lead mb-4 text-secondary animate__animated animate__fadeInUp">
+    {{ _("Advanced unlock platform for all Apple devices — iPhone, iPad and Mac. Fast, secure and fully automated.") }}
+  </p>
+
+  <div class="d-flex justify-content-center gap-3">
+    <a href="{{ url_for('login') }}" class="btn btn-tlux btn-lg px-4 shadow-sm">
+      {{ _("Enter Dashboard") }}
+    </a>
+    <a href="{{ url_for('register') }}" class="btn btn-outline-gold btn-lg px-4 shadow-sm">
+      {{ _("Create Account") }}
+    </a>
+  </div>
+</section>
+
+<hr class="my-5">
+
+<!-- =========================
+     HOW IT WORKS SECTION
+========================= -->
+<section class="container text-center py-5">
+  <h2 class="mb-4 gold-text fw-bold">🧭 {{ _("How T-Lux Works") }}</h2>
+  <p class="lead mb-5 text-secondary">
+    {{ _("Our cloud system automates the entire unlocking process — from IMEI registration to successful completion. You are always in control.") }}
+  </p>
+
+  <div class="row g-4 justify-content-center">
+    <div class="col-md-2">
+      <div class="card card-tlux p-4 h-100 shadow-sm">
+        <div class="display-5 mb-3">👤</div>
+        <h5>{{ _("1. Register & Verify") }}</h5>
+        <p class="small text-muted">{{ _("Create your T-Lux account, verify your email and access your secure dashboard.") }}</p>
       </div>
     </div>
-  </form>
 
-  <hr class="my-4">
-
-  <!-- Lista de modelos -->
-  <h3>📱 {{ _("Available iPhone Models") }}</h3>
-  <div class="row justify-content-center mt-3">
-    {% for model, price in modelos.items() %}
-      <div class="col-md-4 mb-3">
-        <div class="card card-tlux text-center p-3">
-          <strong>{{ model }}</strong><br>
-          💰 {{ price }} MZN
-          {% if session.get('user_id') %}
-            <form action="{{ url_for('unlock_page') }}" method="POST" class="mt-2">
-              <input type="hidden" name="modelo" value="{{ model }}">
-              <button class="btn btn-tlux">{{ _("Unlock Now") }} 🔓</button>
-            </form>
-          {% else %}
-            <p class="text-muted small mt-2">{{ _("Login required to unlock") }}</p>
-          {% endif %}
-        </div>
+    <div class="col-md-2">
+      <div class="card card-tlux p-4 h-100 shadow-sm">
+        <div class="display-5 mb-3">📱</div>
+        <h5>{{ _("2. Choose Device Type") }}</h5>
+        <p class="small text-muted">{{ _("Select iPhone, iPad or Mac — we support all generations and chipsets.") }}</p>
       </div>
-    {% endfor %}
+    </div>
+
+    <div class="col-md-2">
+      <div class="card card-tlux p-4 h-100 shadow-sm">
+        <div class="display-5 mb-3">🔐</div>
+        <h5>{{ _("3. Unlock Type") }}</h5>
+        <p class="small text-muted">{{ _("Signal & No-Signal unlocks available for iPhones, MDM & EFI for iPads and Macs.") }}</p>
+      </div>
+    </div>
+
+    <div class="col-md-2">
+      <div class="card card-tlux p-4 h-100 shadow-sm">
+        <div class="display-5 mb-3">💳</div>
+        <h5>{{ _("4. Confirm Payment") }}</h5>
+        <p class="small text-muted">{{ _("Pay safely via Stripe or your T-Lux balance — transactions are encrypted and instant.") }}</p>
+      </div>
+    </div>
+
+    <div class="col-md-2">
+      <div class="card card-tlux p-4 h-100 shadow-sm">
+        <div class="display-5 mb-3">⚡</div>
+        <h5>{{ _("5. Automatic Processing") }}</h5>
+        <p class="small text-muted">{{ _("Our servers process your unlock in real-time — fast, accurate and fully automated.") }}</p>
+      </div>
+    </div>
+
+    <div class="col-md-2">
+      <div class="card card-tlux p-4 h-100 shadow-sm">
+        <div class="display-5 mb-3">✅</div>
+        <h5>{{ _("6. Unlock Complete") }}</h5>
+        <p class="small text-muted">{{ _("Your device is unlocked — check your dashboard for confirmation and history.") }}</p>
+      </div>
+    </div>
   </div>
-</div>
+</section>
+
+<hr class="my-5">
+
+<!-- =========================
+     WHAT WE DO SECTION
+========================= -->
+<section class="container text-center py-5">
+  <h2 class="mb-4 gold-text fw-bold">💻 {{ _("Comprehensive Apple Services") }}</h2>
+  <p class="lead mb-5 text-secondary">
+    {{ _("T-Lux provides a wide range of digital solutions for Apple devices — unlocking, verification, diagnostics and technical management — all from one secure platform.") }}
+  </p>
+
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card card-tlux p-4 h-100">
+        <h4>📲 {{ _("iPhone Unlocks") }}</h4>
+        <p class="text-muted">{{ _("We support signal and no-signal iCloud bypass for all iPhone models from 5s to 15 Pro Max.") }}</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card card-tlux p-4 h-100">
+        <h4>💼 {{ _("iPad & MDM Services") }}</h4>
+        <p class="text-muted">{{ _("Full MDM removal, activation locks and device supervision bypass for all iPad generations.") }}</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card card-tlux p-4 h-100">
+        <h4>🖥️ {{ _("Mac EFI & Cloud Solutions") }}</h4>
+        <p class="text-muted">{{ _("Secure EFI unlocks and account recovery tools for all MacBook, iMac and Mac mini models.") }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="my-5">
+
+<!-- =========================
+     TRUST & SECURITY SECTION
+========================= -->
+<section class="text-center py-5 bg-light rounded shadow-sm mx-3">
+  <h2 class="fw-bold mb-3">🛡️ {{ _("Trusted by Technicians Worldwide") }}</h2>
+  <p class="lead text-secondary mb-4">
+    {{ _("T-Lux is built on trust, automation and transparency. Every process is verified, encrypted and monitored 24/7 for your safety.") }}
+  </p>
+  <p class="text-muted mb-4">
+    {{ _("Your data and devices are protected under strict privacy protocols — ensuring full confidentiality and professional reliability.") }}
+  </p>
+  <a href="{{ url_for('register') }}" class="btn btn-tlux btn-lg px-5">
+    {{ _("Join T-Lux Now — It's Free to Start") }}
+  </a>
+</section>
+
 {% endblock %}

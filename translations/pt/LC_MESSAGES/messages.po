@@ -1,129 +1,765 @@
-# Portuguese translations for PROJECT.
-# Copyright (C) 2025 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+# Portuguese translations for T-Lux.
+# Copyright (C) 2025 T-Lux
+# This file is distributed under the same license as the T-Lux project.
+# Translator: Blindspot <support@tlux-unlock.com>, 2025.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-10-06 07:43+0200\n"
-"PO-Revision-Date: 2025-10-06 05:49+0200\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Project-Id-Version: T-Lux 1.0\n"
+"Report-Msgid-Bugs-To: suporte@tlux-unlock.com\n"
+"POT-Creation-Date: 2025-10-09 18:28+0200\n"
+"PO-Revision-Date: 2025-10-09 10:00+0000\n"
+"Last-Translator: Blindspot <suporte@tlux-unlock.com>\n"
 "Language: pt\n"
-"Language-Team: pt <LL@li.org>\n"
+"Language-Team: Portuguese\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app.py:516
-msgid "Language changed successfully!"
-msgstr ""
-
-#: templates/base.html:154
-msgid "Dashboard"
-msgstr ""
-
-#: templates/base.html:155
-msgid "Unlock"
-msgstr ""
-
-#: templates/base.html:156
-msgid "Packages"
-msgstr ""
-
-#: templates/base.html:157
-msgid "Services"
-msgstr ""
-
-#: templates/base.html:158
-msgid "My Orders"
-msgstr ""
-
-#: templates/base.html:162
-msgid "Admin Orders"
-msgstr ""
-
-#: templates/base.html:165
-msgid "Admin Panel"
-msgstr ""
-
-#: templates/base.html:169
-msgid "Logout"
-msgstr ""
-
-#: templates/base.html:171 templates/login.html:8 templates/login.html:30
-msgid "Login"
-msgstr ""
-
-#: templates/base.html:172 templates/login.html:35
-msgid "Register"
-msgstr ""
-
-#: templates/base.html:211
-msgid "All rights reserved."
-msgstr ""
-
-#: templates/index.html:2
-msgid "Welcome to T-Lux"
-msgstr ""
-
-#: templates/index.html:6
+#: app.py:4400 templates/index.html:2 templates/index.html:14
 msgid "Welcome to T-Lux Unlock System"
 msgstr ""
 
-#: templates/index.html:7
-msgid "Choose your language and country to get started:"
+#: templates/base.html:191
+msgid "Dashboard"
 msgstr ""
 
-#: templates/index.html:13
-msgid "Language"
+#: templates/base.html:192
+msgid "Unlock"
 msgstr ""
 
-#: templates/index.html:21
-msgid "Country"
+#: templates/base.html:193
+msgid "Packages"
 msgstr ""
 
-#: templates/index.html:34
-msgid "Available iPhone Models"
+#: templates/base.html:194
+msgid "Services"
 msgstr ""
 
-#: templates/index.html:44
-msgid "Unlock Now"
+#: templates/base.html:195
+msgid "My Orders"
 msgstr ""
 
-#: templates/index.html:47
-msgid "Login required to unlock"
+#: templates/base.html:196 templates/base.html:207
+msgid "Support"
 msgstr ""
 
-#: templates/login.html:2
-msgid "Login — T-Lux"
+#: templates/base.html:199
+msgid "Admin Orders"
 msgstr ""
 
-#: templates/login.html:21
-msgid "Email"
+#: templates/base.html:200
+msgid "Admin Panel"
 msgstr ""
 
-#: templates/login.html:22
+#: templates/base.html:203
+msgid "Logout"
+msgstr ""
+
+#: templates/base.html:205 templates/login.html:40 templates/register.html:97
+msgid "Login"
+msgstr ""
+
+#: templates/base.html:206 templates/login.html:47 templates/register.html:90
+msgid "Register"
+msgstr ""
+
+#: templates/base.html:248
+msgid "All rights reserved."
+msgstr ""
+
+#: templates/check_email.html:3
+msgid "Verify Your Email — T-Lux Unlock Systems"
+msgstr ""
+
+#: templates/check_email.html:12
+msgid "Verify Your Email"
+msgstr ""
+
+#: templates/check_email.html:14
+msgid "We’ve sent a verification link and code to:"
+msgstr ""
+
+#: templates/check_email.html:18
+msgid "Please open your inbox and click the"
+msgstr ""
+
+#: templates/check_email.html:19
+msgid "button to activate your account."
+msgstr ""
+
+#: templates/check_email.html:24
+msgid "If you don’t see the message, check your"
+msgstr ""
+
+#: templates/check_email.html:25
+msgid "Spam"
+msgstr ""
+
+#: templates/check_email.html:25
+msgid "or"
+msgstr ""
+
+#: templates/check_email.html:25
+msgid "Junk"
+msgstr ""
+
+#: templates/check_email.html:25
+msgid "folder."
+msgstr ""
+
+#: templates/check_email.html:47
+msgid "Resend Verification Email"
+msgstr ""
+
+#: templates/check_email.html:52
+msgid "Log Out"
+msgstr ""
+
+#: templates/check_email.html:58 templates/email_verificacao.html:68
+msgid "Once verified, you can log in securely to your dashboard."
+msgstr ""
+
+#: templates/choose_package.html:2
+msgid "Choose Your Access Package — T-Lux Unlock Systems"
+msgstr ""
+
+#: templates/choose_package.html:9
+msgid "Choose Your Access Package"
+msgstr ""
+
+#: templates/choose_package.html:11
+msgid "Activate your T-Lux account by purchasing an Access Key."
+msgstr ""
+
+#: templates/choose_package.html:12
+msgid ""
+"Each plan grants full access to all unlocking services during its "
+"validity period."
+msgstr ""
+
+#: templates/choose_package.html:39
+msgid "days"
+msgstr ""
+
+#: templates/choose_package.html:46
+msgid "International payment via Stripe (USD)"
+msgstr ""
+
+#: templates/choose_package.html:53
+msgid "Activate"
+msgstr ""
+
+#: templates/choose_package.html:60
+msgid "No packages available at the moment."
+msgstr ""
+
+#: templates/choose_package.html:68
+msgid ""
+"All payments are processed securely through Stripe using your preferred "
+"card."
+msgstr ""
+
+#: templates/choose_package.html:71
+msgid ""
+"Renew before expiry to maintain uninterrupted access to all T-Lux "
+"services."
+msgstr ""
+
+#: templates/diagnose.html:2
+msgid "Diagnóstico Inteligente"
+msgstr ""
+
+#: templates/diagnose.html:6
+msgid "Diagnóstico Inteligente T-Lux"
+msgstr ""
+
+#: templates/diagnose.html:8
+msgid ""
+"Insira o IMEI ou número de série do dispositivo Apple para detectar "
+"automaticamente o tipo e o serviço mais adequado."
+msgstr ""
+
+#: templates/diagnose.html:14
+msgid "Digite o IMEI ou Serial..."
+msgstr ""
+
+#: templates/diagnose.html:16
+msgid "Diagnosticar"
+msgstr ""
+
+#: templates/diagnose.html:22
+msgid "Alta confiabilidade – sem expor informações sensíveis."
+msgstr ""
+
+#: templates/diagnose_result.html:2 templates/diagnose_result.html:7
+msgid "Resultado do Diagnóstico"
+msgstr ""
+
+#: templates/diagnose_result.html:12
+msgid "Dispositivo"
+msgstr ""
+
+#: templates/diagnose_result.html:15
+msgid "Tipo detectado"
+msgstr ""
+
+#: templates/diagnose_result.html:18
+msgid "Condições detectadas"
+msgstr ""
+
+#: templates/diagnose_result.html:27
+msgid "Serviço Recomendado"
+msgstr ""
+
+#: templates/diagnose_result.html:30
+msgid "Preço estimado"
+msgstr ""
+
+#: templates/diagnose_result.html:34
+msgid "Iniciar Desbloqueio"
+msgstr ""
+
+#: templates/diagnose_result.html:41
+msgid ""
+"Não foi possível determinar automaticamente. Escolha manualmente um "
+"serviço compatível."
+msgstr ""
+
+#: templates/diagnose_result.html:44
+msgid "Ver Serviços"
+msgstr ""
+
+#: templates/diagnose_result.html:51
+msgid ""
+"Análise automática com base em IMEI/Serial e regras internas de "
+"diagnóstico."
+msgstr ""
+
+#: templates/email_verificacao.html:2
+msgid "Email Verification — T-Lux Unlock Systems"
+msgstr ""
+
+#: templates/email_verificacao.html:7
+msgid "Email Verification"
+msgstr ""
+
+#: templates/email_verificacao.html:9
+msgid "If you received a verification link, simply click it in your email."
+msgstr ""
+
+#: templates/email_verificacao.html:10
+msgid ""
+"Otherwise, enter your 6-digit verification code below to activate your "
+"account."
+msgstr ""
+
+#: templates/email_verificacao.html:21 templates/login.html:19
+#: templates/login.html:68 templates/login.html:87 templates/register.html:139
+msgid "Close"
+msgstr ""
+
+#: templates/email_verificacao.html:34 templates/forgot_password.html:31
+#: templates/login.html:28 templates/rest_password.html:31
+msgid "Email Address"
+msgstr ""
+
+#: templates/email_verificacao.html:36
+msgid "you@example.com"
+msgstr ""
+
+#: templates/email_verificacao.html:40 templates/rest_password.html:37
+msgid "6-digit Verification Code"
+msgstr ""
+
+#: templates/email_verificacao.html:43
+msgid "Enter your code"
+msgstr ""
+
+#: templates/email_verificacao.html:44
+msgid "This code expires in 10 minutes."
+msgstr ""
+
+#: templates/email_verificacao.html:48
+msgid "Verify Email"
+msgstr ""
+
+#: templates/email_verificacao.html:56
+msgid "Didn’t receive your verification code or link?"
+msgstr ""
+
+#: templates/email_verificacao.html:60 templates/rest_password.html:69
+msgid "Enter your email again"
+msgstr ""
+
+#: templates/email_verificacao.html:63 templates/rest_password.html:72
+msgid "Resend Code"
+msgstr ""
+
+#: templates/forgot_password.html:2
+msgid "Forgot Password — T-Lux Unlock Systems"
+msgstr ""
+
+#: templates/forgot_password.html:11
+msgid "Forgot Your Password?"
+msgstr ""
+
+#: templates/forgot_password.html:13
+msgid ""
+"Enter your account email below. We'll send you a 6-digit verification "
+"code to reset your password."
+msgstr ""
+
+#: templates/forgot_password.html:33 templates/login.html:30
+#: templates/rest_password.html:33
 msgid "your@email.com"
 msgstr ""
 
-#: templates/login.html:26
+#: templates/forgot_password.html:37
+msgid "Send Verification Code"
+msgstr ""
+
+#: templates/forgot_password.html:44
+msgid "Already have a verification code?"
+msgstr ""
+
+#: templates/forgot_password.html:47
+msgid "Enter Code to Reset Password"
+msgstr ""
+
+#: templates/forgot_password.html:51 templates/rest_password.html:77
+msgid "Remembered your password?"
+msgstr ""
+
+#: templates/forgot_password.html:52 templates/rest_password.html:78
+msgid "Login here"
+msgstr ""
+
+#: templates/index.html:17
+msgid ""
+"Advanced unlock platform for all Apple devices — iPhone, iPad and Mac. "
+"Fast, secure and fully automated."
+msgstr ""
+
+#: templates/index.html:22
+msgid "Enter Dashboard"
+msgstr ""
+
+#: templates/index.html:25
+msgid "Create Account"
+msgstr ""
+
+#: templates/index.html:36
+msgid "How T-Lux Works"
+msgstr ""
+
+#: templates/index.html:38
+msgid ""
+"Our cloud system automates the entire unlocking process — from IMEI "
+"registration to successful completion. You are always in control."
+msgstr ""
+
+#: templates/index.html:45
+msgid "1. Register & Verify"
+msgstr ""
+
+#: templates/index.html:46
+msgid ""
+"Create your T-Lux account, verify your email and access your secure "
+"dashboard."
+msgstr ""
+
+#: templates/index.html:53
+msgid "2. Choose Device Type"
+msgstr ""
+
+#: templates/index.html:54
+msgid "Select iPhone, iPad or Mac — we support all generations and chipsets."
+msgstr ""
+
+#: templates/index.html:61
+msgid "3. Unlock Type"
+msgstr ""
+
+#: templates/index.html:62
+msgid ""
+"Signal & No-Signal unlocks available for iPhones, MDM & EFI for iPads and"
+" Macs."
+msgstr ""
+
+#: templates/index.html:69
+msgid "4. Confirm Payment"
+msgstr ""
+
+#: templates/index.html:70
+msgid ""
+"Pay safely via Stripe or your T-Lux balance — transactions are encrypted "
+"and instant."
+msgstr ""
+
+#: templates/index.html:77
+msgid "5. Automatic Processing"
+msgstr ""
+
+#: templates/index.html:78
+msgid ""
+"Our servers process your unlock in real-time — fast, accurate and fully "
+"automated."
+msgstr ""
+
+#: templates/index.html:85
+msgid "6. Unlock Complete"
+msgstr ""
+
+#: templates/index.html:86
+msgid ""
+"Your device is unlocked — check your dashboard for confirmation and "
+"history."
+msgstr ""
+
+#: templates/index.html:98
+msgid "Comprehensive Apple Services"
+msgstr ""
+
+#: templates/index.html:100
+msgid ""
+"T-Lux provides a wide range of digital solutions for Apple devices — "
+"unlocking, verification, diagnostics and technical management — all from "
+"one secure platform."
+msgstr ""
+
+#: templates/index.html:106
+msgid "iPhone Unlocks"
+msgstr ""
+
+#: templates/index.html:107
+msgid ""
+"We support signal and no-signal iCloud bypass for all iPhone models from "
+"5s to 15 Pro Max."
+msgstr ""
+
+#: templates/index.html:112
+msgid "iPad & MDM Services"
+msgstr ""
+
+#: templates/index.html:113
+msgid ""
+"Full MDM removal, activation locks and device supervision bypass for all "
+"iPad generations."
+msgstr ""
+
+#: templates/index.html:118
+msgid "Mac EFI & Cloud Solutions"
+msgstr ""
+
+#: templates/index.html:119
+msgid ""
+"Secure EFI unlocks and account recovery tools for all MacBook, iMac and "
+"Mac mini models."
+msgstr ""
+
+#: templates/index.html:131
+msgid "Trusted by Technicians Worldwide"
+msgstr ""
+
+#: templates/index.html:133
+msgid ""
+"T-Lux is built on trust, automation and transparency. Every process is "
+"verified, encrypted and monitored 24/7 for your safety."
+msgstr ""
+
+#: templates/index.html:136
+msgid ""
+"Your data and devices are protected under strict privacy protocols — "
+"ensuring full confidentiality and professional reliability."
+msgstr ""
+
+#: templates/index.html:139
+msgid "Join T-Lux Now — It's Free to Start"
+msgstr ""
+
+#: templates/login.html:2
+msgid "Login — T-Lux Unlock Systems"
+msgstr ""
+
+#: templates/login.html:11
+msgid "Login to Your Account"
+msgstr ""
+
+#: templates/login.html:34 templates/register.html:53
 msgid "Password"
 msgstr ""
 
-#: templates/login.html:34
+#: templates/login.html:46
 msgid "Don't have an account?"
 msgstr ""
 
-#: templates/login.html:36
-msgid "Didn't receive the verification email?"
+#: templates/login.html:48
+msgid "Didn’t receive your verification email?"
 msgstr ""
 
-#: templates/login.html:37
-msgid "Resend"
+#: templates/login.html:49
+msgid "Resend Verification"
+msgstr ""
+
+#: templates/login.html:50
+msgid "Forgot your password?"
+msgstr ""
+
+#: templates/login.html:52
+msgid "Privacy & Security Policy"
+msgstr ""
+
+#: templates/login.html:66
+msgid "Privacy and Security Policy — T-Lux Unlock Systems"
+msgstr ""
+
+#: templates/login.html:71
+msgid "1. Account Protection"
+msgstr ""
+
+#: templates/login.html:72
+msgid ""
+"T-Lux ensures that your login credentials are encrypted and stored "
+"securely."
+msgstr ""
+
+#: templates/login.html:74
+msgid "2. Authentication"
+msgstr ""
+
+#: templates/login.html:75
+msgid ""
+"Each login is processed via secure SSL connections. Suspicious access "
+"attempts may trigger temporary blocks for your safety."
+msgstr ""
+
+#: templates/login.html:77
+msgid "3. Data Usage"
+msgstr ""
+
+#: templates/login.html:78
+msgid ""
+"Your information is only used for account management, verification, and "
+"support. We never sell or share it without consent."
+msgstr ""
+
+#: templates/login.html:80
+msgid "4. Password Safety"
+msgstr ""
+
+#: templates/login.html:81
+msgid ""
+"Use strong, unique passwords. You are responsible for keeping your "
+"credentials confidential."
+msgstr ""
+
+#: templates/login.html:83
+msgid "5. Contact & Support"
+msgstr ""
+
+#: templates/login.html:84
+msgid "For questions, contact: support@t-lux.store"
+msgstr ""
+
+#: templates/register.html:2
+msgid "Create Account — T-Lux Unlock Systems"
+msgstr ""
+
+#: templates/register.html:10
+msgid "Create Your T-Lux Account"
+msgstr ""
+
+#: templates/register.html:29
+msgid "First Name"
+msgstr ""
+
+#: templates/register.html:31
+msgid "Enter your first name"
+msgstr ""
+
+#: templates/register.html:34
+msgid "Last Name"
+msgstr ""
+
+#: templates/register.html:36
+msgid "Enter your last name"
+msgstr ""
+
+#: templates/register.html:41
+msgid "Username"
+msgstr ""
+
+#: templates/register.html:43
+msgid "Choose a unique username"
+msgstr ""
+
+#: templates/register.html:47
+msgid "Email"
+msgstr ""
+
+#: templates/register.html:49
+msgid "Enter a valid email"
+msgstr ""
+
+#: templates/register.html:55
+msgid "Create a strong password"
+msgstr ""
+
+#: templates/register.html:60
+msgid "Language"
+msgstr ""
+
+#: templates/register.html:68
+msgid "Country / Region"
+msgstr ""
+
+#: templates/register.html:70
+msgid "Select your country"
+msgstr ""
+
+#: templates/register.html:82
+msgid "I accept the"
+msgstr ""
+
+#: templates/register.html:84
+msgid "Terms and Conditions"
+msgstr ""
+
+#: templates/register.html:96
+msgid "Already have an account?"
+msgstr ""
+
+#: templates/register.html:98
+msgid "Didn’t receive the verification email?"
+msgstr ""
+
+#: templates/register.html:99
+msgid "Resend verification"
+msgstr ""
+
+#: templates/register.html:112
+msgid "Terms and Conditions — T-Lux Unlock Systems"
+msgstr ""
+
+#: templates/register.html:117
+msgid "1. Service Usage"
+msgstr ""
+
+#: templates/register.html:118
+msgid ""
+"By creating an account on T-Lux, you agree to use our platform "
+"responsibly and in compliance with all applicable laws. The services "
+"provided are for authorized device unlocking only."
+msgstr ""
+
+#: templates/register.html:120
+msgid "2. Data Privacy"
+msgstr ""
+
+#: templates/register.html:121
+msgid ""
+"Your personal data is securely stored and used only for account "
+"management, payment processing, and service delivery. We never sell or "
+"share your data without consent."
+msgstr ""
+
+#: templates/register.html:123
+msgid "3. Payments and Refunds"
+msgstr ""
+
+#: templates/register.html:124
+msgid ""
+"All payments are processed via Stripe or official partners. Refunds are "
+"accepted only if the unlock service was not successfully completed."
+msgstr ""
+
+#: templates/register.html:126
+msgid "4. Account Responsibility"
+msgstr ""
+
+#: templates/register.html:127
+msgid ""
+"You are responsible for keeping your credentials secure. T-Lux is not "
+"liable for unauthorized access resulting from negligence."
+msgstr ""
+
+#: templates/register.html:129
+msgid "5. Service Availability"
+msgstr ""
+
+#: templates/register.html:130
+msgid ""
+"While we strive for 24/7 availability, maintenance or provider downtime "
+"may temporarily affect service access."
+msgstr ""
+
+#: templates/register.html:132
+msgid "6. Changes to Terms"
+msgstr ""
+
+#: templates/register.html:133
+msgid ""
+"T-Lux reserves the right to update these terms at any time. Continued use"
+" of the platform means acceptance of the new terms."
+msgstr ""
+
+#: templates/register.html:135
+msgid "7. Contact and Support"
+msgstr ""
+
+#: templates/register.html:136
+msgid ""
+"For support, contact: support@t-lux.store or visit our official Telegram "
+"channel."
+msgstr ""
+
+#: templates/rest_password.html:2
+msgid "Reset Password — T-Lux Unlock Systems"
+msgstr ""
+
+#: templates/rest_password.html:11
+msgid "Reset Your Password"
+msgstr ""
+
+#: templates/rest_password.html:13
+msgid ""
+"Enter the 6-digit verification code we sent to your email, then choose "
+"your new password."
+msgstr ""
+
+#: templates/rest_password.html:40
+msgid "Enter the code"
+msgstr ""
+
+#: templates/rest_password.html:41
+msgid "Code expires in 10 minutes."
+msgstr ""
+
+#: templates/rest_password.html:45
+msgid "New Password"
+msgstr ""
+
+#: templates/rest_password.html:47
+msgid "Create a new secure password"
+msgstr ""
+
+#: templates/rest_password.html:51
+msgid "Confirm New Password"
+msgstr ""
+
+#: templates/rest_password.html:53
+msgid "Re-enter new password"
+msgstr ""
+
+#: templates/rest_password.html:57
+msgid "Reset Password"
+msgstr ""
+
+#: templates/rest_password.html:64
+msgid "Didn’t receive your verification code?"
 msgstr ""
 
 #: venv/lib/python3.13/site-packages/git_filter_repo.py:139
@@ -1640,6 +2276,2509 @@ msgid_plural "{len_type} values are required, but {len_value} were given."
 msgstr[0] ""
 msgstr[1] ""
 
-#~ msgid "Idioma alterado com sucesso!"
+#~ msgid "Payment Successful"
+#~ msgstr "Pagamento Concluído"
+
+#~ msgid "Payment Failed"
+#~ msgstr "Falha no Pagamento"
+
+#~ msgid "Receipt"
+#~ msgstr "Recibo"
+
+#~ msgid "Back to Dashboard"
+#~ msgstr "Voltar ao Painel"
+
+#~ msgid "Try Again"
+#~ msgstr "Tentar Novamente"
+
+#~ msgid "Print Receipt"
+#~ msgstr "Imprimir Recibo"
+
+#~ msgid "Paid"
+#~ msgstr "Pago"
+
+#~ msgid "See Services & Pricing"
+#~ msgstr "Ver Serviços e Preços"
+
+#~ msgid "Join Now — Start Unlocking Smarter"
+#~ msgstr "Junte-se Agora — Desbloqueie de Forma Inteligente"
+
+#~ msgid "Fast, Secure & Professional Unlocking Worldwide"
+#~ msgstr "Desbloqueio Rápido, Seguro e Profissional em Todo o Mundo"
+
+#~ msgid ""
+#~ "T-Lux automates professional unlock operations"
+#~ " for Apple devices — from iPhone "
+#~ "to Mac — combining technology, "
+#~ "reliability, and speed."
+#~ msgstr ""
+#~ "O T-Lux automatiza operações de "
+#~ "desbloqueio profissional para dispositivos "
+#~ "Apple — de iPhone a Mac — "
+#~ "combinando tecnologia, confiabilidade e "
+#~ "velocidade."
+
+#~ msgid "Signal & No-Signal Unlocks"
+#~ msgstr "Desbloqueios com e sem Sinal"
+
+#~ msgid "Smart Automation"
+#~ msgstr "Automação Inteligente"
+
+#~ msgid "Security & Reliability"
+#~ msgstr "Segurança e Confiabilidade"
+
+#~ msgid "Multi-Service Platform"
+#~ msgstr "Plataforma Multi-Serviços"
+
+#~ msgid ""
+#~ "Your privacy is our top priority —"
+#~ " no personal data or device "
+#~ "information is ever shared."
+#~ msgstr ""
+#~ "A sua privacidade é a nossa "
+#~ "prioridade — nenhum dado pessoal ou "
+#~ "informação do dispositivo é partilhado."
+
+# ----------------------
+# SUPORTE
+#~ msgid "T-Lux Support Center"
+#~ msgstr "Centro de Suporte T-Lux"
+
+#~ msgid ""
+#~ "Need help? Our team is always "
+#~ "ready to assist you with any "
+#~ "question or issue."
+#~ msgstr ""
+#~ "Precisa de ajuda? Nossa equipe está "
+#~ "sempre pronta para te auxiliar com "
+#~ "qualquer dúvida ou problema."
+
+#~ msgid "WhatsApp Support"
+#~ msgstr "Suporte via WhatsApp"
+
+#~ msgid ""
+#~ "Talk directly with our support team "
+#~ "for quick assistance and real-time "
+#~ "help."
+#~ msgstr ""
+#~ "Fale diretamente com nossa equipe de "
+#~ "suporte para assistência rápida e em "
+#~ "tempo real."
+
+#~ msgid "Talk on WhatsApp"
+#~ msgstr "Falar no WhatsApp"
+
+#~ msgid "Email Support"
+#~ msgstr "Suporte por E-mail"
+
+#~ msgid "Send us an email and our technical team will reply within 24 hours."
+#~ msgstr "Envie-nos um e-mail e nossa equipe técnica responderá em até 24 horas."
+
+#~ msgid "Telegram Channel"
+#~ msgstr "Canal no Telegram"
+
+#~ msgid ""
+#~ "Join our official Telegram channel to"
+#~ " get news, updates, and direct "
+#~ "communication with the team."
+#~ msgstr ""
+#~ "Junte-se ao nosso canal oficial no"
+#~ " Telegram para receber notícias, "
+#~ "atualizações e contato direto com a "
+#~ "equipe."
+
+#~ msgid "Join on Telegram"
+#~ msgstr "Entrar no Telegram"
+
+# ----------------------
+# DASHBOARD
+#~ msgid "Welcome"
+#~ msgstr "Bem-vindo"
+
+#~ msgid "Account"
+#~ msgstr "Conta"
+
+#~ msgid "License active until"
+#~ msgstr "Licença ativa até"
+
+#~ msgid "License expired on"
+#~ msgstr "Licença expirada em"
+
+#~ msgid "No active license"
+#~ msgstr "Nenhuma licença ativa"
+
+#~ msgid "Available Balance"
+#~ msgstr "Saldo Disponível"
+
+# ----------------------
+# VERIFICAÇÃO / DESBLOQUEIO
+#~ msgid "Check Serial / IMEI"
+#~ msgstr "Verificar Serial / IMEI"
+
+#~ msgid "Buy Package"
+#~ msgstr "Comprar Pacote"
+
+#~ msgid "Technical Support"
+#~ msgstr "Suporte Técnico"
+
+#~ msgid "Become a T-Lux Technician"
+#~ msgstr "Tornar-se Técnico T-Lux"
+
+#~ msgid "Quick Unlock"
+#~ msgstr "Desbloqueio Rápido"
+
+#~ msgid "Unlock History"
+#~ msgstr "Histórico de Desbloqueios"
+
+#~ msgid "Recent Transactions"
+#~ msgstr "Transações Recentes"
+
+#~ msgid "No transactions found."
+#~ msgstr "Nenhuma transação encontrada."
+
+#~ msgid "Verify Serial / IMEI"
+#~ msgstr "Verificar Serial / IMEI"
+
+#~ msgid "Enter the serial number or IMEI to identify your device and proceed."
+#~ msgstr ""
+#~ "Digite o número de série ou IMEI"
+#~ " para identificar o seu dispositivo e"
+#~ " prosseguir."
+
+#~ msgid "Model"
+#~ msgstr "Modelo"
+
+#~ msgid "Serial"
+#~ msgstr "Serial"
+
+#~ msgid "Retail Price"
+#~ msgstr "Preço ao Cliente"
+
+#~ msgid "Supplier Cost"
+#~ msgstr "Custo Fornecedor"
+
+#~ msgid "Estimated Profit"
+#~ msgstr "Lucro Estimado"
+
+#~ msgid "Back and Edit"
+#~ msgstr "Voltar e Corrigir"
+
+#~ msgid "Transaction ID"
+#~ msgstr "ID da Transação"
+
+#~ msgid "Amount"
+#~ msgstr "Montante"
+
+#~ msgid "Date"
+#~ msgstr "Data"
+
+#~ msgid ""
+#~ "Your order is being processed. You’ll"
+#~ " receive an update by email once "
+#~ "the unlock is complete."
+#~ msgstr ""
+#~ "O seu pedido está a ser "
+#~ "processado. Receberá uma atualização por "
+#~ "e-mail assim que o desbloqueio for "
+#~ "concluído."
+
+#~ msgid "Thank you for choosing T-Lux — the Global Unlock Platform."
+#~ msgstr "Obrigado por escolher o T-Lux — a Plataforma Global de Desbloqueio."
+
+# ----------------------
+# ERROS E PAGAMENTO
+#~ msgid "Something went wrong while processing your request."
+#~ msgstr "Ocorreu um erro ao processar o seu pedido."
+
+#~ msgid "Please try again later."
+#~ msgstr "Por favor, tente novamente mais tarde."
+
+#~ msgid "Your payment could not be completed."
+#~ msgstr "O seu pagamento não pôde ser concluído."
+
+#~ msgid "If the issue persists, please contact support."
+#~ msgstr "Se o problema persistir, entre em contato com o suporte."
+
+#~ msgid "Try Payment Again"
+#~ msgstr "Tentar Pagamento Novamente"
+
+#~ msgid ""
+#~ "This receipt confirms that payment has"
+#~ " been received for the selected "
+#~ "unlock service."
+#~ msgstr ""
+#~ "Este recibo confirma que o pagamento "
+#~ "foi recebido para o serviço de "
+#~ "desbloqueio selecionado."
+
+#~ msgid "The process may take a few minutes to complete."
+#~ msgstr "O processo pode levar alguns minutos para ser concluído."
+
+#~ msgid "You’ll be notified via email once the unlock is ready."
+#~ msgstr "Será notificado por e-mail assim que o desbloqueio estiver pronto."
+
+# ----------------------
+# SISTEMA GERAL
+#~ msgid "Language changed successfully!"
+#~ msgstr "Idioma alterado com sucesso!"
+
+# ----------------------
+# HOME PAGE
+#~ msgid "Welcome to T-Lux Unlock System"
+#~ msgstr "Bem-vindo ao Sistema de Desbloqueio T-Lux"
+
+# ----------------------
+# NAVBAR / BASE
+#~ msgid "Dashboard"
+#~ msgstr "Painel"
+
+#~ msgid "Unlock"
+#~ msgstr "Desbloquear"
+
+#~ msgid "Packages"
+#~ msgstr "Pacotes"
+
+#~ msgid "Services"
+#~ msgstr "Serviços"
+
+#~ msgid "My Orders"
+#~ msgstr "Meus Pedidos"
+
+#~ msgid "Support"
+#~ msgstr "Suporte"
+
+#~ msgid "Admin Orders"
+#~ msgstr "Pedidos Admin"
+
+#~ msgid "Admin Panel"
+#~ msgstr "Painel Admin"
+
+#~ msgid "Logout"
+#~ msgstr "Sair"
+
+#~ msgid "Login"
+#~ msgstr "Entrar"
+
+#~ msgid "Register"
+#~ msgstr "Registrar"
+
+#~ msgid "All rights reserved."
+#~ msgstr "Todos os direitos reservados."
+
+# ----------------------
+# HOME PAGE
+#~ msgid "Verify Your Email — T-Lux Unlock Systems"
+#~ msgstr "Bem-vindo ao Sistema de Desbloqueio T-Lux"
+
+#~ msgid "Verify Your Email"
+#~ msgstr "Detalhes do Erro"
+
+#~ msgid "We’ve sent a verification link and code to:"
 #~ msgstr ""
 
+#~ msgid "Please open your inbox and click the"
+#~ msgstr ""
+
+#~ msgid "button to activate your account."
+#~ msgstr ""
+
+#~ msgid "If you don’t see the message, check your"
+#~ msgstr ""
+
+#~ msgid "Spam"
+#~ msgstr ""
+
+#~ msgid "or"
+#~ msgstr ""
+
+#~ msgid "Junk"
+#~ msgstr "Desbloquear"
+
+#~ msgid "folder."
+#~ msgstr ""
+
+#~ msgid "Resend Verification Email"
+#~ msgstr ""
+
+#~ msgid "Log Out"
+#~ msgstr "Sair"
+
+#~ msgid "Once verified, you can log in securely to your dashboard."
+#~ msgstr ""
+
+# ----------------------
+# HOME PAGE
+#~ msgid "Choose Your Access Package — T-Lux Unlock Systems"
+#~ msgstr "Bem-vindo ao Sistema de Desbloqueio T-Lux"
+
+#~ msgid "Choose Your Access Package"
+#~ msgstr ""
+
+#~ msgid "Activate your T-Lux account by purchasing an Access Key."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Each plan grants full access to "
+#~ "all unlocking services during its "
+#~ "validity period."
+#~ msgstr ""
+
+#~ msgid "days"
+#~ msgstr ""
+
+#~ msgid "International payment via Stripe (USD)"
+#~ msgstr ""
+
+#~ msgid "Activate"
+#~ msgstr ""
+
+#~ msgid "No packages available at the moment."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "All payments are processed securely "
+#~ "through Stripe using your preferred "
+#~ "card."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Renew before expiry to maintain "
+#~ "uninterrupted access to all T-Lux "
+#~ "services."
+#~ msgstr ""
+
+#~ msgid "Diagnóstico Inteligente"
+#~ msgstr ""
+
+#~ msgid "Diagnóstico Inteligente T-Lux"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Insira o IMEI ou número de série"
+#~ " do dispositivo Apple para detectar "
+#~ "automaticamente o tipo e o serviço "
+#~ "mais adequado."
+#~ msgstr ""
+
+#~ msgid "Digite o IMEI ou Serial..."
+#~ msgstr ""
+
+#~ msgid "Diagnosticar"
+#~ msgstr ""
+
+#~ msgid "Alta confiabilidade – sem expor informações sensíveis."
+#~ msgstr ""
+
+#~ msgid "Resultado do Diagnóstico"
+#~ msgstr ""
+
+#~ msgid "Dispositivo"
+#~ msgstr ""
+
+#~ msgid "Tipo detectado"
+#~ msgstr ""
+
+#~ msgid "Condições detectadas"
+#~ msgstr ""
+
+#~ msgid "Serviço Recomendado"
+#~ msgstr ""
+
+#~ msgid "Preço estimado"
+#~ msgstr ""
+
+#~ msgid "Iniciar Desbloqueio"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Não foi possível determinar automaticamente."
+#~ " Escolha manualmente um serviço compatível."
+#~ msgstr ""
+
+#~ msgid "Ver Serviços"
+#~ msgstr "Serviços"
+
+#~ msgid ""
+#~ "Análise automática com base em "
+#~ "IMEI/Serial e regras internas de "
+#~ "diagnóstico."
+#~ msgstr ""
+
+# ----------------------
+# HOME PAGE
+#~ msgid "Email Verification — T-Lux Unlock Systems"
+#~ msgstr "Bem-vindo ao Sistema de Desbloqueio T-Lux"
+
+#~ msgid "Email Verification"
+#~ msgstr ""
+
+#~ msgid "If you received a verification link, simply click it in your email."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Otherwise, enter your 6-digit verification "
+#~ "code below to activate your account."
+#~ msgstr ""
+
+#~ msgid "Close"
+#~ msgstr "Fechar"
+
+#~ msgid "Email Address"
+#~ msgstr ""
+
+#~ msgid "you@example.com"
+#~ msgstr ""
+
+#~ msgid "6-digit Verification Code"
+#~ msgstr ""
+
+#~ msgid "Enter your code"
+#~ msgstr ""
+
+#~ msgid "This code expires in 10 minutes."
+#~ msgstr ""
+
+#~ msgid "Verify Email"
+#~ msgstr "Enviar E-mail"
+
+#~ msgid "Didn’t receive your verification code or link?"
+#~ msgstr ""
+
+#~ msgid "Enter your email again"
+#~ msgstr ""
+
+#~ msgid "Resend Code"
+#~ msgstr "Reenviar"
+
+# ----------------------
+# HOME PAGE
+#~ msgid "Forgot Password — T-Lux Unlock Systems"
+#~ msgstr "Bem-vindo ao Sistema de Desbloqueio T-Lux"
+
+#~ msgid "Forgot Your Password?"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Enter your account email below. We'll"
+#~ " send you a 6-digit verification code"
+#~ " to reset your password."
+#~ msgstr ""
+
+#~ msgid "your@email.com"
+#~ msgstr ""
+
+#~ msgid "Send Verification Code"
+#~ msgstr ""
+
+#~ msgid "Already have a verification code?"
+#~ msgstr "Já tem uma conta?"
+
+#~ msgid "Enter Code to Reset Password"
+#~ msgstr ""
+
+#~ msgid "Remembered your password?"
+#~ msgstr ""
+
+#~ msgid "Login here"
+#~ msgstr "Entrar"
+
+#~ msgid ""
+#~ "Advanced unlock platform for all Apple"
+#~ " devices — iPhone, iPad and Mac. "
+#~ "Fast, secure and fully automated."
+#~ msgstr ""
+#~ "Soluções globais de desbloqueio automatizado"
+#~ " para iPhone, iPad e Mac. Rápidas,"
+#~ " seguras e profissionais."
+
+#~ msgid "Enter Dashboard"
+#~ msgstr "Entrar no Painel"
+
+#~ msgid "Create Account"
+#~ msgstr "Criar Conta"
+
+#~ msgid "How T-Lux Works"
+#~ msgstr "Como o T-Lux Funciona"
+
+#~ msgid ""
+#~ "Our cloud system automates the entire"
+#~ " unlocking process — from IMEI "
+#~ "registration to successful completion. You "
+#~ "are always in control."
+#~ msgstr ""
+
+#~ msgid "1. Register & Verify"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Create your T-Lux account, verify your"
+#~ " email and access your secure "
+#~ "dashboard."
+#~ msgstr ""
+
+#~ msgid "2. Choose Device Type"
+#~ msgstr ""
+
+#~ msgid "Select iPhone, iPad or Mac — we support all generations and chipsets."
+#~ msgstr ""
+
+#~ msgid "3. Unlock Type"
+#~ msgstr "Ainda não há desbloqueios."
+
+#~ msgid ""
+#~ "Signal & No-Signal unlocks available "
+#~ "for iPhones, MDM & EFI for iPads"
+#~ " and Macs."
+#~ msgstr ""
+
+#~ msgid "4. Confirm Payment"
+#~ msgstr "Confirmar e Pagar"
+
+#~ msgid ""
+#~ "Pay safely via Stripe or your "
+#~ "T-Lux balance — transactions are "
+#~ "encrypted and instant."
+#~ msgstr ""
+
+#~ msgid "5. Automatic Processing"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Our servers process your unlock in "
+#~ "real-time — fast, accurate and "
+#~ "fully automated."
+#~ msgstr ""
+
+#~ msgid "6. Unlock Complete"
+#~ msgstr "Ainda não há desbloqueios."
+
+#~ msgid ""
+#~ "Your device is unlocked — check "
+#~ "your dashboard for confirmation and "
+#~ "history."
+#~ msgstr ""
+
+#~ msgid "Comprehensive Apple Services"
+#~ msgstr "Serviços Completos para Dispositivos Apple"
+
+#~ msgid ""
+#~ "T-Lux provides a wide range of "
+#~ "digital solutions for Apple devices —"
+#~ " unlocking, verification, diagnostics and "
+#~ "technical management — all from one "
+#~ "secure platform."
+#~ msgstr ""
+
+#~ msgid "iPhone Unlocks"
+#~ msgstr "Confirmar Desbloqueio"
+
+#~ msgid ""
+#~ "We support signal and no-signal "
+#~ "iCloud bypass for all iPhone models "
+#~ "from 5s to 15 Pro Max."
+#~ msgstr ""
+
+#~ msgid "iPad & MDM Services"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Full MDM removal, activation locks and"
+#~ " device supervision bypass for all "
+#~ "iPad generations."
+#~ msgstr ""
+
+#~ msgid "Mac EFI & Cloud Solutions"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Secure EFI unlocks and account recovery"
+#~ " tools for all MacBook, iMac and "
+#~ "Mac mini models."
+#~ msgstr ""
+
+#~ msgid "Trusted by Technicians Worldwide"
+#~ msgstr "Confiado por profissionais em todo o mundo"
+
+#~ msgid ""
+#~ "T-Lux is built on trust, automation "
+#~ "and transparency. Every process is "
+#~ "verified, encrypted and monitored 24/7 "
+#~ "for your safety."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Your data and devices are protected "
+#~ "under strict privacy protocols — "
+#~ "ensuring full confidentiality and professional"
+#~ " reliability."
+#~ msgstr ""
+
+#~ msgid "Join T-Lux Now — It's Free to Start"
+#~ msgstr ""
+
+# ----------------------
+# HOME PAGE
+#~ msgid "Login — T-Lux Unlock Systems"
+#~ msgstr "Bem-vindo ao Sistema de Desbloqueio T-Lux"
+
+#~ msgid "Login to Your Account"
+#~ msgstr ""
+
+#~ msgid "Password"
+#~ msgstr "Senha"
+
+#~ msgid "Don't have an account?"
+#~ msgstr "Não tem uma conta?"
+
+#~ msgid "Didn’t receive your verification email?"
+#~ msgstr ""
+
+#~ msgid "Resend Verification"
+#~ msgstr ""
+
+#~ msgid "Forgot your password?"
+#~ msgstr ""
+
+#~ msgid "Privacy & Security Policy"
+#~ msgstr "Política de Privacidade e Segurança"
+
+#~ msgid "Privacy and Security Policy — T-Lux Unlock Systems"
+#~ msgstr "Política de Privacidade e Segurança"
+
+#~ msgid "1. Account Protection"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "T-Lux ensures that your login "
+#~ "credentials are encrypted and stored "
+#~ "securely."
+#~ msgstr ""
+
+#~ msgid "2. Authentication"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Each login is processed via secure "
+#~ "SSL connections. Suspicious access attempts"
+#~ " may trigger temporary blocks for "
+#~ "your safety."
+#~ msgstr ""
+
+#~ msgid "3. Data Usage"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Your information is only used for "
+#~ "account management, verification, and support."
+#~ " We never sell or share it "
+#~ "without consent."
+#~ msgstr ""
+
+#~ msgid "4. Password Safety"
+#~ msgstr "Senha"
+
+#~ msgid ""
+#~ "Use strong, unique passwords. You are"
+#~ " responsible for keeping your credentials"
+#~ " confidential."
+#~ msgstr ""
+
+#~ msgid "5. Contact & Support"
+#~ msgstr ""
+
+#~ msgid "For questions, contact: support@t-lux.store"
+#~ msgstr "Precisa de ajuda? Contacte support@t-lux.tech"
+
+# ----------------------
+# HOME PAGE
+#~ msgid "Create Account — T-Lux Unlock Systems"
+#~ msgstr "Bem-vindo ao Sistema de Desbloqueio T-Lux"
+
+#~ msgid "Create Your T-Lux Account"
+#~ msgstr "Criar Conta"
+
+#~ msgid "First Name"
+#~ msgstr "Primeiro Nome"
+
+#~ msgid "Enter your first name"
+#~ msgstr "Primeiro Nome"
+
+#~ msgid "Last Name"
+#~ msgstr "Último Nome"
+
+#~ msgid "Enter your last name"
+#~ msgstr "Último Nome"
+
+#~ msgid "Username"
+#~ msgstr "Nome de Usuário"
+
+#~ msgid "Choose a unique username"
+#~ msgstr ""
+
+# ----------------------
+# LOGIN / REGISTER
+#~ msgid "Email"
+#~ msgstr "E-mail"
+
+#~ msgid "Enter a valid email"
+#~ msgstr "Enviar E-mail"
+
+#~ msgid "Create a strong password"
+#~ msgstr ""
+
+#~ msgid "Language"
+#~ msgstr "Idioma"
+
+#~ msgid "Country / Region"
+#~ msgstr "País / Região"
+
+#~ msgid "Select your country"
+#~ msgstr ""
+
+#~ msgid "I accept the"
+#~ msgstr "Eu aceito os"
+
+#~ msgid "Terms and Conditions"
+#~ msgstr "Termos e Condições"
+
+#~ msgid "Already have an account?"
+#~ msgstr "Já tem uma conta?"
+
+#~ msgid "Didn’t receive the verification email?"
+#~ msgstr ""
+
+#~ msgid "Resend verification"
+#~ msgstr ""
+
+# ----------------------
+# HOME PAGE
+#~ msgid "Terms and Conditions — T-Lux Unlock Systems"
+#~ msgstr "Bem-vindo ao Sistema de Desbloqueio T-Lux"
+
+#~ msgid "1. Service Usage"
+#~ msgstr "Serviços"
+
+#~ msgid ""
+#~ "By creating an account on T-Lux, "
+#~ "you agree to use our platform "
+#~ "responsibly and in compliance with all"
+#~ " applicable laws. The services provided "
+#~ "are for authorized device unlocking "
+#~ "only."
+#~ msgstr ""
+
+#~ msgid "2. Data Privacy"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Your personal data is securely stored"
+#~ " and used only for account "
+#~ "management, payment processing, and service"
+#~ " delivery. We never sell or share "
+#~ "your data without consent."
+#~ msgstr ""
+
+#~ msgid "3. Payments and Refunds"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "All payments are processed via Stripe"
+#~ " or official partners. Refunds are "
+#~ "accepted only if the unlock service "
+#~ "was not successfully completed."
+#~ msgstr ""
+
+#~ msgid "4. Account Responsibility"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You are responsible for keeping your "
+#~ "credentials secure. T-Lux is not liable"
+#~ " for unauthorized access resulting from "
+#~ "negligence."
+#~ msgstr ""
+
+#~ msgid "5. Service Availability"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "While we strive for 24/7 availability,"
+#~ " maintenance or provider downtime may "
+#~ "temporarily affect service access."
+#~ msgstr ""
+
+#~ msgid "6. Changes to Terms"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "T-Lux reserves the right to update "
+#~ "these terms at any time. Continued "
+#~ "use of the platform means acceptance "
+#~ "of the new terms."
+#~ msgstr ""
+
+#~ msgid "7. Contact and Support"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "For support, contact: support@t-lux.store or"
+#~ " visit our official Telegram channel."
+#~ msgstr ""
+
+# ----------------------
+# HOME PAGE
+#~ msgid "Reset Password — T-Lux Unlock Systems"
+#~ msgstr "Bem-vindo ao Sistema de Desbloqueio T-Lux"
+
+#~ msgid "Reset Your Password"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Enter the 6-digit verification code we"
+#~ " sent to your email, then choose "
+#~ "your new password."
+#~ msgstr ""
+
+#~ msgid "Enter the code"
+#~ msgstr ""
+
+#~ msgid "Code expires in 10 minutes."
+#~ msgstr ""
+
+#~ msgid "New Password"
+#~ msgstr "Senha"
+
+#~ msgid "Create a new secure password"
+#~ msgstr ""
+
+#~ msgid "Confirm New Password"
+#~ msgstr "Confirmar e Pagar"
+
+#~ msgid "Re-enter new password"
+#~ msgstr "Entrar no Painel"
+
+#~ msgid "Reset Password"
+#~ msgstr "Senha"
+
+#~ msgid "Didn’t receive your verification code?"
+#~ msgstr ""
+
+#~ msgid "Error: Cannot handle glob %s"
+#~ msgstr ""
+
+#~ msgid "Cannot read %s"
+#~ msgstr ""
+
+#~ msgid "Unimplemented function: %s"
+#~ msgstr ""
+
+#~ msgid "new name needed for rename of %s"
+#~ msgstr ""
+
+#~ msgid "Unhandled filechange type: %s"
+#~ msgstr ""
+
+#~ msgid "Couldn't parse rename source"
+#~ msgstr ""
+
+#~ msgid "Malformed %(refname)s line: '%(line)s'"
+#~ msgstr ""
+
+#~ msgid "Unsupported command: '%s'"
+#~ msgstr ""
+
+#~ msgid "Could not parse line: '%s'"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\n"
+#~ "NEXT STEPS FOR YOUR SENSITIVE DATA REMOVAL:\n"
+#~ "  * If you are doing your "
+#~ "rewrite in multiple steps, ignore these"
+#~ " next steps\n"
+#~ "    until you have completed all your invocations of git-filter-repo.\n"
+#~ "  * See the \"Sensitive Data "
+#~ "Removal\" subsection of the \"DISCUSSION\" "
+#~ "section\n"
+#~ "    of the manual for more details about any of the steps below.\n"
+#~ "  * Inspect this repository and "
+#~ "verify that the sensitive data is "
+#~ "indeed\n"
+#~ "    completely removed from all commits.\n"
+#~ "  * Force push the rewritten history to the server:\n"
+#~ "      %s\n"
+#~ "  * Contact the server admins for"
+#~ " additional steps they need to take;"
+#~ " the\n"
+#~ "    First Changed Commit(s)%s may come in handy here.\n"
+#~ "  * Have other colleagues with a"
+#~ " clone either discard their clone and"
+#~ " reclone\n"
+#~ "    OR follow the detailed steps "
+#~ "in the manual to repeatedly rebase "
+#~ "and\n"
+#~ "    purge the sensitive data from "
+#~ "their copy.  Again, the First Changed"
+#~ "\n"
+#~ "    Commit(s)%s may come in handy.\n"
+#~ "  * See the \"Prevent repeats and"
+#~ " avoid future sensitive data spills\" "
+#~ "section\n"
+#~ "    of the manual.\n"
+#~ msgstr ""
+
+#~ msgid "%s does not appear to be a valid git repository"
+#~ msgstr ""
+
+#~ msgid "Processed %d blob sizes"
+#~ msgstr ""
+
+#~ msgid "Error: unexpected `git cat-file` output: \"%s\"\n"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Error: --path-rename expects one colon"
+#~ " in its argument: <old_name:new_name>."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Error: With --path-rename, if OLD_NAME"
+#~ " and NEW_NAME are both non-empty "
+#~ "and either ends with a slash then"
+#~ " both must."
+#~ msgstr ""
+
+#~ msgid "Error: Pathnames cannot begin with a '/'"
+#~ msgstr ""
+
+#~ msgid "Error: Invalid path component '%s' found in '%s'"
+#~ msgstr ""
+
+#~ msgid "Error: HelperFilter given invalid option_string: %s"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Rewrite (or analyze) repository history\n"
+#~ "\n"
+#~ "    git-filter-repo destructively "
+#~ "rewrites history (unless --analyze or\n"
+#~ "    --dry-run are given) according "
+#~ "to specified rules.  It refuses to "
+#~ "do any\n"
+#~ "    rewriting unless either run from "
+#~ "a clean fresh clone, or --force "
+#~ "was\n"
+#~ "    given.\n"
+#~ "\n"
+#~ "    Basic Usage:\n"
+#~ "      git-filter-repo --analyze\n"
+#~ "      git-filter-repo [FILTER/RENAME/CONTROL OPTIONS]\n"
+#~ "\n"
+#~ "    See EXAMPLES section for details.\n"
+#~ "    "
+#~ msgstr ""
+
+#~ msgid ""
+#~ "CALLBACKS\n"
+#~ "\n"
+#~ "    Most callback functions are of "
+#~ "the same general format.  For a "
+#~ "command line\n"
+#~ "    argument like\n"
+#~ "      --foo-callback 'BODY'\n"
+#~ "\n"
+#~ "    the following code will be compiled and called:\n"
+#~ "      def foo_callback(foo):\n"
+#~ "        BODY\n"
+#~ "\n"
+#~ "    The exception on callbacks is "
+#~ "the --file-info-callback, which will "
+#~ "be\n"
+#~ "    discussed further below.\n"
+#~ "\n"
+#~ "    Given the callback style, we "
+#~ "can thus make a simple callback to"
+#~ " replace\n"
+#~ "    'Jon' with 'John' in author/committer/tagger names:\n"
+#~ "      git filter-repo --name-callback"
+#~ " 'return name.replace(b\"Jon\", b\"John\")'\n"
+#~ "\n"
+#~ "    To remove all 'Tested-by' tags in commit (or tag) messages:\n"
+#~ "      git filter-repo --message-callback"
+#~ " 'return re.sub(br\"\\nTested-by:.*\", \"\", "
+#~ "message)'\n"
+#~ "\n"
+#~ "    To remove all .DS_Store files:\n"
+#~ "      git filter-repo --filename-"
+#~ "callback 'return None if "
+#~ "os.path.basename(filename) == b\".DS_Store\" else"
+#~ " filename'\n"
+#~ "\n"
+#~ "    Note that if BODY resolves to"
+#~ " a filename, then the contents of "
+#~ "that file\n"
+#~ "    will be used as the BODY in the callback function.\n"
+#~ "\n"
+#~ "    The --file-info-callback has a"
+#~ " more involved function callback; for "
+#~ "it the\n"
+#~ "    following code will be compiled and called:\n"
+#~ "      def file_info_callback(filename, mode, blob_id, value):\n"
+#~ "        BODY\n"
+#~ "\n"
+#~ "    It is designed to be used "
+#~ "in cases where filtering depends on "
+#~ "both\n"
+#~ "    filename and contents (and maybe "
+#~ "mode).  It is called for file "
+#~ "changes\n"
+#~ "    other than deletions (since "
+#~ "deletions have no file contents to "
+#~ "operate\n"
+#~ "    on).  This callback is expected "
+#~ "to return a tuple of (filename, "
+#~ "mode,\n"
+#~ "    blob_id).  It can make use of"
+#~ " the following functions from the "
+#~ "value\n"
+#~ "    instance:\n"
+#~ "      value.get_contents_by_identifier(blob_id) -> "
+#~ "contents (bytestring)\n"
+#~ "      value.get_size_by_identifier(blob_id) -> size_of_blob (int)\n"
+#~ "      value.insert_file_with_contents(contents) -> blob_id\n"
+#~ "      value.is_binary(contents) -> bool\n"
+#~ "      value.apply_replace_text(contents) -> new_contents (bytestring)\n"
+#~ "    and can read/write the following "
+#~ "data member from the value instance:"
+#~ "\n"
+#~ "      value.data (dict)\n"
+#~ "\n"
+#~ "    The filename can be used for renaming the file similar to\n"
+#~ "    --filename-callback (or None to drop the change), and mode is one\n"
+#~ "    of b'100644', b'100755', b'120000', or b'160000'.\n"
+#~ "\n"
+#~ "    For more detailed examples and explanations AND caveats, see\n"
+#~ "      https://htmlpreview.github.io/?https://github.com/newren"
+#~ "/git-filter-repo/blob/docs/html/git-filter-"
+#~ "repo.html#CALLBACKS\n"
+#~ "\n"
+#~ "EXAMPLES\n"
+#~ "\n"
+#~ "    To get a bunch of reports "
+#~ "mentioning renames that have occurred in"
+#~ "\n"
+#~ "    your repo and listing sizes of objects aggregated by any of path,\n"
+#~ "    directory, extension, or blob-id:\n"
+#~ "      git filter-repo --analyze\n"
+#~ "\n"
+#~ "    (These reports can help you "
+#~ "choose how to filter your repo; it"
+#~ " can\n"
+#~ "    be useful to re-run this "
+#~ "command after filtering to regenerate "
+#~ "the\n"
+#~ "    report and verify the changes look correct.)\n"
+#~ "\n"
+#~ "    To extract the history that "
+#~ "touched just 'guides' and 'tools/releases':"
+#~ "\n"
+#~ "      git filter-repo --path guides/ --path tools/releases\n"
+#~ "\n"
+#~ "    To remove foo.zip and bar/baz/zips"
+#~ " from every revision in history:\n"
+#~ "      git filter-repo --path foo.zip "
+#~ "--path bar/baz/zips/ --invert-paths\n"
+#~ "\n"
+#~ "    To replace the text 'password' with 'p455w0rd':\n"
+#~ "      git filter-repo --replace-text <(echo \"password==>p455w0rd\")\n"
+#~ "\n"
+#~ "    To use the current version of"
+#~ " the .mailmap file to update authors,"
+#~ "\n"
+#~ "    committers, and taggers throughout history and make it permanent:\n"
+#~ "      git filter-repo --use-mailmap\n"
+#~ "\n"
+#~ "    To extract the history of "
+#~ "'src/', rename all files to have a"
+#~ " new leading\n"
+#~ "    directory 'my-module' (e.g. "
+#~ "src/foo.java -> my-module/src/foo.java), and"
+#~ "\n"
+#~ "    add a 'my-module-' prefix to all tags:\n"
+#~ "      git filter-repo --path src/ "
+#~ "--to-subdirectory-filter my-module "
+#~ "--tag-rename '':'my-module-'\n"
+#~ "\n"
+#~ "    For more detailed examples and explanations, see\n"
+#~ "      https://htmlpreview.github.io/?https://github.com/newren"
+#~ "/git-filter-repo/blob/docs/html/git-filter-"
+#~ "repo.html#EXAMPLES"
+#~ msgstr ""
+
+#~ msgid "Analysis"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Analyze repository history and create a"
+#~ " report that may be useful in "
+#~ "determining what to filter in a "
+#~ "subsequent run. Will not modify your "
+#~ "repo."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Directory to write report, defaults to"
+#~ " GIT_DIR/filter_repo/analysis,refuses to run if"
+#~ " exists, --force delete existing dir "
+#~ "first."
+#~ msgstr ""
+
+#~ msgid "Filtering based on paths (see also --filename-callback)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\n"
+#~ "           These options specify the "
+#~ "paths to select.  Note that much "
+#~ "like git\n"
+#~ "           itself, renames are NOT "
+#~ "followed so you may need to "
+#~ "specify multiple\n"
+#~ "           paths, e.g. `--path olddir/ --path newdir/`\n"
+#~ "           "
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Invert the selection of files from "
+#~ "the specified --path-{match,glob,regex} options "
+#~ "below, i.e. only select files matching"
+#~ " none of those options."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Exact paths (files or directories) to"
+#~ " include in filtered history.  Multiple "
+#~ "--path options can be specified to "
+#~ "get a union of paths."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Glob of paths to include in "
+#~ "filtered history. Multiple --path-glob "
+#~ "options can be specified to get a"
+#~ " union of paths."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Regex of paths to include in "
+#~ "filtered history. Multiple --path-regex "
+#~ "options can be specified to get a"
+#~ " union of paths"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Match on file base name instead of"
+#~ " full path from the top of the"
+#~ " repo.  Incompatible with --path-rename,"
+#~ " and incompatible with matching against "
+#~ "directory names."
+#~ msgstr ""
+
+#~ msgid "Renaming based on paths (see also --filename-callback)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Path to rename; if filename or "
+#~ "directory matches OLD_NAME rename to "
+#~ "NEW_NAME.  Multiple --path-rename options "
+#~ "can be specified.  NOTE: If you "
+#~ "combine filtering options with renaming "
+#~ "ones, do not rely on a rename "
+#~ "argument to select paths; you also "
+#~ "need a filter to select them."
+#~ msgstr ""
+
+#~ msgid "Path shortcuts"
+#~ msgstr "Atalhos Rápidos"
+
+#~ msgid ""
+#~ "Specify several path filtering and "
+#~ "renaming directives, one per line.  "
+#~ "Lines with '==>' in them specify "
+#~ "path renames, and lines can begin "
+#~ "with 'literal:' (the default), 'glob:', "
+#~ "or 'regex:' to specify different "
+#~ "matching styles.  Blank lines and lines"
+#~ " starting with a '#' are ignored."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Only look at history that touches "
+#~ "the given subdirectory and treat that"
+#~ " directory as the project root.  "
+#~ "Equivalent to using '--path DIRECTORY/"
+#~ " --path-rename DIRECTORY/:'"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Treat the project root as if it"
+#~ " were under DIRECTORY. Equivalent to "
+#~ "using '--path-rename :DIRECTORY/'"
+#~ msgstr ""
+
+#~ msgid "Content editing filters (see also --blob-callback)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A file with expressions that, if "
+#~ "found, will be replaced. By default, "
+#~ "each expression is treated as literal"
+#~ " text, but 'regex:' and 'glob:' "
+#~ "prefixes are supported.  You can end "
+#~ "the line with '==>' and some "
+#~ "replacement text to choose a replacement"
+#~ " choice other than the default of "
+#~ "'{}'."
+#~ msgstr ""
+
+#~ msgid "Strip blobs (files) bigger than specified size (e.g. '5M', '2G', etc)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Read git object ids from each line"
+#~ " of the given file, and strip "
+#~ "all of them from history"
+#~ msgstr ""
+
+#~ msgid "Renaming of refs (see also --refname-callback)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Rename tags starting with OLD to "
+#~ "start with NEW.  For example, --tag-"
+#~ "rename foo:bar will rename tag foo-1.2.3"
+#~ " to bar-1.2.3; either OLD or NEW "
+#~ "can be empty."
+#~ msgstr ""
+
+#~ msgid "Filtering of commit messages (see also --message-callback)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A file with expressions that, if "
+#~ "found in commit or tag messages, "
+#~ "will be replaced. This file uses "
+#~ "the same syntax as --replace-text."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "By default, since commits are rewritten"
+#~ " and thus gain new hashes, references"
+#~ " to old commit hashes in commit "
+#~ "messages are replaced with new commit"
+#~ " hashes (abbreviated to the same "
+#~ "length as the old reference).  Use "
+#~ "this flag to turn off updating "
+#~ "commit hashes in commit messages."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Do not reencode commit messages into "
+#~ "UTF-8.  By default, if the commit "
+#~ "object specifies an encoding for the "
+#~ "commit message, the message is re-"
+#~ "encoded into UTF-8."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Filtering of names & emails (see "
+#~ "also --name-callback and --email-"
+#~ "callback)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Use specified mailmap file (see git-"
+#~ "shortlog(1) for details on the format)"
+#~ " when rewriting author, committer, and "
+#~ "tagger names and emails.  If the "
+#~ "specified file is part of git "
+#~ "history, historical versions of the file"
+#~ " will be ignored; only the current"
+#~ " contents are consulted."
+#~ msgstr ""
+
+#~ msgid "Same as: '--mailmap .mailmap' "
+#~ msgstr ""
+
+#~ msgid "Parent rewriting"
+#~ msgstr "Recibo de Pagamento"
+
+#~ msgid ""
+#~ "How to handle replace refs (see "
+#~ "git-replace(1)).  Replace refs can be "
+#~ "added during the history rewrite as "
+#~ "a way to allow users to pass "
+#~ "old commit IDs (from before git-"
+#~ "filter-repo was run) to git commands"
+#~ " and have git know how to "
+#~ "translate those old commit IDs to "
+#~ "the new (post-rewrite) commit IDs.  "
+#~ "Also, replace refs that existed before"
+#~ " the rewrite can either be deleted"
+#~ " or updated.  The choices to pass "
+#~ "to --replace-refs thus need to "
+#~ "specify both what to do with "
+#~ "existing refs and what to do with"
+#~ " commit rewrites.  Thus 'update-and-"
+#~ "add' means to update existing replace"
+#~ " refs, and for any commit rewrite "
+#~ "(even if already pointed at by a"
+#~ " replace ref) add a new refs/replace/"
+#~ " reference to map from the old "
+#~ "commit ID to the new commit ID."
+#~ "  The default is update-no-add, "
+#~ "meaning update existing replace refs but"
+#~ " do not add any new ones.  "
+#~ "There is also a special 'old-"
+#~ "default' option for picking the default"
+#~ " used in versions prior to git-"
+#~ "filter-repo-2.45, namely 'update-and-add'"
+#~ " upon the first run of git-"
+#~ "filter-repo in a repository and "
+#~ "'update-or-add' if running git-"
+#~ "filter-repo again on a repository."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Whether to prune empty commits.  'auto'"
+#~ " (the default) means only prune "
+#~ "commits which become empty (not commits"
+#~ " which were empty in the original "
+#~ "repo, unless their parent was pruned)."
+#~ " When the parent of a commit is"
+#~ " pruned, the first non-pruned "
+#~ "ancestor becomes the new parent."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Since merge commits are needed for "
+#~ "history topology, they are typically "
+#~ "exempt from pruning.  However, they can"
+#~ " become degenerate with the pruning "
+#~ "of other commits (having fewer than "
+#~ "two parents, having one commit serve "
+#~ "as both parents, or having one "
+#~ "parent as the ancestor of the "
+#~ "other.)  If such merge commits have "
+#~ "no file changes, they can be "
+#~ "pruned.  The default ('auto') is to "
+#~ "only prune empty merge commits which "
+#~ "become degenerate (not which started as"
+#~ " such)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Even if the first parent is or "
+#~ "becomes an ancestor of another parent,"
+#~ " do not prune it.  This modifies "
+#~ "how --prune-degenerate behaves, and may"
+#~ " be useful in projects who always "
+#~ "use merge --no-ff."
+#~ msgstr ""
+
+#~ msgid "Generic callback code snippets"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Python code body for processing "
+#~ "filenames; see CALLBACKS sections below."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Python code body for processing file "
+#~ "and metadata; see CALLBACKS sections "
+#~ "below."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Python code body for processing messages"
+#~ " (both commit messages and tag "
+#~ "messages); see CALLBACKS section below."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Python code body for processing names"
+#~ " of people; see CALLBACKS section "
+#~ "below."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Python code body for processing emails"
+#~ " addresses; see CALLBACKS section below."
+#~ msgstr ""
+
+#~ msgid "Python code body for processing refnames; see CALLBACKS section below."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Python code body for processing blob "
+#~ "objects; see CALLBACKS section below."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Python code body for processing commit"
+#~ " objects; see CALLBACKS section below."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Python code body for processing tag "
+#~ "objects.  Note that lightweight tags "
+#~ "have no tag object and are thus"
+#~ " not handled by this callback. See"
+#~ " CALLBACKS section below."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Python code body for processing reset"
+#~ " objects; see CALLBACKS section below."
+#~ msgstr ""
+
+#~ msgid "Sensitive Data Removal Handling"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This rewrite is intended to remove "
+#~ "sensitive data from a repository.  "
+#~ "Gather extra information from the "
+#~ "rewrite needed to provide additional "
+#~ "instructions on how to clean up "
+#~ "other copies."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "By default, --sensitive-data-removal "
+#~ "will trigger a mirror-like fetch "
+#~ "of all refs from origin, discarding "
+#~ "local changes, but ensuring that _all_"
+#~ " fetchable refs that hold on to "
+#~ "the sensitve data are rewritten.  This"
+#~ " flag removes that fetch, risking "
+#~ "that other refs continue holding on "
+#~ "to the sensitive data.  This option "
+#~ "is implied by --partial or any "
+#~ "flag that implies --partial."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Specifying alternate source or target locations implies --partial,\n"
+#~ "except that the normal default for --replace-refs is used.  However,\n"
+#~ "unlike normal uses of --partial, this doesn't risk mixing old and new\n"
+#~ "history since the old and new histories are in different repositories."
+#~ msgstr ""
+
+#~ msgid "Location to filter from/to"
+#~ msgstr ""
+
+#~ msgid "Git repository to read from"
+#~ msgstr ""
+
+#~ msgid "Git repository to overwrite with filtered history"
+#~ msgstr ""
+
+#~ msgid "Ordering of commits"
+#~ msgstr ""
+
+#~ msgid "Processes commits in commit timestamp order."
+#~ msgstr ""
+
+#~ msgid "Miscellaneous options"
+#~ msgstr ""
+
+#~ msgid "Show this help message and exit."
+#~ msgstr ""
+
+#~ msgid "Display filter-repo's version and exit."
+#~ msgstr ""
+
+#~ msgid "Avoid triggering the no-arguments-specified check."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Rewrite repository history even if the"
+#~ " current repo does not look like "
+#~ "a fresh clone.  History rewriting is "
+#~ "irreversible (and includes immediate pruning"
+#~ " of reflogs and old objects), so "
+#~ "be cautious about using this flag."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Do a partial history rewrite, resulting"
+#~ " in the mixture of old and new"
+#~ " history.  This disables rewriting "
+#~ "refs/remotes/origin/* to refs/heads/*, disables "
+#~ "removing of the 'origin' remote, "
+#~ "disables removing unexported refs, disables"
+#~ " expiring the reflog, and disables "
+#~ "the automatic post-filter gc.  Also, "
+#~ "this modifies --tag-rename and "
+#~ "--refname-callback options such that "
+#~ "instead of replacing old refs with "
+#~ "new refnames, it will instead create "
+#~ "new refs and keep the old ones "
+#~ "around.  Use with caution."
+#~ msgstr ""
+
+#~ msgid "Do not run 'git gc' after filtering."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Limit history rewriting to the specified"
+#~ " refs.  Implies --partial.  In addition "
+#~ "to the normal caveats of --partial "
+#~ "(mixing old and new history, no "
+#~ "automatic remapping of refs/remotes/origin/* "
+#~ "to refs/heads/*, etc.), this also may"
+#~ " cause problems for pruning of "
+#~ "degenerate empty merge commits when "
+#~ "negative revisions are specified."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Do not change the repository.  Run "
+#~ "`git fast-export` and filter its "
+#~ "output, and save both the original "
+#~ "and the filtered version for comparison."
+#~ "  This also disables rewriting commit "
+#~ "messages due to not knowing new "
+#~ "commit IDs and disables filtering of "
+#~ "some empty commits due to inability "
+#~ "to query the fast-import backend."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Print additional information about operations"
+#~ " being performed and commands being "
+#~ "run.  When used together with --dry-"
+#~ "run, also show extra information about"
+#~ " what would be run."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Instead of running `git fast-export` "
+#~ "and filtering its output, filter the "
+#~ "fast-export stream from stdin.    The"
+#~ " stdin must be in the expected "
+#~ "input format (e.g. it needs to "
+#~ "include original-oid directives)."
+#~ msgstr ""
+
+#~ msgid "Pass --quiet to other git commands called"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Error: --analyze is incompatible with "
+#~ "--path* flags; it's a read-only "
+#~ "operation."
+#~ msgstr ""
+
+#~ msgid "Error: --analyze is incompatible with --stdin."
+#~ msgstr ""
+
+#~ msgid "Error: --use-base-name and --path-rename are incompatible."
+#~ msgstr ""
+
+#~ msgid "Error: need git >= 2.24.0"
+#~ msgstr ""
+
+#~ msgid "Error: need git >= 2.23.0"
+#~ msgstr ""
+
+#~ msgid "Error: need git >= 2.22.0"
+#~ msgstr ""
+
+#~ msgid "Error: could not parse --strip-blobs-bigger-than argument %s"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Error: --file-info-callback is "
+#~ "incompatible with --stdin, --blob-callback,"
+#~ "\n"
+#~ "and --filename-callback."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Error: In %s, 'glob:' and '==>' "
+#~ "are incompatible (renaming globs makes "
+#~ "no sense)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Error: When rename directories, if "
+#~ "OLDNAME and NEW_NAME are both non-"
+#~ "empty and either ends with a slash"
+#~ " then both must."
+#~ msgstr ""
+
+#~ msgid "No arguments specified."
+#~ msgstr ""
+
+#~ msgid "Unhandled change type(s): %(change_type)s (in commit %(commit)s)"
+#~ msgstr ""
+
+#~ msgid "Processed %d commits"
+#~ msgstr ""
+
+#~ msgid "Nothing to analyze; repository is empty."
+#~ msgstr ""
+
+#~ msgid "Error: rev-list|diff-tree pipeline failed; see above."
+#~ msgstr ""
+
+#~ msgid "<present>"
+#~ msgstr "Reenviar"
+
+#~ msgid "Overall Statistics"
+#~ msgstr ""
+
+#~ msgid "Number of commits"
+#~ msgstr ""
+
+#~ msgid "Number of filenames"
+#~ msgstr ""
+
+#~ msgid "Number of directories"
+#~ msgstr ""
+
+#~ msgid "Number of file extensions"
+#~ msgstr ""
+
+#~ msgid "Total unpacked size (bytes)"
+#~ msgstr ""
+
+#~ msgid "Total packed size (bytes)"
+#~ msgstr ""
+
+#~ msgid "Caveats"
+#~ msgstr ""
+
+#~ msgid "Sizes"
+#~ msgstr "Serviços"
+
+#~ msgid ""
+#~ "\n"
+#~ "        Packed size represents what size"
+#~ " your repository would be if no\n"
+#~ ""
+#~ "        trees, commits, tags, or other"
+#~ " metadata were included (though it "
+#~ "may\n"
+#~ "        fail to represent de-"
+#~ "duplication; see below).  It also "
+#~ "represents the\n"
+#~ "        current packing, which may be"
+#~ " suboptimal if you haven't gc'ed for"
+#~ " a\n"
+#~ "        while.\n"
+#~ "\n"
+#~ "        Unpacked size represents what "
+#~ "size your repository would be if "
+#~ "no\n"
+#~ "        trees, commits, tags, or other"
+#~ " metadata were included AND if no"
+#~ "\n"
+#~ "        files were packed; i.e., without delta-ing or compression.\n"
+#~ "\n"
+#~ "        Both unpacked and packed sizes"
+#~ " can be slightly misleading.  Deleting\n"
+#~ ""
+#~ "        a blob from history not "
+#~ "save as much space as the unpacked"
+#~ " size,\n"
+#~ "        because it is obviously normally"
+#~ " stored in packed form.  Also,\n"
+#~ "        deleting a blob from history "
+#~ "may not save as much space as "
+#~ "its packed\n"
+#~ "        size either, because another "
+#~ "blob could be stored as a delta"
+#~ " against\n"
+#~ "        that blob, so when you "
+#~ "remove one blob another blob's packed"
+#~ " size may\n"
+#~ "        grow.\n"
+#~ "\n"
+#~ "        Also, the sum of the packed sizes can add up to more than the\n"
+#~ "        repository size; if the same "
+#~ "contents appeared in the repository in"
+#~ "\n"
+#~ "        multiple places, git will "
+#~ "automatically de-dupe and store only "
+#~ "one\n"
+#~ "        copy, while the way sizes "
+#~ "are added in this analysis adds "
+#~ "the size\n"
+#~ "        for each file path that "
+#~ "has those contents.  Further, if a "
+#~ "file is\n"
+#~ "        ever reverted to a previous version's contents, the previous\n"
+#~ "        version's size will be counted"
+#~ " multiple times in this analysis, "
+#~ "even\n"
+#~ "        though git will only store it once.\n"
+#~ "        "
+#~ msgstr ""
+
+#~ msgid "Deletions"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\n"
+#~ "        Whether a file is deleted "
+#~ "is not a binary quality, since it"
+#~ " can be\n"
+#~ "        deleted on some branches but "
+#~ "still exist in others.  Also, it "
+#~ "might\n"
+#~ "        exist in an old tag, but"
+#~ " have been deleted in versions newer"
+#~ " than\n"
+#~ "        that.  More thorough tracking "
+#~ "could be done, including looking at\n"
+#~ ""
+#~ "        merge commits where one side "
+#~ "of history deleted and the other "
+#~ "modified,\n"
+#~ "        in order to give a more"
+#~ " holistic picture of deletions.  However,"
+#~ " that\n"
+#~ "        algorithm would not only be "
+#~ "more complex to implement, it'd also "
+#~ "be\n"
+#~ "        quite difficult to present and"
+#~ " interpret by users.  Since --analyze\n"
+#~ ""
+#~ "        is just about getting a "
+#~ "high-level rough picture of history, "
+#~ "it instead\n"
+#~ "        implements the simplistic rule "
+#~ "that is good enough for 98% of "
+#~ "cases:\n"
+#~ "          A file is marked as "
+#~ "deleted if the last commit in the"
+#~ " fast-export\n"
+#~ "          stream that mentions the file lists it as deleted.\n"
+#~ "        This makes it dependent on "
+#~ "topological ordering, but generally gives\n"
+#~ ""
+#~ "        the \"right\" answer.\n"
+#~ "        "
+#~ msgstr ""
+
+#~ msgid "Renames"
+#~ msgstr "Nome de Usuário"
+
+#~ msgid ""
+#~ "\n"
+#~ "        Renames share the same non-"
+#~ "binary nature that deletions do, plus"
+#~ "\n"
+#~ "        additional challenges:\n"
+#~ "          * If the renamed file is"
+#~ " renamed again, instead of just two"
+#~ " names for\n"
+#~ "            a path you can have three or more.\n"
+#~ "          * Rename pairs of the "
+#~ "form (oldname, newname) that we consider"
+#~ " to be\n"
+#~ "            different names of the "
+#~ "\"same file\" might only be valid "
+#~ "over certain\n"
+#~ "            commit ranges.  For example, "
+#~ "if a new commit reintroduces a "
+#~ "file\n"
+#~ "            named oldname, then new "
+#~ "versions of oldname aren't the \"same"
+#~ " file\"\n"
+#~ "            anymore.  We could try to"
+#~ " portray this to the user, but "
+#~ "it's easier\n"
+#~ "            for the user to just "
+#~ "break the pairing and only report "
+#~ "unbroken\n"
+#~ "            rename pairings to the user.\n"
+#~ "          * The ability for users "
+#~ "to rename files differently in different"
+#~ "\n"
+#~ "            branches means that our "
+#~ "chains of renames will not necessarily"
+#~ " be\n"
+#~ "            linear but may branch out.\n"
+#~ "        "
+#~ msgstr ""
+
+#~ msgid "Deleted directories by reverse size"
+#~ msgstr ""
+
+#~ msgid "Format: unpacked size, packed size, date deleted, directory name\n"
+#~ msgstr ""
+
+#~ msgid "<toplevel>"
+#~ msgstr ""
+
+#~ msgid "All directories by reverse size"
+#~ msgstr ""
+
+#~ msgid "Deleted extensions by reverse size"
+#~ msgstr ""
+
+#~ msgid "Format: unpacked size, packed size, date deleted, extension name\n"
+#~ msgstr ""
+
+#~ msgid "<no extension>"
+#~ msgstr ""
+
+#~ msgid "All extensions by reverse size"
+#~ msgstr ""
+
+#~ msgid "Deleted paths by reverse accumulated size"
+#~ msgstr ""
+
+#~ msgid "Format: unpacked size, packed size, date deleted, path name(s)\n"
+#~ msgstr ""
+
+#~ msgid "All paths by reverse accumulated size"
+#~ msgstr ""
+
+#~ msgid "Format: unpacked size, packed size, date deleted, path name\n"
+#~ msgstr ""
+
+#~ msgid "Files by sha and associated pathnames in reverse size"
+#~ msgstr ""
+
+#~ msgid "Format: sha, unpacked size, packed size, filename(s) object stored as\n"
+#~ msgstr ""
+
+#~ msgid "Warning: Removing recursively: \"%s\""
+#~ msgstr ""
+
+#~ msgid "Error: dir already exists (use --force to delete): \"%s\"\n"
+#~ msgstr ""
+
+#~ msgid "Writing reports to %s..."
+#~ msgstr ""
+
+#~ msgid "done.\n"
+#~ msgstr ""
+
+#~ msgid "Parsed %d commits"
+#~ msgstr ""
+
+#~ msgid "Error: Cannot pass a %s_callback to RepoFilter AND pass --%s-callback"
+#~ msgstr ""
+
+#~ msgid "Error: --%s-callback should have a return statement"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "      Error: Cannot specify --sensitive-"
+#~ "data-removal on a follow-up "
+#~ "invocation\n"
+#~ "             of git-filter-repo unless"
+#~ " it was specified in previously runs."
+#~ msgstr ""
+
+#~ msgid "Error: sensitive data removal is incompatible with --stdin"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Error: sensitive data removal is "
+#~ "incompatible with --source and --target"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Note: when cloning local repositories, you need to pass\n"
+#~ "      --no-local to git clone to avoid this issue.\n"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Aborting: Refusing to destructively overwrite repo history since\n"
+#~ "this does not look like a fresh clone.\n"
+#~ "  (%s)\n"
+#~ "%sPlease operate on a fresh clone instead.  If you want to proceed\n"
+#~ "anyway, use --force."
+#~ msgstr ""
+
+#~ msgid "GIT_DIR must be ."
+#~ msgstr ""
+
+#~ msgid "GIT_DIR must be .git"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Aborting: Cannot rewrite history on a case insensitive\n"
+#~ "filesystem since you have refs that differ in case only:\n"
+#~ "%s"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Aborting: Cannot rewrite history on a character normalizing\n"
+#~ "filesystem since you have refs that differ in normalization:\n"
+#~ "%s"
+#~ msgstr ""
+
+#~ msgid "expected freshly packed repo"
+#~ msgstr ""
+
+#~ msgid "expected one remote, origin"
+#~ msgstr ""
+
+#~ msgid "expected at most one entry in the reflog for %s"
+#~ msgstr ""
+
+#~ msgid "has stashed changes"
+#~ msgstr ""
+
+#~ msgid "you have uncommitted changes"
+#~ msgstr ""
+
+#~ msgid "you have unstaged changes"
+#~ msgstr ""
+
+#~ msgid "you have untracked changes"
+#~ msgstr ""
+
+#~ msgid "%s exists, but %s not found"
+#~ msgstr ""
+
+#~ msgid "%s does not match %s"
+#~ msgstr ""
+
+#~ msgid "you have multiple worktrees"
+#~ msgstr ""
+
+#~ msgid "Repacking your repo and cleaning out old unneeded objects"
+#~ msgstr ""
+
+#~ msgid "File renaming caused colliding pathnames!\n"
+#~ msgstr ""
+
+#~ msgid "  Commit: {}\n"
+#~ msgstr ""
+
+#~ msgid "  Filename: {}"
+#~ msgstr ""
+
+#~ msgid "Failed loading %s from %s"
+#~ msgstr ""
+
+#~ msgid "Failed to find %s to save to %s"
+#~ msgstr ""
+
+#~ msgid "Rewrote the stash."
+#~ msgstr ""
+
+#~ msgid "git update-ref failed; see above"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "NOTICE: Fetching all refs from origin to make sure we rewrite\n"
+#~ "        all history that may reference the sensitive data, via\n"
+#~ "      "
+#~ msgstr ""
+
+#~ msgid "WARNING: Fetching all refs from origin failed"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "NOTICE: Removing 'origin' remote; see 'Why is my origin removed?'\n"
+#~ "        in the manual if you want to push back there.\n"
+#~ "        (was %s)"
+#~ msgstr ""
+
+#~ msgid "old"
+#~ msgstr ""
+
+#~ msgid "new"
+#~ msgstr ""
+
+#~ msgid "ref"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\n"
+#~ "          The following commits used to"
+#~ " be merge commits but due to "
+#~ "filtering\n"
+#~ "          are now regular commits; they"
+#~ " likely have suboptimal commit messages"
+#~ "\n"
+#~ "          (e.g. \"Merge branch next into"
+#~ " master\").  Original commit hash on "
+#~ "the\n"
+#~ "          left, commit hash after filtering/rewriting on the right:\n"
+#~ "          "
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\n"
+#~ "          The following commits were "
+#~ "filtered out, but referenced in another"
+#~ "\n"
+#~ "          commit message.  The reference "
+#~ "to the now-nonexistent commit hash\n"
+#~ ""
+#~ "          (or a substring thereof) was"
+#~ " left as-is in any commit "
+#~ "messages:\n"
+#~ "          "
+#~ msgstr ""
+
+#~ msgid "No filtering problems encountered.\n"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This file exists to allow you to filter again without --force,\n"
+#~ "and to specify that metadata files should be updated instead\n"
+#~ "of rewritten"
+#~ msgstr ""
+
+#~ msgid "Error: fast-export failed; see above."
+#~ msgstr ""
+
+#~ msgid "Error: fast-import failed; see above."
+#~ msgstr ""
+
+#~ msgid "NOTE: Not running fast-import or cleaning up; --dry-run passed."
+#~ msgstr ""
+
+#~ msgid "      Requested filtering can be seen by comparing:"
+#~ msgstr ""
+
+#~ msgid "      Requested filtering can be seen at:"
+#~ msgstr ""
+
+#~ msgid "Completely finished after {:.2f} seconds."
+#~ msgstr ""
+
+#~ msgid " and LFS Objects Orphaned"
+#~ msgstr ""
+
+#~ msgid "{editor}: Editing failed"
+#~ msgstr "Operação Falhou"
+
+#~ msgid "{editor}: Editing failed: {e}"
+#~ msgstr ""
+
+#~ msgid "{text} {deprecated_message}"
+#~ msgstr ""
+
+#~ msgid "Options"
+#~ msgstr ""
+
+#~ msgid "Got unexpected extra argument ({args})"
+#~ msgid_plural "Got unexpected extra arguments ({args})"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
+#~ msgstr ""
+
+#~ msgid "Aborted!"
+#~ msgstr ""
+
+#~ msgid "Commands"
+#~ msgstr ""
+
+#~ msgid "Missing command."
+#~ msgstr ""
+
+#~ msgid "No such command {name!r}."
+#~ msgstr ""
+
+#~ msgid "Value must be an iterable."
+#~ msgstr ""
+
+#~ msgid "Takes {nargs} values but 1 was given."
+#~ msgid_plural "Takes {nargs} values but {len} were given."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid ""
+#~ "DeprecationWarning: The {param_type} {name!r} "
+#~ "is deprecated.{extra_message}"
+#~ msgstr ""
+
+#~ msgid "env var: {var}"
+#~ msgstr ""
+
+#~ msgid "default: {default}"
+#~ msgstr ""
+
+#~ msgid "required"
+#~ msgstr ""
+
+#~ msgid "(dynamic)"
+#~ msgstr ""
+
+#~ msgid "%(prog)s, version %(version)s"
+#~ msgstr ""
+
+#~ msgid "Show the version and exit."
+#~ msgstr ""
+
+#~ msgid "Show this message and exit."
+#~ msgstr ""
+
+#~ msgid "Error: {message}"
+#~ msgstr ""
+
+#~ msgid "Try '{command} {option}' for help."
+#~ msgstr ""
+
+#~ msgid "Invalid value: {message}"
+#~ msgstr ""
+
+#~ msgid "Invalid value for {param_hint}: {message}"
+#~ msgstr ""
+
+#~ msgid "Missing argument"
+#~ msgstr ""
+
+#~ msgid "Missing option"
+#~ msgstr ""
+
+#~ msgid "Missing parameter"
+#~ msgstr ""
+
+#~ msgid "Missing {param_type}"
+#~ msgstr ""
+
+#~ msgid "Missing parameter: {param_name}"
+#~ msgstr ""
+
+#~ msgid "No such option: {name}"
+#~ msgstr ""
+
+#~ msgid "Did you mean {possibility}?"
+#~ msgid_plural "(Possible options: {possibilities})"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "unknown error"
+#~ msgstr ""
+
+#~ msgid "Could not open file {filename!r}: {message}"
+#~ msgstr ""
+
+#~ msgid "Usage:"
+#~ msgstr ""
+
+#~ msgid "Argument {name!r} takes {nargs} values."
+#~ msgstr ""
+
+#~ msgid "Option {name!r} does not take a value."
+#~ msgstr ""
+
+#~ msgid "Option {name!r} requires an argument."
+#~ msgid_plural "Option {name!r} requires {nargs} arguments."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Shell completion is not supported for Bash versions older than 4.4."
+#~ msgstr ""
+
+#~ msgid "Couldn't detect Bash version, shell completion is not supported."
+#~ msgstr ""
+
+#~ msgid "Repeat for confirmation"
+#~ msgstr "Confirmação de Desbloqueio"
+
+#~ msgid "Error: The value you entered was invalid."
+#~ msgstr ""
+
+#~ msgid "Error: {e.message}"
+#~ msgstr ""
+
+#~ msgid "Error: The two entered values do not match."
+#~ msgstr ""
+
+#~ msgid "Error: invalid input"
+#~ msgstr ""
+
+#~ msgid "Press any key to continue..."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Choose from:\n"
+#~ "\t{choices}"
+#~ msgstr ""
+
+#~ msgid "{value!r} is not {choice}."
+#~ msgid_plural "{value!r} is not one of {choices}."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "{value!r} does not match the format {format}."
+#~ msgid_plural "{value!r} does not match the formats {formats}."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "{value!r} is not a valid {number_type}."
+#~ msgstr ""
+
+#~ msgid "{value} is not in the range {range}."
+#~ msgstr ""
+
+#~ msgid "{value!r} is not a valid boolean."
+#~ msgstr ""
+
+#~ msgid "{value!r} is not a valid UUID."
+#~ msgstr ""
+
+#~ msgid "file"
+#~ msgstr ""
+
+#~ msgid "directory"
+#~ msgstr ""
+
+#~ msgid "path"
+#~ msgstr ""
+
+#~ msgid "{name} {filename!r} does not exist."
+#~ msgstr ""
+
+#~ msgid "{name} {filename!r} is a file."
+#~ msgstr ""
+
+#~ msgid "{name} {filename!r} is a directory."
+#~ msgstr ""
+
+#~ msgid "{name} {filename!r} is not readable."
+#~ msgstr ""
+
+#~ msgid "{name} {filename!r} is not writable."
+#~ msgstr ""
+
+#~ msgid "{name} {filename!r} is not executable."
+#~ msgstr ""
+
+#~ msgid "{len_type} values are required, but {len_value} was given."
+#~ msgid_plural "{len_type} values are required, but {len_value} were given."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+# ================================================
+# Password Reset / Forgot Password — T-Lux Unlock Systems
+# ================================================
+
+msgid "Forgot Password — T-Lux Unlock Systems"
+msgstr "Esqueci a Palavra-passe — T-Lux Unlock Systems"
+
+msgid "Reset Password — T-Lux Unlock Systems"
+msgstr "Redefinir Palavra-passe — T-Lux Unlock Systems"
+
+msgid "Forgot Your Password?"
+msgstr "Esqueceu a sua Palavra-passe?"
+
+msgid "Enter your account email below. We'll send you a 6-digit verification code to reset your password securely."
+msgstr "Insira abaixo o e-mail da sua conta. Enviaremos um código de verificação de 6 dígitos para redefinir a sua palavra-passe com segurança."
+
+msgid "Email Address"
+msgstr "Endereço de E-mail"
+
+msgid "Send Verification Code"
+msgstr "Enviar Código de Verificação"
+
+msgid "Already have a verification code?"
+msgstr "Já tem um código de verificação?"
+
+msgid "Enter Code to Reset Password"
+msgstr "Introduzir Código para Redefinir Palavra-passe"
+
+msgid "Remembered your password?"
+msgstr "Lembrou-se da sua palavra-passe?"
+
+msgid "Login here"
+msgstr "Inicie sessão aqui"
+
+msgid "Reset Your Password"
+msgstr "Redefina a Sua Palavra-passe"
+
+msgid "Enter the 6-digit verification code sent to your email, then create your new secure password."
+msgstr "Introduza o código de verificação de 6 dígitos enviado para o seu e-mail e crie uma nova palavra-passe segura."
+
+msgid "6-digit Verification Code"
+msgstr "Código de Verificação de 6 Dígitos"
+
+msgid "Enter the code"
+msgstr "Introduza o código"
+
+msgid "Code expires in 10 minutes."
+msgstr "O código expira em 10 minutos."
+
+msgid "New Password"
+msgstr "Nova Palavra-passe"
+
+msgid "Create a new secure password"
+msgstr "Crie uma nova palavra-passe segura"
+
+msgid "Confirm New Password"
+msgstr "Confirmar Nova Palavra-passe"
+
+msgid "Re-enter new password"
+msgstr "Volte a introduzir a nova palavra-passe"
+
+msgid "Reset Password"
+msgstr "Redefinir Palavra-passe"
+
+msgid "Didn’t receive your verification code?"
+msgstr "Não recebeu o seu código de verificação?"
+
+msgid "Enter your email again"
+msgstr "Introduza novamente o seu e-mail"
+
+msgid "Resend Code"
+msgstr "Reenviar Código"
+
+msgid "your@email.com"
+msgstr "seu@email.com"
+
+msgid "Please enter your email address."
+msgstr "Por favor, introduza o seu endereço de e-mail."
+
+msgid "No account found with that email address."
+msgstr "Nenhuma conta encontrada com esse endereço de e-mail."
+
+msgid "A 6-digit verification code has been sent to your email."
+msgstr "Um código de verificação de 6 dígitos foi enviado para o seu e-mail."
+
+msgid "Invalid or expired verification code."
+msgstr "Código de verificação inválido ou expirado."
+
+msgid "✅ Password successfully reset! You can now log in."
+msgstr "✅ Palavra-passe redefinida com sucesso! Agora pode iniciar sessão."
+
+msgid "Please fill in all fields."
+msgstr "Por favor, preencha todos os campos."
+
+msgid "Enter your registered email address. We’ll send a 6-digit verification code to reset your password."
+msgstr "Insira o seu endereço de e-mail registado. Enviaremos um código de verificação de 6 dígitos para redefinir a sua palavra-passe."
+
+msgid "A verification code has been sent to your email."
+msgstr "Um código de verificação foi enviado para o seu e-mail."
+
+msgid "Once verified, you can log in securely to your dashboard."
+msgstr "Após a verificação, pode iniciar sessão em segurança no seu painel."
+
+# ================================================
+# System Flash Messages — T-Lux Unlock Systems
+# ================================================
+
+msgid "Please fill in all fields."
+msgstr "Por favor, preencha todos os campos."
+
+msgid "Please enter your email address."
+msgstr "Por favor, introduza o seu endereço de e-mail."
+
+msgid "No account found with that email address."
+msgstr "Nenhuma conta encontrada com esse endereço de e-mail."
+
+msgid "A 6-digit verification code has been sent to your email."
+msgstr "Um código de verificação de 6 dígitos foi enviado para o seu e-mail."
+
+msgid "Invalid or expired verification code."
+msgstr "Código de verificação inválido ou expirado."
+
+msgid "✅ Password successfully reset! You can now log in."
+msgstr "✅ Palavra-passe redefinida com sucesso! Agora pode iniciar sessão."
+
+msgid "Error while sending verification email. Please try again later."
+msgstr "Erro ao enviar o e-mail de verificação. Tente novamente mais tarde."
+
+msgid "Your email has been successfully verified!"
+msgstr "O seu e-mail foi verificado com sucesso!"
+
+msgid "Email verification failed. Invalid or expired link."
+msgstr "A verificação de e-mail falhou. O link é inválido ou expirou."
+
+msgid "Account not found."
+msgstr "Conta não encontrada."
+
+msgid "This email is already verified."
+msgstr "Este e-mail já foi verificado."
+
+msgid "Login successful! Welcome back."
+msgstr "Início de sessão bem-sucedido! Bem-vindo de volta."
+
+msgid "Invalid email or password."
+msgstr "E-mail ou palavra-passe inválido."
+
+msgid "Please verify your email before logging in."
+msgstr "Por favor, verifique o seu e-mail antes de iniciar sessão."
+
+msgid "Session expired. Please log in again."
+msgstr "Sessão expirada. Por favor, inicie sessão novamente."
+
+msgid "You have been logged out successfully."
+msgstr "Terminou a sessão com sucesso."
+
+msgid "Access denied. Admins only."
+msgstr "Acesso negado. Apenas administradores."
+
+msgid "Your account has been activated successfully."
+msgstr "A sua conta foi ativada com sucesso."
+
+msgid "Your account is already active."
+msgstr "A sua conta já está ativa."
+
+msgid "A new verification email has been sent! Check your inbox."
+msgstr "Um novo e-mail de verificação foi enviado! Verifique a sua caixa de entrada."
+
+msgid "Verification email sent successfully."
+msgstr "E-mail de verificação enviado com sucesso."
+
+msgid "Invalid or expired link."
+msgstr "Link inválido ou expirado."
+
+msgid "Password updated successfully."
+msgstr "Palavra-passe atualizada com sucesso."
+
+msgid "Email address not found in our system."
+msgstr "Endereço de e-mail não encontrado no nosso sistema."
+
+msgid "Your verification code has expired. Please request a new one."
+msgstr "O seu código de verificação expirou. Solicite um novo."
+
+msgid "Incorrect verification code."
+msgstr "Código de verificação incorreto."
+
+msgid "Your request has been processed successfully."
+msgstr "O seu pedido foi processado com sucesso."
+
+msgid "Something went wrong. Please try again."
+msgstr "Algo correu mal. Tente novamente."
+
+msgid "Access key purchase completed successfully."
+msgstr "Compra da chave de acesso concluída com sucesso."
+
+msgid "Access key payment failed."
+msgstr "Falha no pagamento da chave de acesso."
+
+msgid "Your payment is being verified. Please wait..."
+msgstr "O seu pagamento está a ser verificado. Por favor, aguarde..."
+
+msgid "You need to log in to continue."
+msgstr "Precisa de iniciar sessão para continuar."
+
+msgid "Email successfully verified!"
+msgstr "E-mail verificado com sucesso!"
+
+msgid "Resend verification email"
+msgstr "Reenviar e-mail de verificação"
+
+msgid "Didn’t receive your verification code?"
+msgstr "Não recebeu o seu código de verificação?"
+
+msgid "Resend Code"
+msgstr "Reenviar Código"

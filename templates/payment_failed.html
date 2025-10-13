@@ -1,6 +1,6 @@
-<!-- templates/error.html -->
+<!-- templates/payment_failed.html -->
 {% extends "base.html" %}
-{% block title %}❌ Operation Failed — T-Lux{% endblock %}
+{% block title %}💳 Payment Failed — T-Lux{% endblock %}
 
 {% block content %}
 <div class="container my-5">
@@ -10,32 +10,38 @@
 
         <!-- Header -->
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="T-Lux Logo" height="55" class="mb-2">
-        <h3 class="text-danger fw-bold">❌ Operation Failed</h3>
-        <p class="text-muted mb-4">Something went wrong while processing your request.</p>
+        <h3 class="text-danger fw-bold">💳 Payment Failed</h3>
+        <p class="text-muted mb-4">
+          Unfortunately, your payment could not be completed.  
+          Please verify your payment method and try again.
+        </p>
 
-        <!-- Error message -->
+        <!-- Optional detailed message -->
         {% if message %}
-          <div class="alert alert-danger shadow-sm text-start">
+          <div class="alert alert-danger text-start shadow-sm">
             <strong>Error Details:</strong><br>{{ message }}
           </div>
         {% else %}
           <div class="alert alert-danger shadow-sm">
-            An unexpected issue occurred. Please try again later.
+            Transaction was not completed or was declined by your bank.
           </div>
         {% endif %}
 
-        <!-- Retry / Back Buttons -->
+        <!-- Action buttons -->
         <div class="d-flex justify-content-center gap-3 mt-4">
+          <a href="{{ url_for('choose_package') }}" class="btn btn-tlux fw-bold px-4">
+            🔁 Try Payment Again
+          </a>
           <a href="{{ url_for('dashboard') }}" class="btn btn-outline-gold fw-bold px-4">
             🏠 Back to Dashboard
           </a>
-          <a href="{{ url_for('home') }}" class="btn btn-tlux fw-bold px-4">
-            🔁 Try Again
-          </a>
         </div>
 
-        <div class="text-muted small mt-4">
-          <em>If this error persists, please contact <a href="mailto:support@t-lux.tech">support@t-lux.tech</a>.</em>
+        <!-- Help section -->
+        <div class="alert alert-warning mt-4 small text-start">
+          <strong>💡 Need help?</strong><br>
+          If the issue persists, please contact our billing team at  
+          <a href="mailto:support@t-lux.tech">support@t-lux.tech</a>.
         </div>
 
       </div>

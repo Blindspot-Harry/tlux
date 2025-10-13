@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+{% block title %}{{ _("T-Lux Unlock Systems — Global Automated Unlock Platform") }}{% endblock %}
+
+{% block content %}
+<!-- =========================
+     HERO SECTION
+========================= -->
+<section class="text-center py-5 bg-light">
+  <div class="container animate__animated animate__fadeInDown">
+    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="T-Lux Logo"
+         class="img-fluid mb-3" style="max-height:110px;">
+    <h1 class="display-5 fw-bold gold-text mb-2">⚡ {{ _("Welcome to T-Lux Unlock Systems") }}</h1>
+    <p class="lead text-muted mb-4">
+      {{ _("Next-generation automated unlock platform for iPhone, iPad & Mac — fast, secure, and globally connected.") }}
+    </p>
+
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg px-4 fw-bold shadow-sm">
+        🔓 {{ _("Enter Dashboard") }}
+      </a>
+      <a href="{{ url_for('register') }}" class="btn btn-tlux btn-lg px-4 fw-bold shadow-sm">
+        ✨ {{ _("Create Account") }}
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- =========================
+     FEATURE CARDS
+========================= -->
+<section class="container my-5">
+  <div class="row text-center g-4">
+    <div class="col-md-4">
+      <div class="card card-tlux border-0 shadow-sm h-100 animate__animated animate__fadeInUp">
+        <div class="card-body">
+          <h5 class="fw-bold text-primary">🔁 {{ _("Automated Unlocks") }}</h5>
+          <p class="text-muted small">
+            {{ _("Instant unlocking for Apple devices — fully integrated with iRemoval Tools API and verified in real time.") }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card card-tlux border-0 shadow-sm h-100 animate__animated animate__fadeInUp" style="animation-delay:0.1s;">
+        <div class="card-body">
+          <h5 class="fw-bold text-primary">🌍 {{ _("Global Reach") }}</h5>
+          <p class="text-muted small">
+            {{ _("Available in over 192 countries — serving technicians and resellers worldwide with a single, unified platform.") }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card card-tlux border-0 shadow-sm h-100 animate__animated animate__fadeInUp" style="animation-delay:0.2s;">
+        <div class="card-body">
+          <h5 class="fw-bold text-primary">💳 {{ _("Secure Payments") }}</h5>
+          <p class="text-muted small">
+            {{ _("Pay safely via Stripe or Flutterwave — all transactions are encrypted and instantly confirmed.") }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================
+     FULL SIGNAL NOTICE
+========================= -->
+<section class="container my-5">
+  <div class="alert alert-warning shadow-lg border-0 rounded-4 p-4 animate__animated animate__fadeInUp">
+    <h4 class="fw-bold gold-text mb-3">⚠️ {{ _("Important Notice — Full Signal Bypass Availability") }}</h4>
+    <p class="text-dark mb-2">
+      {{ _("The Full Signal Bypass service is temporarily unavailable for new or never-linked devices. Only the No-Signal Bypass is currently supported for those units.") }}
+    </p>
+    <p class="text-dark mb-2">
+      {{ _("Full Signal remains available only for devices previously linked to iRemoval Tools before August 22, 2024.") }}
+    </p>
+    <p class="text-muted small mb-0">
+      {{ _("This limitation comes directly from iRemoval Tools. T-Lux will notify all users as soon as Full Signal support is restored.") }}
+    </p>
+  </div>
+</section>
+
+<!-- =========================
+     ACCOUNT ACTIVATION FLOW
+========================= -->
+<section class="py-5 bg-light" id="activation-flow">
+  <div class="container text-center">
+    <h2 class="fw-bold gold-text mb-4 animate__animated animate__fadeInDown">
+      🔄 {{ _("T-Lux Account Activation Flow") }}
+    </h2>
+    <p class="text-muted lead mb-5">
+      {{ _("Follow these four simple steps to unlock your full T-Lux experience.") }}
+    </p>
+
+    <div class="row justify-content-center g-4">
+
+      <!-- Step 1 -->
+      <div class="col-md-3">
+        <div class="card border-0 shadow-lg rounded-4 p-4 h-100 animate__animated animate__fadeInUp">
+          <div class="card-body">
+            <div class="fs-1 mb-3">🔐</div>
+            <h5 class="fw-bold mb-2">{{ _("1. Register or Login") }}</h5>
+            <p class="text-muted small">
+              {{ _("Create an account or sign in securely to start using T-Lux Unlock Systems.") }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="col-md-3">
+        <div class="card border-0 shadow-lg rounded-4 p-4 h-100 animate__animated animate__fadeInUp" style="animation-delay:0.1s;">
+          <div class="card-body">
+            <div class="fs-1 mb-3">✉️</div>
+            <h5 class="fw-bold mb-2">{{ _("2. Verify Your Email") }}</h5>
+            <p class="text-muted small">
+              {{ _("Click the verification link or enter your 8-digit code to activate your account.") }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="col-md-3">
+        <div class="card border-0 shadow-lg rounded-4 p-4 h-100 animate__animated animate__fadeInUp" style="animation-delay:0.2s;">
+          <div class="card-body">
+            <div class="fs-1 mb-3">💳</div>
+            <h5 class="fw-bold mb-2">{{ _("3. Activate Your License") }}</h5>
+            <p class="text-muted small">
+              {{ _("Select your license package and complete payment via Stripe or Flutterwave.") }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="col-md-3">
+        <div class="card border-0 shadow-lg rounded-4 p-4 h-100 animate__animated animate__fadeInUp" style="animation-delay:0.3s;">
+          <div class="card-body">
+            <div class="fs-1 mb-3">🧭</div>
+            <h5 class="fw-bold mb-2">{{ _("4. Access Your Dashboard") }}</h5>
+            <p class="text-muted small">
+              {{ _("Enjoy full unlocking control, real-time tracking, and secure account management.") }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-5">
+      <a href="{{ url_for('register') }}" class="btn btn-tlux btn-lg px-5 shadow-sm">
+        🚀 {{ _("Get Started Now") }}
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- =========================
+     HOW T-LUX WORKS
+========================= -->
+<section class="container py-5">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold gold-text">🧭 {{ _("How T-Lux Works") }}</h2>
+    <p class="text-muted lead">
+      {{ _("T-Lux automates professional unlock services for Apple devices — combining automation, reliability, and global scalability.") }}
+    </p>
+  </div>
+
+  <div class="row g-4 align-items-center justify-content-center">
+    <!-- Text -->
+    <div class="col-md-5">
+      <ul class="list-group list-group-flush text-start">
+        <li class="list-group-item border-0">
+          <h5>📱 {{ _("Signal & No-Signal Unlocks") }}</h5>
+          <p class="text-muted small">
+            {{ _("Supports both signal and no-signal iPhone bypass — allowing full restoration and safe reuse.") }}
+          </p>
+        </li>
+        <li class="list-group-item border-0">
+          <h5>🧠 {{ _("Smart Automation") }}</h5>
+          <p class="text-muted small">
+            {{ _("Every request is automatically verified, processed, and completed via secure server connection.") }}
+          </p>
+        </li>
+        <li class="list-group-item border-0">
+          <h5>🔐 {{ _("Security & Reliability") }}</h5>
+          <p class="text-muted small">
+            {{ _("All data is encrypted, validated, and handled under strict protection standards.") }}
+          </p>
+        </li>
+        <li class="list-group-item border-0">
+          <h5>💼 {{ _("Multi-Service Platform") }}</h5>
+          <p class="text-muted small">
+            {{ _("Unlock iPhone, iPad, Mac EFI, and MDM — all from one secure T-Lux account.") }}
+          </p>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Image -->
+    <div class="col-md-6 text-center">
+      <img src="{{ url_for('static', filename='img/how_tlux_works.png') }}"
+           alt="How T-Lux Works"
+           class="img-fluid rounded shadow-lg animate__animated animate__fadeInUp"
+           style="max-height:350px;">
+    </div>
+  </div>
+
+  <div class="text-center mt-5">
+    <a href="{{ url_for('register') }}" class="btn btn-tlux btn-lg px-5 fw-bold shadow-sm">
+      🚀 {{ _("Start Unlocking Smarter") }}
+    </a>
+  </div>
+</section>
+
+<!-- =========================
+     CTA
+========================= -->
+<section class="py-5 text-center bg-dark text-white">
+  <div class="container">
+    <h3 class="fw-bold mb-3">🌍 {{ _("Trusted by Technicians Worldwide") }}</h3>
+    <p class="mb-4">{{ _("Join the T-Lux network — manage all your unlock services in one secure global platform.") }}</p>
+    <a href="{{ url_for('register') }}" class="btn btn-tlux btn-lg fw-bold shadow-sm">
+      💎 {{ _("Create Your Account Now") }}
+    </a>
+  </div>
+</section>
+
+<!-- =========================
+     STYLES
+========================= -->
+<style>
+  .gold-text { color: #d4af37; }
+  .btn-tlux {
+    background-color: #d4af37;
+    color: #fff;
+    border: none;
+    transition: all 0.3s ease;
+  }
+  .btn-tlux:hover {
+    background-color: #0d6efd;
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .card-tlux {
+    border-radius: 12px;
+    background: #fff;
+    transition: all 0.2s;
+  }
+  .card-tlux:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(13,110,253,0.1);
+  }
+  .alert-warning {
+    border-left: 6px solid #d4af37;
+    background-color: #fffbea;
+  }
+  .animate__animated.animate__fadeInUp,
+  .animate__animated.animate__fadeInDown {
+    animation-duration: 0.8s;
+  }
+</style>
+{% endblock %}

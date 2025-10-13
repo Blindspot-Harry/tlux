@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Verify your account — T-Lux Unlock Systems</title>
+    <style>
+      body { background-color: #f8f9fa; font-family: Arial, sans-serif; color: #333; }
+      .card {
+        max-width: 600px; margin: 40px auto; background: #fff; padding: 30px;
+        border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        text-align: center;
+      }
+      h2 { color: #d4af37; }
+      a.button {
+        display: inline-block; background: #0d6efd; color: #fff;
+        padding: 12px 24px; border-radius: 6px; text-decoration: none;
+        margin-top: 20px; font-weight: bold;
+      }
+      .otp {
+        font-size: 1.5em; font-weight: bold; letter-spacing: 4px;
+        color: #0d6efd; background: #f0f0f0; display: inline-block;
+        padding: 10px 20px; border-radius: 8px; margin: 20px 0;
+      }
+      small { color: #888; display: block; margin-top: 30px; font-size: 0.8em; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>✨ Welcome to <span style="color:#0d6efd;">T-Lux</span></h2>
+
+      <p>Hello <strong>{{ first_name }}</strong>,</p>
+
+      <p>
+        Thank you for registering with <strong>T-Lux Unlock Systems</strong>!<br>
+        You can verify your account using <strong>either</strong> of the options below:
+      </p>
+
+      <div class="otp">{{ code }}</div>
+
+      <a href="{{ link_verificacao }}" class="button">🔗 Verify My Account</a>
+
+      <p style="margin-top:15px;">
+        Or copy this link:<br>
+        <a href="{{ link_verificacao }}">{{ link_verificacao }}</a>
+      </p>
+
+      <small>
+        © 2025 T-Lux — Blindspot.<br>
+        This message was sent automatically by the T-Lux verification system.<br>
+        Please do not reply to this email.
+      </small>
+    </div>
+  </body>
+</html>

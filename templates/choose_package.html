@@ -1,67 +1,91 @@
-<!-- templates/choose_package.html -->
 {% extends "base.html" %}
-{% block title %}🎁 Escolher Pacote — T-Lux{% endblock %}
+{% block title %}🎁 {{ _("Choose Your Access Package — T-Lux Unlock Systems") }}{% endblock %}
 
 {% block content %}
-<div class="container my-4">
+<div class="container my-5">
 
-  <!-- Cabeçalho -->
-  <div class="text-center mb-4">
-    <h2 class="gold-text fw-bold">🎁 Escolha o seu Pacote</h2>
-    <p class="small-muted">Ative sua conta adquirindo uma <strong>Chave de Acesso</strong> válida.</p>
+  <!-- Header -->
+  <div class="text-center mb-5">
+    <h2 class="fw-bold gold-text">🎁 {{ _("Choose Your Access Package") }}</h2>
+    <p class="text-muted">
+      {{ _("Activate your T-Lux account by purchasing an Access Key.") }}<br>
+      {{ _("Each plan grants full access to all unlocking services during its validity period.") }}
+    </p>
   </div>
 
-  <!-- Mensagens de feedback -->
+  <!-- Flash messages -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       <div class="col-12 mb-3">
         {% for category, message in messages %}
           <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
             {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
           </div>
         {% endfor %}
       </div>
     {% endif %}
   {% endwith %}
 
-  <!-- Lista de pacotes -->
-  <div class="row justify-content-center">
-    {% if pacotes %}
-      {% for nome, info in pacotes.items() %}
-        <div class="col-md-6 col-lg-3 mb-4">
-          <div class="card card-tlux p-3 h-100 shadow-sm border-0">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-              <h4 class="mb-0 text-gold fw-bold">{{ nome }}</h4>
-              <span class="badge bg-warning text-dark">{{ info.duration_days }} dias</span>
-            </div>
+  <!-- Packages Section -->
+  <div class="row justify-content-center g-4">
+    {% for p in pacotes %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-lg border-0 rounded-4 h-100 text-center p-4 d-flex flex-column justify-content-between package-card">
 
-            <p class="mt-2 mb-1 fs-5">
-              💵 <strong>${{ "%.2f"|format(info.price) }} USD</strong>
-            </p>
-            <p class="small-muted mb-3">🌍 Pagamento internacional em USD</p>
-            
-            <!-- Botão Stripe -->
-            <form method="POST" action="{{ url_for('pagar_pacote') }}">
-              <input type="hidden" name="pacote" value="{{ nome }}">
-              <button type="submit" class="btn btn-brighton w-100 fw-bold">
-                💳 Ativar {{ nome }}
-              </button>
-            </form>
+          <!-- Package Header -->
+          <div>
+            <h4 class="fw-bold gold-text mb-1">{{ p.nome }}</h4>
+            <span class="badge bg-warning text-dark mb-2">⏱ {{ p.dias }} {{ _("days") }}</span>
+            <p class="text-muted small mb-3">{{ p.descricao }}</p>
           </div>
+
+          <!-- Pricing -->
+          <div class="mb-2">
+            <p class="display-6 fw-bold text-primary mb-0">${{ "%.2f"|format(p.preco_usd) }}</p>
+            <p class="text-muted small mb-0">{{ _("International payment via Stripe (USD)") }}</p>
+          </div>
+
+          <!-- Payment Form -->
+          <form method="POST" action="{{ url_for('pagar_pacote') }}" class="mt-3">
+            <input type="hidden" name="pacote" value="{{ p.nome }}">
+            <button type="submit" class="btn btn-tlux w-100 fw-bold py-2 rounded-3">
+              💳 {{ _("Activate") }} {{ p.nome }}
+            </button>
+          </form>
         </div>
-      {% endfor %}
+      </div>
     {% else %}
       <div class="col-12 text-center">
-        <p class="text-muted">⚠️ Nenhum pacote disponível no momento.</p>
+        <p class="text-muted">⚠️ {{ _("No packages available at the moment.") }}</p>
       </div>
-    {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Notes -->
+  <div class="text-center mt-5 small text-muted">
+    <p class="mb-1">
+      💰 {{ _("All payments are processed securely through Stripe using your preferred card.") }}
+    </p>
+    <p class="mb-0">
+      🔒 {{ _("Renew before expiry to maintain uninterrupted access to all T-Lux services.") }}
+    </p>
   </div>
 </div>
 
-<!-- Stripe.js -->
+<!-- Stripe Integration -->
 <script src="https://js.stripe.com/v3/"></script>
 <script>
   const stripe = Stripe("{{ publishable_key }}");
 </script>
+
+<style>
+  .package-card {
+    transition: all 0.25s ease-in-out;
+  }
+  .package-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+</style>
 {% endblock %}

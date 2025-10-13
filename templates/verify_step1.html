@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Email Verification — Step 1") }}{% endblock %}
+{% block content %}
+
+<div class="container my-5 text-center animate__animated animate__fadeInDown">
+  <div class="card shadow-lg border-0 mx-auto rounded-4 p-4" style="max-width:480px;">
+    <h3 class="gold-text fw-bold mb-3">🔐 {{ _("Email Verification") }}</h3>
+    <p class="text-muted mb-4">
+      {{ _("Enter your email address to receive a 6-digit verification code.") }}
+    </p>
+
+    <form method="POST" action="{{ url_for('verify_step1') }}">
+      <input type="email" name="email" 
+             class="form-control form-control-lg text-center rounded-3 mb-3 shadow-sm"
+             placeholder="{{ _('you@example.com') }}" required>
+      <button class="btn btn-tlux w-100 fw-bold py-2">
+        🚀 {{ _("Send Verification Code") }}
+      </button>
+    </form>
+  </div>
+</div>
+
+<style>
+  body { background:#f7f8fa; }
+  .gold-text { color:#d4af37; }
+  .btn-tlux {
+    background:#d4af37;
+    color:#fff;
+    border:none;
+    font-weight:700;
+    transition:0.3s;
+  }
+  .btn-tlux:hover { background:#0d6efd; color:#fff; }
+</style>
+
+{% endblock %}

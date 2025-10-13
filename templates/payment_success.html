@@ -1,0 +1,75 @@
+<!-- templates/payment_success.html -->
+{% extends "base.html" %}
+{% block title %}✅ Payment Successful — T-Lux{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card card-tlux p-4 shadow-lg border-0 text-center">
+
+        <!-- Header -->
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="T-Lux Logo" height="55" class="mb-3">
+        <h3 class="text-success fw-bold">✅ Payment Successful</h3>
+        <p class="text-muted mb-4">
+          Your transaction has been processed successfully.  
+          Thank you for choosing <strong>T-Lux</strong> — the Global Unlock Platform.
+        </p>
+
+        <!-- Payment summary -->
+        <div class="table-responsive mb-3">
+          <table class="table table-bordered align-middle">
+            <tbody>
+              <tr>
+                <th class="bg-light">💳 Transaction ID</th>
+                <td>{{ transaction_id or 'N/A' }}</td>
+              </tr>
+              <tr>
+                <th class="bg-light">📱 Service</th>
+                <td>{{ service_name or 'Unlock Service' }}</td>
+              </tr>
+              <tr>
+                <th class="bg-light">💵 Amount</th>
+                <td><span class="fw-bold text-gold">{{ amount or '—' }} {{ currency or 'USD' }}</span></td>
+              </tr>
+              <tr>
+                <th class="bg-light">📅 Date</th>
+                <td>{{ payment_date or now.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Success message -->
+        <div class="alert alert-success shadow-sm text-start">
+          <strong>Next step:</strong><br>
+          Your order is being processed. You’ll receive an update by email once the unlock is complete.
+        </div>
+
+        <!-- Action buttons -->
+        <div class="d-flex justify-content-center gap-3 mt-4">
+          <a href="{{ url_for('dashboard') }}" class="btn btn-brighton fw-bold px-4">
+            🏠 Go to Dashboard
+          </a>
+          <a href="{{ url_for('receipt_unlock') }}" class="btn btn-outline-gold fw-bold px-4">
+            🧾 View Receipt
+          </a>
+        </div>
+
+        <div class="text-muted small mt-4">
+          <em>Need help? Contact <a href="mailto:support@t-lux.tech">support@t-lux.tech</a></em>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Animation -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const alert = document.querySelector(".alert-success");
+  if (alert) alert.classList.add("animate__animated", "animate__fadeInDown");
+});
+</script>
+{% endblock %}

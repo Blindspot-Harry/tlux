@@ -1,4 +1,3 @@
-<!-- templates/verificar_serial.html -->
 {% extends "base.html" %}
 {% block title %}📱 Verificar Serial / IMEI — T-Lux{% endblock %}
 
@@ -14,7 +13,7 @@
           Digite abaixo o número de série ou IMEI do dispositivo para identificar o modelo e prosseguir com o desbloqueio.
         </p>
 
-        <!-- Mensagens de feedback -->
+        <!-- Mensagens -->
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             <div class="mb-3">
@@ -41,7 +40,7 @@
               required 
             />
             <small class="form-text text-muted">
-              Digite a serial ou IMEI do iPhone que deseja verificar.
+              Digite a serial ou IMEI do dispositivo Apple que deseja verificar.
             </small>
           </div>
 
@@ -49,14 +48,23 @@
             <label for="modelo" class="form-label fw-bold">📲 Modelo (opcional)</label>
             <select id="modelo" name="modelo" class="form-select">
               <option value="">— Detectar automaticamente —</option>
-              {% if modelos %}
-                {% for modelo, preco in modelos.items() %}
+
+              <!-- Grupo com SINAL -->
+              <optgroup label="📶 iPhone (With Signal)">
+                {% for modelo, preco in MODELOS_IPHONE_USD_SINAL.items() %}
                   <option value="{{ modelo }}">{{ modelo }} — {{ preco }} USD</option>
                 {% endfor %}
-              {% endif %}
+              </optgroup>
+
+              <!-- Grupo sem SINAL -->
+              <optgroup label="🚫 iPhone (No Signal)">
+                {% for modelo, preco in MODELOS_IPHONE_SEM_SINAL_USD.items() %}
+                  <option value="{{ modelo }}">{{ modelo }} — {{ preco }} USD</option>
+                {% endfor %}
+              </optgroup>
             </select>
             <small class="form-text text-muted">
-              Caso saiba o modelo, selecione manualmente. Senão, deixe em "Detectar automaticamente".
+              Escolha manualmente ou deixe o sistema detectar automaticamente.
             </small>
           </div>
 

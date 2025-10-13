@@ -3,14 +3,31 @@ import os
 import sqlite3
 import secrets
 import uuid
-from datetime import datetime, timedelta
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from datetime import datetime, timedelta, timezone
+from flask import Flask, render_template, request, redirect, url_for, session, flash, g
+from flask_babel import Babel, gettext as _
 import smtplib
 from email.message import EmailMessage
 import bcrypt
 from dotenv import load_dotenv
-import os, stripe
+import stripe
 from functools import wraps
+import requests
+
+# =======================================
+# T-LUX Flask App — inicialização principal (única)
+# =======================================
+app = Flask(__name__)
+app.secret_key = os.getenv("APP_SECRET", "chave-super-secreta")
+
+# ⚠️ DEV ONLY: empurra um contexto global para evitar o erro enquanto limpamos o arquivo
+app.app_context().push()
+
+# Configuração de idiomas (Babel)
+app.config["BABEL_DEFAULT_LOCALE"] = "en"
+app.config["BABEL_DEFAULT_TIMEZONE"] = "UTC"
+app.config["LANGUAGES"] = {"en": "English", "pt": "Português"}
+babel = Babel(app)
 
 # -----------------------
 # Carrega variáveis do .env
@@ -21,7 +38,9 @@ load_dotenv()
 # Configurações do Sistema T-Lux
 # -----------------------
 APP_SECRET = os.getenv("APP_SECRET", secrets.token_hex(16))
-DB_PATH = os.path.join(os.path.dirname(__file__), "T-LUX.db")
+BASE_DIR = os.path.dirname(__file__)
+# caminho do DB padrão (usa T-LUX.db / t-lux.db conforme preferir)
+DB_FILE = os.getenv("DB_FILE", os.path.join(BASE_DIR, "t-lux.db"))
 
 # -----------------------
 # Stripe — agora usando .env
@@ -29,37 +48,11 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "T-LUX.db")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
-
-stripe.api_key = STRIPE_SECRET_KEY
-
-print("✅ Stripe carregado com sucesso!")
-
-# -----------------------
-# Configuração de e-mails
-# -----------------------
-EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
-EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-
-# E-mails fixos do sistema
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
-TECH_EMAIL = os.getenv("TECH_EMAIL")
-TECH_PASSWORD = os.getenv("TECH_PASSWORD")
-
-# -----------------------
-# iRemoval API para desbloqueios reais
-# -----------------------
-import requests
-import os
-
-# chave da API: pega do .env ou usa fallback
-API_KEY = os.getenv(
-    "DHRU_API_KEY",
-    "I8QMHj1cZIqWWrdZ8tZDX2f2vnGDxttSpC0vHKbdxnbGs9nSlUOLESysHLyE"
-)
-USERNAME = os.getenv("DHRU_USERNAME", "T-Lux")  # substitui pelo username real
-API_URL = "https://bulk.iremove.tools/api/dhru/api/index.php"
-
+if STRIPE_SECRET_KEY:
+    stripe.api_key = STRIPE_SECRET_KEY
+    print("✅ Stripe carregado com sucesso!")
+else:
+    print("⚠️ Stripe não configurado (STRIPE_SECRET_KEY ausente).")
 
 # -----------------------
 # Mapeamento de modelos para SERVICEID reais
@@ -206,7 +199,7 @@ def atualizar_servicos():
                 """, (servico["ID"], servico["NAME"], servico["CREDIT"], group_name))
 
         conn.commit()
-        conn.close()
+        # conn.close() — fechado pelo teardown
         return True
     except Exception as e:
         print("Erro ao atualizar serviços:", e)
@@ -240,6 +233,27 @@ def login_required(f):
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorated_function
+# -----------------------
+# Decorator for admin-only routes
+# -----------------------
+from functools import wraps
+from flask import session, redirect, url_for, flash
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Check if user is logged in
+        if not session.get("user_id"):
+            flash("⚠️ You need to log in first.", "warning")
+            return redirect(url_for("login"))
+
+        # Check if user is admin
+        if not session.get("is_admin"):
+            flash("⛔ Access restricted to administrators only.", "danger")
+            return redirect(url_for("dashboard"))
+
+        return f(*args, **kwargs)
+    return decorated_function
 
 # -----------------------
 # Funções auxiliares iRemoval
@@ -248,54 +262,45 @@ import requests
 import sqlite3
 from datetime import datetime
 
-# -----------------------
-# Funções de banco e logs
-# -----------------------
+from datetime import datetime, timezone
+
+from datetime import datetime, timedelta, timezone
+UTC = timezone.utc
+
+def _now_iso() -> str:
+    """Retorna timestamp ISO com fuso UTC."""
+    return datetime.now(UTC).isoformat()
 
 def init_db():
-    conn = sqlite3.connect("t-lux.db")
+    """Garante que a tabela transactions tenha todas as colunas necessárias."""
+    conn = get_db()
     c = conn.cursor()
 
-    # Verifica colunas existentes
     c.execute("PRAGMA table_info(transactions)")
     colunas = [info[1] for info in c.fetchall()]
 
-    # Adiciona colunas se não existirem
-    if "imei" not in colunas:
-        c.execute("ALTER TABLE transactions ADD COLUMN imei TEXT")
-        print("Coluna 'imei' adicionada à tabela transactions.")
+    def add_coluna(nome, tipo):
+        if nome not in colunas:
+            c.execute(f"ALTER TABLE transactions ADD COLUMN {nome} {tipo}")
+            print(f"✅ Coluna '{nome}' adicionada à tabela transactions.")
 
-    if "order_id" not in colunas:
-        c.execute("ALTER TABLE transactions ADD COLUMN order_id TEXT")
-        print("Coluna 'order_id' adicionada à tabela transactions.")
-
-    if "preco_fornecedor" not in colunas:
-        c.execute("ALTER TABLE transactions ADD COLUMN preco_fornecedor REAL DEFAULT 0.0")
-        print("Coluna 'preco_fornecedor' adicionada à tabela transactions.")
-
-    if "lucro" not in colunas:
-        c.execute("ALTER TABLE transactions ADD COLUMN lucro REAL DEFAULT 0.0")
-        print("Coluna 'lucro' adicionada à tabela transactions.")
-
-    if "processed" not in colunas:
-        c.execute("ALTER TABLE transactions ADD COLUMN processed INTEGER DEFAULT 0")
-        print("Coluna 'processed' adicionada à tabela transactions.")
+    add_coluna("imei", "TEXT")
+    add_coluna("order_id", "TEXT")
+    add_coluna("preco_fornecedor", "REAL DEFAULT 0.0")
+    add_coluna("lucro", "REAL DEFAULT 0.0")
+    add_coluna("processed", "INTEGER DEFAULT 0")
 
     conn.commit()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
 
 def validar_transacao(tx_id: int) -> bool:
-    """
-    Verifica se a transação existe, está paga e ainda não foi processada.
-    Retorna True se a transação for válida para desbloqueio.
-    """
+    """Verifica se a transação existe, está paga e ainda não foi processada."""
     conn = get_db()
     c = conn.cursor()
     c.execute("SELECT status, processed FROM transactions WHERE id=?", (tx_id,))
     tx = c.fetchone()
-    conn.close()
-
+    # conn.close() — fechado pelo teardown
     if not tx:
         return False
     status, processed = tx
@@ -303,52 +308,28 @@ def validar_transacao(tx_id: int) -> bool:
 
 
 def obter_dados_imei(tx_id: int):
-    """
-    Busca o IMEI e o modelo do iPhone associado à transação.
-    Retorna uma tupla (imei, modelo) ou None se não encontrar.
-    """
+    """Busca o IMEI e o modelo do iPhone associado à transação."""
     conn = get_db()
     c = conn.cursor()
     c.execute("SELECT imei, modelo FROM transactions WHERE id=?", (tx_id,))
-    resultado = c.fetchone()
-    conn.close()
-
-    if resultado:
-        return resultado["imei"], resultado["modelo"]
+    row = c.fetchone()
+    # conn.close() — fechado pelo teardown
+    if row:
+        return row["imei"], row["modelo"]
     return None
 
 
-def registrar_log(tx_id, user_email, imei, modelo, status):
-    """
-    Registra um log de desbloqueio no banco de dados.
-    """
+def registrar_log_desbloqueio(tx_id, user_email, imei, modelo, status):
+    """Registra logs de desbloqueio vinculados a uma transação."""
     conn = get_db()
     c = conn.cursor()
-    data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    data_hora = datetime.now(timezone.utc).isoformat()
     c.execute("""
         INSERT INTO logs_desbloqueio (tx_id, user_email, imei, modelo, status, data_hora)
         VALUES (?, ?, ?, ?, ?, ?)
     """, (tx_id, user_email, imei, modelo, status, data_hora))
     conn.commit()
-    conn.close()
-    
-def registrar_log_desbloqueio(tx_id, user_email, imei, modelo, status):
-    """Registra logs de desbloqueio vinculados a uma transação."""
-    conn = get_db()
-    c = conn.cursor()
-    c.execute("""
-        INSERT INTO logs_desbloqueio (tx_id, user_email, imei, modelo, status, data_hora)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (
-        tx_id,
-        user_email,
-        imei,
-        modelo,
-        status,
-        datetime.now(UTC).isoformat()
-    ))
-    conn.commit()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
 # -----------------------
 # Funções de comunicação com iRemoval
@@ -419,7 +400,7 @@ def consultar_status_unlock(tx_id):
     c = conn.cursor()
     c.execute("SELECT order_id FROM transactions WHERE id=?", (tx_id,))
     row = c.fetchone()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     if not row or not row["order_id"]:
         return {"status": "pending", "message": "Order ID não encontrado"}
@@ -448,13 +429,13 @@ def processar_desbloqueio(modelo, imei, metodo_pagamento, email):
     - Cria ordem na API
     - Registra transação no banco com order_id
     """
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db()
     cursor = conn.cursor()
 
     # procurar o ID do serviço para o modelo
     service_id = obter_service_id(modelo)
     if not service_id:
-        conn.close()
+        # conn.close() — fechado pelo teardown
         return {"status": "error", "message": f"Modelo {modelo} não encontrado no mapeamento."}
 
     # criar ordem real na API
@@ -469,65 +450,129 @@ def processar_desbloqueio(modelo, imei, metodo_pagamento, email):
             VALUES (?, ?, ?, ?, ?, ?)
         """, (modelo, imei, metodo_pagamento, email, order_id, "Pendente"))
         conn.commit()
-        conn.close()
+        # conn.close() — fechado pelo teardown
 
         return {"status": "success", "order_id": order_id}
 
     else:
-        conn.close()
+        # conn.close() — fechado pelo teardown
         return {"status": "error", "message": resultado}
 
+#------------------------
+#Maddleware protecao
+#------------------------
+@app.before_request
+def verificar_email_global():
+    """
+    Middleware: antes de cada requisição, verifica se o usuário está logado
+    e se o e-mail foi verificado.
+    Exceções: login, registro, verificação de e-mail e páginas públicas.
+    """
+    rotas_publicas = {
+        "login", "register", "logout",
+        "verify_email_route", "resend_verification",
+        "check_email", "static"
+    }
 
-# -----------------------
-# Flask app
-# -----------------------
-# Inicialização do Flask
-app = Flask(__name__)
-app.secret_key = "chave-super-secreta"  # já tens a tua no .env
+    if "user_id" in session:
+        # Se usuário existe mas ainda não confirmou o e-mail
+        if not session.get("email_verified", False):
+            # Pega rota atual
+            rota_atual = request.endpoint
+
+            # Se tentar acessar rota protegida → redireciona
+            if rota_atual not in rotas_publicas:
+                flash("⚠️ Você precisa verificar seu e-mail para continuar.", "warning")
+                return redirect(url_for("check_email"))
+
+# ------------------------------
+# Página pública (Landing Page)
+# ------------------------------
+@app.route("/")
+def home():
+    # Se o usuário já estiver logado, envia direto para o painel
+    if session.get("user_id"):
+        return redirect(url_for("dashboard"))
+    return render_template("home.html")
+    
+from datetime import datetime, UTC
 
 # ======================================
 # 🌍 SUPORTE MULTILÍNGUE (Flask-Babel 3.x)
 # ======================================
-from flask_babel import Babel, gettext as _
-from flask import session, request, redirect, url_for, flash
+from flask_babel import Babel
+from flask import request, session
 
-# Configurações de idioma
+# -----------------------
+# 🌍 Babel Configuration
+# -----------------------
 app.config["BABEL_DEFAULT_LOCALE"] = "en"
-app.config["BABEL_SUPPORTED_LOCALES"] = ["en", "pt"]
 app.config["BABEL_DEFAULT_TIMEZONE"] = "UTC"
+app.config["LANGUAGES"] = ["en", "pt"]
 
-# Função que escolhe o idioma ativo
-def get_locale():
-    # Se o usuário escolheu manualmente, usa esse idioma
-    if "lang" in session:
-        return session["lang"]
-    # Caso contrário, tenta detectar do navegador
-    return request.accept_languages.best_match(["en", "pt"])
-
-# Inicializa o Babel com a função de seleção
-babel = Babel(app, locale_selector=get_locale)
-
-# Torna get_locale() acessível dentro dos templates Jinja
-app.jinja_env.globals['get_locale'] = get_locale
-
-# Rota para trocar idioma manualmente (🇬🇧 / 🇵🇹)
-@app.route("/set_lang/<lang>")
-def set_language(lang):
-    if lang not in ["en", "pt"]:
-        lang = "en"
-    session["lang"] = lang
-    flash(_("Language changed successfully!") if lang == "en" else "Idioma alterado com sucesso!", "info")
-    return redirect(request.referrer or url_for("index"))
+# ======================================
+# 🌍 SUPORTE MULTILÍNGUE — Flask-Babel (corrigido)
+# ======================================
+from flask import request, session, redirect, url_for
+from flask_babel import Babel
 
 # -----------------------
-# Idiomas padrão
+# Configuração do Babel
 # -----------------------
-LANGUAGES = {
-    "pt": "Português",
+app.config["BABEL_DEFAULT_LOCALE"] = "en"
+app.config["BABEL_DEFAULT_TIMEZONE"] = "UTC"
+app.config["LANGUAGES"] = {
     "en": "English",
-    "fr": "Français"
+    "pt": "Português"
 }
 
+# -----------------------
+# Selecionador de idioma
+# -----------------------
+from flask import request, session, redirect, url_for
+from flask_babel import Babel
+
+def get_locale():
+    """
+    Determina o idioma ativo da sessão.
+    Prioridade:
+      1️⃣ Idioma manual definido pelo usuário (/set_language/<lang>)
+      2️⃣ Idioma do navegador (Accept-Language)
+      3️⃣ Idioma padrão ('en')
+    """
+    # 1️⃣ Preferência manual na sessão
+    lang = session.get("lang")
+    if lang in app.config["LANGUAGES"]:
+        return lang
+
+    # 2️⃣ Idioma aceito pelo navegador
+    best_match = request.accept_languages.best_match(app.config["LANGUAGES"])
+    if best_match:
+        return best_match
+
+    # 3️⃣ Padrão
+    return app.config["BABEL_DEFAULT_LOCALE"]
+# Disponibiliza a função no Jinja (para usar em templates)
+app.jinja_env.globals["get_locale"] = get_locale
+
+# (Re)inicializa o Babel usando o seletor de locale
+babel = Babel(app, locale_selector=get_locale)   # substitui a versão antiga "Babel(app)"
+
+# -----------------------
+# Rota para mudar idioma
+# -----------------------
+@app.route("/set_language/<lang>")
+def set_language(lang):
+    """Altera o idioma da sessão e redireciona de volta."""
+    if lang in app.config["LANGUAGES"]:
+        session["lang"] = lang
+        print(f"🌍 Idioma alterado para: {lang}")
+    return redirect(request.referrer or url_for("home"))
+
+LANGUAGES={
+ "pt":"Portugues",
+ "en":"Engles"
+ }
 # -----------------------
 # Países (195) -> name + currency code
 # Note: lista completa incluída. Currency is ISO code (e.g., MZN, USD, BRL)
@@ -815,13 +860,45 @@ EXCHANGE_RATES = {
 # -----------------------
 # Pacotes e modelos (preços fixos em USD)
 # -----------------------
-PACOTES_USD = {
-    "Bronze":  {"price": 39.68,   "duration_days": 7},
-    "Prata":   {"price": 87.30,   "duration_days": 30},
-    "Ouro":    {"price": 190.48,  "duration_days": 90},
-    "Premium": {"price": 396.83,  "duration_days": 365},
-    "Teste1Min": {"price": 0.50, "duration_days": 0.001}    
-}
+# -----------------------
+# Planos / Pacotes de acesso (em USD)
+# -----------------------
+# -----------------------
+# Planos / Pacotes de acesso (em USD)
+# -----------------------
+
+PACOTES = [
+    {
+        "nome": "Starter",
+        "dias": 7,
+        "preco_usd": 8.00,
+        "descricao": "Ideal para novos usuários — acesso completo por 7 dias."
+    },
+    {
+        "nome": "Bronze",
+        "dias": 30,
+        "preco_usd": 39.00,  # atualizado ✅
+        "descricao": "Pacote mensal com desbloqueios ilimitados e suporte padrão."
+    },
+    {
+        "nome": "Prata",
+        "dias": 60,
+        "preco_usd": 87.30,
+        "descricao": "Plano de 2 meses — ideal para técnicos ativos."
+    },
+    {
+        "nome": "Gold",
+        "dias": 180,  # 6 meses
+        "preco_usd": 190.47,
+        "descricao": "Acesso profissional de 6 meses — prioridade no suporte."
+    },
+    {
+        "nome": "Premium",
+        "dias": 365,  # 1 ano
+        "preco_usd": 400.00,
+        "descricao": "Licença anual — desbloqueios ilimitados e suporte VIP."
+    },
+]
 
 # -----------------------
 # Preço de venda no T-Lux (com lucro ajustado, SEM SINAL)
@@ -837,24 +914,17 @@ PRECO_IREMOVAL_SEM_SINAL_USD = {
     "iPhone XR": 50.00, "iPhone XS": 50.00, "iPhone XS Max": 50.00,
 }
 
-# Venda (T-Lux) — SEM SINAL, com margem mínima 20% e lucro >= $10
-MODELOS_IPHONE_SEM_SINAL_USD = {
-    "iPhone 11": 66.00, "iPhone 11 Pro": 72.00, "iPhone 11 Pro Max": 78.00,
-    "iPhone 12": 72.00, "iPhone 12 Mini": 66.00, "iPhone 12 Pro": 78.00, "iPhone 12 Pro Max": 84.00,
-    "iPhone 13": 90.00, "iPhone 13 Mini": 66.00, "iPhone 13 Pro": 90.00, "iPhone 13 Pro Max": 108.00,
-    "iPhone 14": 96.00, "iPhone 14 Plus": 102.00, "iPhone 14 Pro": 108.00, "iPhone 14 Pro Max": 114.00,
-    "iPhone 15": 102.00, "iPhone 15 Plus": 108.00, "iPhone 15 Pro": 126.00, "iPhone 15 Pro Max": 132.00,
-    "iPhone SE (2ª Geração)": 66.00, "iPhone SE (3ª Geração)": 66.00,
-    "iPhone XR": 60.00, "iPhone XS": 60.00, "iPhone XS Max": 60.00,
-}
+# -----------------------
+# Tabelas de Preços T-Lux (ajustadas com margem)
+# -----------------------
 
+# iPhone com SINAL — serviços premium (Signal Bypass)
 MODELOS_IPHONE_USD_SINAL = {
     "iPhone 6s": 31.75, "iPhone 6s Plus": 34.92,
     "iPhone 7": 39.68, "iPhone 7 Plus": 42.86,
     "iPhone 8": 47.62, "iPhone 8 Plus": 50.79,
-    "iPhone SE (1st gen)": 44.44, "iPhone SE (2nd gen)": 47.62, "iPhone SE (3rd gen)": 57.14,
-    "iPhone X": 71.43, "iPhone Xr": 79.37,
-    "iPhone Xs": 82.54, "iPhone Xs Max": 87.30,
+    "iPhone SE (1st Gen)": 44.44, "iPhone SE (2nd Gen)": 47.62, "iPhone SE (3rd Gen)": 57.14,
+    "iPhone X": 71.43, "iPhone Xr": 79.37, "iPhone Xs": 82.54, "iPhone Xs Max": 87.30,
     "iPhone 11": 95.24, "iPhone 11 Pro": 103.17, "iPhone 11 Pro Max": 107.94,
     "iPhone 12 Mini": 111.11, "iPhone 12": 119.05, "iPhone 12 Pro": 126.98, "iPhone 12 Pro Max": 134.92,
     "iPhone 13 Mini": 134.92, "iPhone 13": 142.86, "iPhone 13 Pro": 150.79, "iPhone 13 Pro Max": 158.73,
@@ -862,6 +932,33 @@ MODELOS_IPHONE_USD_SINAL = {
     "iPhone 15": 253.97, "iPhone 15 Plus": 261.90, "iPhone 15 Pro": 269.84, "iPhone 15 Pro Max": 277.78,
     "iPhone 16": 253.97, "iPhone 16 Plus": 269.84, "iPhone 16 Pro": 285.71, "iPhone 16 Pro Max": 317.46
 }
+
+# iPhone SEM SINAL — preços otimizados (No Signal Bypass)
+MODELOS_IPHONE_SEM_SINAL_USD = {
+    "iPhone 5S": 10.00,
+    "iPhone 6": 12.50, "iPhone 6 Plus": 12.50,
+    "iPhone 6s": 14.00, "iPhone 6s Plus": 14.00,
+    "iPhone 7": 18.00, "iPhone 7 Plus": 18.00,
+    "iPhone 8": 22.00, "iPhone 8 Plus": 24.00,
+    "iPhone X": 28.00,
+    "iPhone XR": 55.00, "iPhone XS": 60.00, "iPhone XS Max": 65.00,
+    "iPhone 11": 66.00, "iPhone 11 Pro": 72.00, "iPhone 11 Pro Max": 78.00,
+    "iPhone 12 Mini": 66.00, "iPhone 12": 72.00, "iPhone 12 Pro": 78.00, "iPhone 12 Pro Max": 84.00,
+    "iPhone 13 Mini": 66.00, "iPhone 13": 90.00, "iPhone 13 Pro": 90.00, "iPhone 13 Pro Max": 108.00,
+    "iPhone 14": 96.00, "iPhone 14 Plus": 102.00, "iPhone 14 Pro": 108.00, "iPhone 14 Pro Max": 114.00,
+    "iPhone 15": 102.00, "iPhone 15 Plus": 108.00, "iPhone 15 Pro": 126.00, "iPhone 15 Pro Max": 132.00,
+    "iPhone 16": 95.00, "iPhone 16 Plus": 100.00, "iPhone 16 Pro": 115.00, "iPhone 16 Pro Max": 120.00,
+    "iPhone SE (2nd Gen)": 60.00, "iPhone SE (3rd Gen)": 60.00,
+}
+
+# Alias de compatibilidade
+MODELOS_IPHONE_USD_NO_SIGNAL = MODELOS_IPHONE_SEM_SINAL_USD
+
+# Combinação geral
+MODELOS_IPHONE_USD = {**MODELOS_IPHONE_USD_SINAL, **MODELOS_IPHONE_SEM_SINAL_USD}
+
+# Ordenar alfabeticamente
+MODELOS_IPHONE_USD = dict(sorted(MODELOS_IPHONE_USD.items()))
 
 # -----------------------
 # Preços do fornecedor (iRemoval) em USD
@@ -967,7 +1064,7 @@ def unlock_page():
             c.execute("UPDATE transactions SET order_id=?, updated_at=? WHERE id=?",
                       (order_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), tx_id))
             conn.commit()
-            conn.close()
+            # conn.close() — fechado pelo teardown
 
             # Feedback
             flash(f"✅ {message}", "success")
@@ -1051,6 +1148,7 @@ UNLOCK_PRECOS = {}
 # -----------------------
 # Banco de Dados (SQLite) + Inicialização
 # -----------------------
+from datetime import timezone
 UTC = timezone.utc
 
 def get_db():
@@ -1059,7 +1157,7 @@ def get_db():
         g.db = sqlite3.connect(DB_FILE, timeout=30, check_same_thread=False)
         g.db.row_factory = sqlite3.Row
         g.db.execute("PRAGMA journal_mode=WAL")
-        g.db.execute("PRAGMA foreign_keys = ON")  # 🔒 integridade relacional
+        g.db.execute("PRAGMA foreign_keys = ON")
     return g.db
 
 @app.teardown_appcontext
@@ -1071,8 +1169,41 @@ def close_db(exception):
 
 def init_db():
     """Cria todas as tabelas necessárias se não existirem"""
-    with get_db() as conn:
+    conn = get_db()
+    c = conn.cursor()
+    # Exemplo simples: tabela de eventos
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS eventos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        descricao TEXT,
+        data TEXT DEFAULT (datetime('now', 'localtime'))
+    )
+    """)
+    conn.commit()
+# -----------------------
+# Limpeza automática de códigos expirados
+# -----------------------
+def clean_expired_codes():
+    db = get_db()
+    db.execute("DELETE FROM verification_codes WHERE expires_at < datetime('now')")
+    db.commit()
+
+def registrar_evento(user_id, descricao):
+    import sqlite3
+    try:
+        # 🔒 Abre conexão nova, totalmente independente do Flask
+        conn = get_db()
         c = conn.cursor()
+        c.execute("""
+            INSERT INTO eventos (user_id, descricao, data)
+            VALUES (?, ?, datetime('now', 'localtime'))
+        """, (user_id, descricao))
+        conn.commit()
+        # conn.close() — fechado pelo teardown
+        print(f"[OK] Evento registrado para o usuário {user_id}: {descricao}")
+    except Exception as e:
+        print(f"[ERRO] Falha ao registrar evento: {e}")
 
         # -----------------------
         # USERS
@@ -1324,7 +1455,7 @@ def gravar_transacao_unlock(user_id: int, modelo: str, imei: str, sem_sinal: int
     """, (user_id, modelo, imei, sem_sinal, preco_venda, preco_fornecedor, lucro, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     tx_id = c.lastrowid
     conn.commit()
-    conn.close()
+    # conn.close() — fechado pelo teardown
     return tx_id
 
 # -----------------------
@@ -1333,10 +1464,8 @@ def gravar_transacao_unlock(user_id: int, modelo: str, imei: str, sem_sinal: int
 def generate_license_key():
     return uuid.uuid4().hex.upper()
 
-
 def now_str():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
 
 def current_user():
     """Retorna o usuário logado como dicionário ou None"""
@@ -1346,7 +1475,6 @@ def current_user():
     c = conn.cursor()
     c.execute("SELECT * FROM users WHERE id=?", (session["user_id"],))
     row = c.fetchone()
-    conn.close()
     if not row:
         return None
     # Converte sqlite3.Row para dict
@@ -1364,21 +1492,21 @@ def _issue_license_from_tx(tx_id):
     c.execute("SELECT * FROM transactions WHERE id=?", (tx_id,))
     tx = c.fetchone()
     if not tx:
-        conn.close()
+        # conn.close() — fechado pelo teardown
         app.logger.error(f"Transação {tx_id} não encontrada.")
         return False
 
     user_id = tx["user_id"]
     pacote = tx["pacote"]
     if not user_id or not pacote:
-        conn.close()
+        # conn.close() — fechado pelo teardown
         app.logger.error(f"Transação {tx_id} inválida (sem user_id/pacote).")
         return False
 
     # Recupera info do pacote
     pacote_info = PACOTES_USD.get(pacote)
     if not pacote_info:
-        conn.close()
+        # conn.close() — fechado pelo teardown
         app.logger.error(f"Pacote {pacote} não existe.")
         return False
 
@@ -1418,7 +1546,7 @@ def _issue_license_from_tx(tx_id):
     """, ("license_issued", now_str(), tx_id))
 
     conn.commit()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     app.logger.info(f"✅ Licença emitida para user {user_id} (pacote {pacote}, expira em {expiry_date}).")
     return True
@@ -1477,67 +1605,250 @@ def _debug_email():
     )
     return ("OK" if ok else "FAIL"), (200 if ok else 500)
 
+# -----------------------
+# Função de envio de e-mail (T-Lux via Zoho)
+# -----------------------
+from email.message import EmailMessage
+import smtplib, ssl
+
+def send_email(to_email, subject, body_text=None, body_html=None):
+    """
+    Envia e-mails usando Zoho SMTP com suporte a HTML.
+    As credenciais são carregadas do .env.
+    """
+    smtp_host = os.getenv("ZOHO_SMTP_HOST", "smtp.zoho.com")
+    smtp_port = int(os.getenv("ZOHO_SMTP_PORT", 587))
+    smtp_user = os.getenv("ZOHO_SMTP_USER")
+    smtp_pass = os.getenv("ZOHO_SMTP_PASS")
+
+    msg = EmailMessage()
+    msg["From"] = f"T-Lux Systems <{smtp_user}>"
+    msg["To"] = to_email
+    msg["Subject"] = subject
+
+    # HTML ou texto simples
+    if body_html:
+        msg.add_alternative(body_html, subtype="html")
+    else:
+        msg.set_content(body_text or "")
+
+    # Conexão segura
+    context = ssl.create_default_context()
+    with smtplib.SMTP(smtp_host, smtp_port) as server:
+        server.starttls(context=context)
+        server.login(smtp_user, smtp_pass)
+        server.send_message(msg)
+
+    print(f"✅ [E-MAIL] Enviado com sucesso para {to_email}")
+
 #---------------------------
 # Bloqueio de tentativas
 #---------------------------    
 from datetime import datetime, timedelta, timezone
+UTC = timezone.utc
 
 LOGIN_MAX_ATTEMPTS = 5
 LOGIN_BLOCK_MINUTES = 10
-
 MAX_FAILED_ATTEMPTS = LOGIN_MAX_ATTEMPTS
 BLOCK_TIME_MINUTES = LOGIN_BLOCK_MINUTES
 
-def is_blocked(email, ip):
-    """Verifica se email ou IP ainda está bloqueado."""
+def _now_iso():
+    return datetime.now(UTC).isoformat()
+
+def is_blocked(email: str, ip: str) -> bool:
+    """Verifica se email OU IP está bloqueado neste momento."""
     conn = get_db()
     c = conn.cursor()
-    now = datetime.now(UTC).isoformat()
-
-    c.execute("""
-        SELECT 1 FROM blocked_users
+    now = _now_iso()
+    c.execute(
+        """
+        SELECT 1
+        FROM blocked_users
         WHERE (email = ? OR ip_address = ?)
           AND blocked_until > ?
         LIMIT 1
-    """, (email, ip, now))
+        """,
+        (email, ip, now),
+    )
     return c.fetchone() is not None
 
-def register_login_attempt(email, ip, status, conn=None):
-    if conn is None:
-        conn = get_db()
-    c = conn.cursor()
-    c.execute("""
-        INSERT INTO login_attempts (email, ip_address, status, created_at)
-        VALUES (?, ?, ?, ?)
-    """, (email, ip, status, datetime.now(UTC).isoformat()))
-    conn.commit()
-
-    # 🚨 Se falhou, verifica se precisa bloquear
-    if status == "failed":
-        total = failed_attempts(email, ip)
-        if total >= MAX_FAILED_ATTEMPTS:
-            blocked_until = (datetime.now(UTC) + timedelta(minutes=BLOCK_TIME_MINUTES)).isoformat()
-            c.execute("""
-                INSERT INTO blocked_users (email, ip_address, blocked_until)
-                VALUES (?, ?, ?)
-                ON CONFLICT(email) DO UPDATE SET blocked_until = excluded.blocked_until
-            """, (email, ip, blocked_until))
-            conn.commit()
-
-def failed_attempts(email, ip):
-    """Conta tentativas falhadas recentes para este email ou IP."""
+def failed_attempts(email: str, ip: str) -> int:
+    """
+    Conta tentativas falhadas recentes para este email+IP dentro da janela BLOCK_TIME_MINUTES.
+    Considera status='failed'.
+    """
     conn = get_db()
     c = conn.cursor()
     time_limit = (datetime.now(UTC) - timedelta(minutes=BLOCK_TIME_MINUTES)).isoformat()
-    c.execute("""
-        SELECT COUNT(*) as total
+    c.execute(
+        """
+        SELECT COUNT(*) AS total
         FROM login_attempts
         WHERE (email = ? OR ip_address = ?)
           AND status = 'failed'
           AND created_at >= ?
-    """, (email, ip, time_limit))
+        """,
+        (email, ip, time_limit),
+    )
     row = c.fetchone()
-    return row["total"] if row else 0
+    # row pode ser tupla (0) ou dict-like; normaliza pra int
+    try:
+        return int(row[0] if row is not None else 0)
+    except Exception:
+        return int((row["total"] if row and "total" in row.keys() else 0))
+
+def register_login_attempt(email: str, ip: str, status: str, conn=None) -> None:
+    """
+    Registra tentativa (success/failed) e aplica bloqueio se exceder o limite.
+    Usa a conexão passada ou get_db(); NÃO fecha aqui (teardown fecha no fim da request).
+    """
+    close_after = False
+    if conn is None:
+        conn = get_db()
+        close_after = True
+
+    c = conn.cursor()
+    try:
+        # 1) Registra a tentativa
+        c.execute(
+            """
+            INSERT INTO login_attempts (email, ip_address, status, created_at)
+            VALUES (?, ?, ?, ?)
+            """,
+            (email, ip, status, _now_iso()),
+        )
+        conn.commit()
+
+        # 2) Se falhou, checa se deve bloquear
+        if status == "failed":
+            total = failed_attempts(email, ip)
+            if total >= MAX_FAILED_ATTEMPTS:
+                blocked_until = (datetime.now(UTC) + timedelta(minutes=BLOCK_TIME_MINUTES)).isoformat()
+
+                # Atualiza ou insere novo bloqueio
+                c.execute(
+                    """
+                    UPDATE blocked_users
+                       SET blocked_until = ?
+                     WHERE email = ? OR ip_address = ?
+                    """,
+                    (blocked_until, email, ip),
+                )
+                if c.rowcount == 0:
+                    c.execute(
+                        """
+                        INSERT INTO blocked_users (email, ip_address, blocked_until)
+                        VALUES (?, ?, ?)
+                        """,
+                        (email, ip, blocked_until),
+                    )
+                conn.commit()
+
+    except Exception as e:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        app.logger.error(f"[DB ERROR] register_login_attempt failed: {e}")
+
+    finally:
+        # opcional: fecha se foi aberta internamente
+        if close_after:
+            try:
+                conn.close()
+            except Exception:
+                pass
+
+# -----------------------
+# Password Reset (Forgot Password)
+# -----------------------
+@app.route("/forgot_password", methods=["GET", "POST"])
+def forgot_password():
+    """
+    Step 1: User enters email
+    Step 2: System sends 6-digit verification code via email
+    Step 3: Redirects user to code confirmation and password reset
+    """
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+
+        if not email:
+            flash("Please enter your email address.", "warning")
+            return redirect(url_for("forgot_password"))
+
+        conn = get_db()
+        c = conn.cursor()
+        c.execute("SELECT id FROM users WHERE email=?", (email,))
+        user = c.fetchone()
+
+        if not user:
+            # conn.close() — fechado pelo teardown
+            flash("No account found with that email address.", "danger")
+            return redirect(url_for("forgot_password"))
+
+        # Generate and send a verification code
+        create_verification_code(email, user["id"])
+        flash("A 6-digit verification code has been sent to your email.", "info")
+
+        # conn.close() — fechado pelo teardown
+        return redirect(url_for("reset_password", email=email))
+
+    return render_template("forgot_password.html")
+
+# --------------------------
+# 🔑 Reset Password (after code)
+# --------------------------
+@app.route("/reset_password", methods=["GET", "POST"])
+def reset_password():
+    """
+    Tela para redefinir senha com código de verificação.
+    """
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        code = request.form.get("code", "").strip()
+        new_password = request.form.get("new_password", "")
+        confirm_password = request.form.get("confirm_password", "")
+
+        if not email or not code or not new_password or not confirm_password:
+            flash(_("Please fill in all fields."), "warning")
+            return redirect(url_for("reset_password"))
+
+        if new_password != confirm_password:
+            flash(_("Passwords do not match."), "danger")
+            return redirect(url_for("reset_password"))
+
+        conn = get_db()
+        c = conn.cursor()
+
+        # valida código
+        c.execute("""
+            SELECT id, user_id, expires_at, used FROM verification_codes
+            WHERE email=? AND code=? ORDER BY id DESC LIMIT 1
+        """, (email, code))
+        row = c.fetchone()
+
+        if not row:
+            flash(_("Invalid verification code."), "danger")
+            return redirect(url_for("reset_password"))
+
+        exp = datetime.fromisoformat(row["expires_at"])
+        if datetime.now() > exp:
+            flash(_("Code expired. Please request a new one."), "warning")
+            return redirect(url_for("forgot_password"))
+
+        # atualiza senha
+        hashed = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt())
+        c.execute("UPDATE users SET password=?, email_verified=1 WHERE id=?", (hashed, row["user_id"]))
+        c.execute("UPDATE verification_codes SET used=1 WHERE id=?", (row["id"],))
+        conn.commit()
+
+        registrar_evento(row["user_id"], "Password reset successfully")
+        flash(_("✅ Password reset successful. You can now log in."), "success")
+        return redirect(url_for("login"))
+
+    # GET → exibe formulário de redefinição
+    return render_template("reset_password.html")
+
 # -----------------------
 # Login attempts (anti-bruteforce)
 # -----------------------
@@ -1551,7 +1862,7 @@ def registrar_tentativa_login(email: str, sucesso: bool):
         (email.lower(), now_str(), 1 if sucesso else 0)
     )
     conn.commit()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
 def is_login_blocked(email: str) -> Tuple[bool, int]:
     """
@@ -1572,7 +1883,7 @@ def is_login_blocked(email: str) -> Tuple[bool, int]:
     fails = row["fails"] if row else 0
 
     if fails < LOGIN_MAX_ATTEMPTS:
-        conn.close()
+        # conn.close() — fechado pelo teardown
         return False, 0
 
     # Última falha registrada
@@ -1581,7 +1892,7 @@ def is_login_blocked(email: str) -> Tuple[bool, int]:
         WHERE email=? AND success=0
     """, (email,))
     last = c.fetchone()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     if not last or not last["last_fail"]:
         return False, 0
@@ -1595,93 +1906,409 @@ def is_login_blocked(email: str) -> Tuple[bool, int]:
     return False, 0
 
 # -----------------------
-# Email verification tokens
+# Email Verification & OTP (Secure T-Lux System)
 # -----------------------
 
+import hmac, hashlib, secrets
+from datetime import datetime, timedelta, timezone
+from typing import Tuple
+
+UTC = timezone.utc
+
+# ------------------------------------
+# 🔹 TOKEN VERIFICATION (LINK METHOD)
+# ------------------------------------
+
 def gerar_token_verificacao(user_id: int, validade_horas: int = 48) -> str:
-    """Gera token seguro, salva em email_verifications e retorna token."""
+    """
+    Gera token seguro para verificação de e-mail via link.
+    Salva em email_verifications e retorna o token.
+    """
     token = secrets.token_urlsafe(32)
     now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     expires = (datetime.now(UTC) + timedelta(hours=validade_horas)).strftime("%Y-%m-%d %H:%M:%S")
 
     conn = get_db()
     c = conn.cursor()
-    c.execute(
-        "INSERT INTO email_verifications (user_id, token, created_at, expires_at, used) VALUES (?, ?, ?, ?, 0)",
-        (user_id, token, now, expires)
-    )
+    c.execute("""
+        INSERT INTO email_verifications (user_id, token, created_at, expires_at, used)
+        VALUES (?, ?, ?, ?, 0)
+    """, (user_id, token, now, expires))
     conn.commit()
-    conn.close()
+    # conn.close() — fechado pelo teardown
     return token
 
 
 def marcar_token_usado(token: str):
-    """Marca token como utilizado."""
+    """Marca token de verificação como utilizado."""
     conn = get_db()
     c = conn.cursor()
     c.execute("UPDATE email_verifications SET used=1 WHERE token=?", (token,))
     conn.commit()
-    conn.close()
-
+    # conn.close() — fechado pelo teardown
 
 def verify_email_token(token: str) -> Tuple[bool, str]:
     """
-    Verifica token de e-mail; se válido marca user.email_verified=1.
-    Retorna (True, mensagem) ou (False, erro).
+    Verifica a validade de um token de verificação de e-mail.
+    Se for válido:
+      ✅ Marca o usuário como verificado
+      ✅ Marca o token como usado
+    Retorna:
+      (True, "mensagem de sucesso") ou (False, "mensagem de erro")
     """
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT id, user_id, used, expires_at FROM email_verifications WHERE token=?", (token,))
-    row = c.fetchone()
 
-    if not row:
-        conn.close()
-        return False, "Token inválido."
-
-    if row["used"]:
-        conn.close()
-        return False, "Token já utilizado."
-
-    # verifica expiração
-    if row["expires_at"]:
-        expira_em = datetime.fromisoformat(row["expires_at"])
-        if datetime.now(UTC) > expira_em:
-            conn.close()
-            return False, "Token expirado."
-
-    user_id = row["user_id"]
-
-    # marca user como verificado
-    c.execute("UPDATE users SET email_verified=1 WHERE id=?", (user_id,))
-    # marca token como usado
-    c.execute("UPDATE email_verifications SET used=1 WHERE id=?", (row["id"],))
-    conn.commit()
-    conn.close()
-
-    return True, "E-mail verificado com sucesso."
-
-# -----------------------
-# Envio de e-mail de verificação
-# -----------------------
-
-def enviar_email_verificacao(user_id: int, user_email: str):
-    """
-    Gera token e envia e-mail de verificação usando send_email existente.
-    Se não tiveres send_email, podes integrar SMTP aqui.
-    """
-    token = gerar_token_verificacao(user_id)
-    verify_url = url_for("verify_email", token=token, _external=True)
-    subject = "Verifique seu e-mail — T-Lux"
-    body = f"Olá,\n\nClique no link para verificar o seu e-mail e ativar a conta T-Lux:\n\n{verify_url}\n\nSe não criou esta conta, ignore.\n\n— Equipa T-Lux"
     try:
-        # Usa tua função existente de envio de e-mails
-        send_email(user_email, subject, body)
-        return True
+        # 1️⃣ Busca o token na base
+        c.execute("""
+            SELECT id, user_id, used, expires_at
+            FROM email_verifications
+            WHERE token = ?
+        """, (token,))
+        row = c.fetchone()
+
+        # 2️⃣ Token não existe
+        if not row:
+            return False, "❌ Invalid or unknown verification token."
+
+        # 3️⃣ Token já usado
+        if row["used"]:
+            return False, "⚠️ This verification link has already been used."
+
+        # 4️⃣ Valida expiração
+        try:
+            expira_em = datetime.fromisoformat(row["expires_at"]).replace(tzinfo=UTC)
+        except Exception:
+            return False, "⚠️ Invalid expiration date format."
+
+        if datetime.now(UTC) > expira_em:
+            return False, "⌛ Verification link expired. Please request a new one."
+
+        # 5️⃣ Marca como verificado
+        user_id = row["user_id"]
+        c.execute("UPDATE users SET email_verified = 1 WHERE id = ?", (user_id,))
+        c.execute("UPDATE email_verifications SET used = 1 WHERE id = ?", (row["id"],))
+        conn.commit()
+
+        return True, "✅ Email verified successfully!"
+
     except Exception as e:
-        app.logger.error(f"Erro ao enviar email de verificação: {e}")
+        # Rollback de segurança em caso de erro
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        print(f"[DB ERROR] verify_email_token failed: {e}")
+        return False, "❌ An unexpected error occurred during verification."
+
+    # ❌ NÃO fecha a conexão aqui — o teardown faz isso automaticamente
+
+# ------------------------------------
+# 🔹 OTP VERIFICATION (CODE METHOD)
+# ------------------------------------
+import hmac, hashlib, secrets, string, random
+from datetime import datetime, timedelta, timezone
+from flask import current_app as app
+from typing import Optional
+
+UTC = timezone.utc
+
+
+# -----------------------
+# Funções utilitárias OTP
+# -----------------------
+
+def generate_code(length: int = 6) -> str:
+    """Gera código numérico aleatório (OTP)."""
+    length = max(length, 4)  # mínimo de segurança
+    return ''.join(random.choices(string.digits, k=length))
+
+
+def hash_code(code: str) -> str:
+    """Hash HMAC-SHA256 do código OTP usando a secret_key do app."""
+    key = app.secret_key.encode()
+    return hmac.new(key, code.encode(), hashlib.sha256).hexdigest()
+
+
+# ============================================================
+# 🔐 T-LUX EMAIL & OTP VERIFICATION MODULE
+# ============================================================
+
+import hmac, hashlib, random
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+
+UTC = timezone.utc
+
+# ============================================================
+# 🔧 Funções auxiliares
+# ============================================================
+
+def _now_iso() -> str:
+    """Retorna timestamp ISO no fuso UTC."""
+    return datetime.now(UTC).isoformat()
+
+def generate_code(length: int = 6) -> str:
+    """Gera um código numérico aleatório."""
+    return ''.join(random.choices('0123456789', k=length))
+
+def hash_code(code: str) -> str:
+    """Retorna hash SHA256 do código (armazenado no DB)."""
+    return hashlib.sha256(code.encode()).hexdigest()
+
+# ============================================================
+# 🧮 Criação e envio de código OTP (WhatsApp-style)
+# ============================================================
+
+def create_verification_code(email: str, user_id: Optional[int] = None, length: int = 6, minutes_valid: int = 10) -> bool:
+    """
+    Cria e salva um código OTP, envia via e-mail com design moderno.
+    """
+    code = generate_code(length)
+    code_hash = hash_code(code)
+    now_iso = _now_iso()
+    expires_at = (datetime.now(UTC) + timedelta(minutes=minutes_valid)).isoformat()
+
+    conn = None
+    try:
+        conn = get_db()
+        c = conn.cursor()
+
+        # Invalida códigos antigos
+        c.execute("UPDATE verification_codes SET used=1 WHERE email=? AND used=0", (email,))
+
+        # Insere novo
+        c.execute("""
+            INSERT INTO verification_codes (user_id, email, code_hash, created_at, expires_at, used)
+            VALUES (?, ?, ?, ?, ?, 0)
+        """, (user_id, email, code_hash, now_iso, expires_at))
+        conn.commit()
+
+    except Exception as e:
+        if conn:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+        app.logger.error(f"[VERIFICATION_CODE][DB] Failed for {email}: {e}")
         return False
 
+    # =====================================================
+    # 💌 Monta o e-mail de verificação OTP
+    # =====================================================
+    subject = "🔐 Your T-Lux Verification Code"
+    minutes_lbl = f"{minutes_valid} minute{'s' if minutes_valid != 1 else ''}"
 
+    body_text = (
+        f"T-Lux Verification\n\n"
+        f"Your verification code is: {code}\n"
+        f"This code will expire in {minutes_lbl}.\n\n"
+        f"If you did not request this, just ignore this email.\n"
+        f"— T-Lux Unlock Systems"
+    )
+
+    body_html = f"""
+    <div style="font-family:Arial,sans-serif;background:#f7f7f7;padding:20px;">
+      <div style="max-width:600px;margin:auto;background:#ffffff;padding:28px;border-radius:12px;
+                  box-shadow:0 6px 18px rgba(0,0,0,0.08);text-align:center;">
+        <h2 style="color:#d4af37;margin-bottom:6px;">🔐 T-Lux Verification</h2>
+        <p style="color:#555;">Use the code below to continue your verification:</p>
+        <div style="margin:20px 0;">
+          <span style="display:inline-block;font-size:30px;letter-spacing:8px;color:#0d6efd;
+                       font-weight:800;border:2px dashed #0d6efd;border-radius:10px;padding:12px 20px;">
+            {code}
+          </span>
+        </div>
+        <p style="color:#555;">This code will expire in <strong>{minutes_lbl}</strong>.</p>
+        <hr style="border:none;border-top:1px solid #eee;margin:25px 0;">
+        <p style="font-size:12px;color:#777;">
+          © 2025 T-Lux Unlock Systems — Secure Global Platform
+        </p>
+      </div>
+    </div>
+    """
+
+    try:
+        send_email(email, subject, body_text=body_text, body_html=body_html)
+        app.logger.info(f"✅ Verification code sent to {email}")
+        return True
+    except Exception as e:
+        app.logger.error(f"[VERIFICATION_CODE][MAIL] Failed to send code to {email}: {e}")
+        return False
+
+# ============================================================
+# 🔍 Verificação de código OTP (versão atualizada — 30 segundos)
+# ============================================================
+
+def verify_code(email: str, code: str) -> bool:
+    """
+    Valida o código OTP de um usuário (expira em 30 segundos).
+    Retorna True se o código é válido e marca como usado.
+    """
+    try:
+        db = get_db()
+        c = db.cursor()
+
+        # Busca o código mais recente e ainda não usado
+        c.execute("""
+            SELECT id, code_hash, expires_at, used
+            FROM verification_codes
+            WHERE email=? AND used=0
+            ORDER BY id DESC
+            LIMIT 1
+        """, (email,))
+        row = c.fetchone()
+
+        # Nenhum código ativo encontrado
+        if not row:
+            app.logger.warning(f"[VERIFY_CODE] Nenhum código ativo encontrado para {email}")
+            return False
+
+        # Verifica expiração
+        try:
+            expires = datetime.fromisoformat(row["expires_at"])
+        except Exception:
+            app.logger.error(f"[VERIFY_CODE] Erro ao converter expires_at para {email}")
+            return False
+
+        now_utc = datetime.now(UTC)
+        if now_utc > expires:
+            app.logger.info(f"[VERIFY_CODE] Código expirado para {email}")
+            # Marca como usado/expirado para não reutilizar
+            try:
+                c.execute("UPDATE verification_codes SET used=1 WHERE id=?", (row["id"],))
+                db.commit()
+            except Exception:
+                pass
+            return False
+
+        # Compara hashes de forma segura (protege contra timing attacks)
+        if not hmac.compare_digest(row["code_hash"], hash_code(code)):
+            app.logger.info(f"[VERIFY_CODE] Código incorreto para {email}")
+            return False
+
+        # Marca como usado (para impedir reuso)
+        try:
+            c.execute("UPDATE verification_codes SET used=1 WHERE id=?", (row["id"],))
+            db.commit()
+            app.logger.info(f"✅ Código verificado com sucesso para {email}")
+        except Exception as e:
+            app.logger.error(f"[VERIFY_CODE][DB] Erro ao marcar código como usado: {e}")
+            return False
+
+        return True
+
+    except Exception as e:
+        app.logger.error(f"[VERIFY_CODE][EXCEPTION] {e}")
+        return False
+
+# ============================================================
+# 💌 Envio de link alternativo (token)
+# ============================================================
+
+def enviar_email_verificacao(user_id: int, user_email: str) -> bool:
+    """
+    Envia e-mail de verificação com link (caso o usuário prefira clicar).
+    """
+    try:
+        token = gerar_token_verificacao(user_id)
+        verify_url = url_for("verify_email_route", token=token, _external=True)
+
+        subject = "🔐 Verify your email — T-Lux Unlock Systems"
+
+        body_html = f"""
+        <div style='font-family:Arial,sans-serif;background:#f5f5f5;padding:30px;'>
+          <div style='max-width:600px;margin:auto;background:#fff;padding:35px;border-radius:12px;
+                      box-shadow:0 6px 20px rgba(0,0,0,0.1);'>
+            <h2 style='color:#d4af37;text-align:center;margin-bottom:20px;'>
+              ✨ Welcome to <span style="color:#0d6efd;">T-Lux</span>
+            </h2>
+            <p>Hello,</p>
+            <p>Thank you for registering with <strong>T-Lux Unlock Systems</strong>!</p>
+            <p>To activate your account, click the button below:</p>
+            <div style='text-align:center;margin:30px 0;'>
+              <a href='{verify_url}' 
+                 style='background:#d4af37;color:#fff;text-decoration:none;padding:14px 28px;
+                        border-radius:8px;font-weight:bold;'>
+                 ✅ Verify Email
+              </a>
+            </div>
+            <p>If the button above doesn’t work, copy and paste this link:</p>
+            <p style='word-break:break-all;color:#0d6efd;'>{verify_url}</p>
+            <hr style='margin:30px 0;border:none;border-top:1px solid #eee;'>
+            <p style='font-size:13px;color:#777;text-align:center;'>
+              This link expires in 48 hours.<br>
+              If you did not create a T-Lux account, please ignore this message.
+            </p>
+            <p style='font-size:12px;text-align:center;color:#999;margin-top:10px;'>
+              © 2025 T-Lux — Secure Unlock Platform<br>
+              <em>Developed by Blindspot</em>
+            </p>
+          </div>
+        </div>
+        """
+
+        send_email(user_email, subject, body_html=body_html)
+        app.logger.info(f"✅ Verification link sent to {user_email}")
+        return True
+
+    except Exception as e:
+        app.logger.error(f"❌ Error sending verification email: {e}")
+        return False
+
+# ============================================================
+# 🧱 AUTO-MIGRATION: Ensure database structure consistency
+# ============================================================
+
+def ensure_database_schema():
+    """
+    Garante que as tabelas 'users' e 'verification_codes' têm as colunas certas.
+    Corrige automaticamente se estiver faltando algo.
+    """
+    conn = get_db()
+    c = conn.cursor()
+
+    # ---------------------------
+    # USERS TABLE CHECK
+    # ---------------------------
+    try:
+        c.execute("PRAGMA table_info(users);")
+        columns = [col[1] for col in c.fetchall()]
+
+        if "email_verified" not in columns:
+            app.logger.warning("🛠 Adding 'email_verified' column to 'users' table...")
+            c.execute("ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 0;")
+            conn.commit()
+            app.logger.info("✅ Column 'email_verified' added successfully.")
+    except Exception as e:
+        app.logger.error(f"[MIGRATION][USERS] Error: {e}")
+
+    # ---------------------------
+    # VERIFICATION_CODES TABLE CHECK
+    # ---------------------------
+    try:
+        c.execute("PRAGMA table_info(verification_codes);")
+        columns = [col[1] for col in c.fetchall()]
+
+        if "user_id" not in columns:
+            app.logger.warning("🛠 Adding 'user_id' column to 'verification_codes'...")
+            c.execute("ALTER TABLE verification_codes ADD COLUMN user_id INTEGER;")
+            conn.commit()
+
+        if "expires_at" not in columns:
+            app.logger.warning("🛠 Adding 'expires_at' column to 'verification_codes'...")
+            c.execute("ALTER TABLE verification_codes ADD COLUMN expires_at TIMESTAMP;")
+            conn.commit()
+
+        if "used" not in columns:
+            app.logger.warning("🛠 Adding 'used' column to 'verification_codes'...")
+            c.execute("ALTER TABLE verification_codes ADD COLUMN used INTEGER DEFAULT 0;")
+            conn.commit()
+
+        app.logger.info("✅ verification_codes structure verified and up-to-date.")
+    except Exception as e:
+        app.logger.error(f"[MIGRATION][VERIFICATION_CODES] Error: {e}")
 
 # -----------------------
 # Licença a partir de transação
@@ -1694,18 +2321,18 @@ def _issue_license_from_tx(tx_id: int):
     c.execute("SELECT * FROM transactions WHERE id=?", (tx_id,))
     tx = c.fetchone()
     if not tx:
-        conn.close()
+        # conn.close() — fechado pelo teardown
         return False, "Transação não encontrada."
 
     # Evita duplicidade
     c.execute("SELECT id FROM licenses WHERE tx_id=?", (tx_id,))
     if c.fetchone():
-        conn.close()
+        # conn.close() — fechado pelo teardown
         return True, "Licença já emitida."
 
     # Só PACOTE gera licença
     if (tx["purpose"] or "").lower() != "package":
-        conn.close()
+        # conn.close() — fechado pelo teardown
         return True, "Transação não é de pacote (nenhuma licença emitida)."
 
     pacote = tx["pacote"]
@@ -1725,7 +2352,7 @@ def _issue_license_from_tx(tx_id: int):
     # Notifica usuário
     c.execute("SELECT email, language FROM users WHERE id=?", (tx["user_id"],))
     row = c.fetchone()
-    conn.close()
+    # conn.close() — fechado pelo teardown
     if row:
         user_email = row["email"]
         user_lang = (row["language"] or "pt").lower()
@@ -1766,96 +2393,68 @@ def convert_local_to_usd(local_amount, currency_code):
         rate = 1.0
     return round(float(local_amount) / rate, 2)
 
-#------------------------
-#Maddleware protecao
-#------------------------
-@app.before_request
-def verificar_email_global():
-    """
-    Middleware: antes de cada requisição, verifica se o usuário está logado
-    e se o e-mail foi verificado.
-    Exceções: login, registro, verificação de e-mail e páginas públicas.
-    """
-    rotas_publicas = {
-        "login", "register", "logout",
-        "verify_email_route", "resend_verification",
-        "check_email", "static"
-    }
-
-    if "user_id" in session:
-        # Se usuário existe mas ainda não confirmou o e-mail
-        if not session.get("email_verified", False):
-            # Pega rota atual
-            rota_atual = request.endpoint
-
-            # Se tentar acessar rota protegida → redireciona
-            if rota_atual not in rotas_publicas:
-                flash("⚠️ Você precisa verificar seu e-mail para continuar.", "warning")
-                return redirect(url_for("check_email"))
-
 # -----------------------
 # Rotas principais
 # -----------------------
-@app.route("/")
-def index():
-    return redirect(url_for("login"))
-
-from datetime import datetime, UTC
-
+#--------------------
+# Rota Registacao
+#--------------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        # 1️⃣ Coleta dados do formulário
+        # 1️⃣ Collect form data
         first_name = request.form.get("first_name", "").strip()
         last_name = request.form.get("last_name", "").strip()
         username = request.form.get("username", "").strip()
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "").strip()
-        language = request.form.get("language", "pt")[:2].lower()
+        language = request.form.get("language", "en")[:2].lower()
         region = request.form.get("region", "").strip() or "MZ"
         currency = request.form.get("currency", "").strip() or "USD"
         terms_ok = request.form.get("terms") == "on"
         ip = request.remote_addr
 
-        # 2️⃣ Verifica bloqueio
+        # 2️⃣ Check blocking
         if is_blocked(email, ip):
-            flash("Registro bloqueado temporariamente devido a múltiplas tentativas falhadas.", "danger")
+            flash("Registration temporarily blocked due to multiple failed attempts.", "danger")
             return redirect(url_for("register"))
 
-        # 3️⃣ Validação básica
+        # 3️⃣ Validation
         if not all([first_name, last_name, username, email, password]):
             register_login_attempt(email, ip, "failed")
-            flash("Preencha todos os campos obrigatórios.", "danger")
+            flash("Please fill in all required fields.", "danger")
             return redirect(url_for("register"))
         if not terms_ok:
             register_login_attempt(email, ip, "failed")
-            flash("Você deve aceitar os Termos e Condições.", "warning")
+            flash("You must accept the Terms and Conditions.", "warning")
             return redirect(url_for("register"))
 
-        # 4️⃣ Hash da senha
+        # 4️⃣ Hash password
         hashed_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
         conn = get_db()
         c = conn.cursor()
 
         try:
-            # 5️⃣ Verifica duplicidade
+            # 5️⃣ Check duplicates
             c.execute("SELECT id FROM users WHERE email=? OR username=?", (email, username))
             if c.fetchone():
                 conn.rollback()
                 register_login_attempt(email, ip, "failed", conn=conn)
-                flash("Email ou Nome de usuário já cadastrado.", "danger")
+                flash("Email or username already exists.", "danger")
 
                 if failed_attempts(email, ip) >= MAX_FAILED_ATTEMPTS:
                     block_user(email, ip)
-                    flash(f"Muitas tentativas falhadas. Registro bloqueado por {BLOCK_TIME_MINUTES} minutos.", "danger")
+                    flash(f"Too many failed attempts. Registration blocked for {BLOCK_TIME_MINUTES} minutes.", "danger")
 
                 return redirect(url_for("register"))
 
-            # 6️⃣ Insere novo usuário (não verificado ainda)
+            # 6️⃣ Insert user (not verified yet)
             c.execute("""
-                INSERT INTO users (first_name, last_name, username, email, password_hash, 
-                                   language, region, currency, email_verified, created_at)
+                INSERT INTO users (
+                    first_name, last_name, username, email, password_hash,
+                    language, region, currency, email_verified, created_at
+                )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
             """, (
                 first_name, last_name, username, email, hashed_pw,
@@ -1864,68 +2463,62 @@ def register():
             ))
             conn.commit()
 
-            # 7️⃣ Recupera usuário criado
+            # 7️⃣ Get new user
             c.execute("SELECT id, is_admin FROM users WHERE email=?", (email,))
             user = c.fetchone()
 
-            # 8️⃣ Gera token de verificação
+            # 8️⃣ Generate verification token + OTP (dual system)
             token = gerar_token_verificacao(user["id"])
-            link_verificacao = url_for("verify_email_route", token=token, _external=True)
+            verify_link = url_for("verify_email_route", token=token, _external=True)
+            create_verification_code(email, user_id=user["id"], length=8, minutes_valid=10)
 
-            # 9️⃣ Envia e-mail de verificação
+            # 9️⃣ Send verification email
             try:
-                body_text = f"""
-                Olá {first_name},
+                html_body = render_template(
+                    "email_verificacao.html",
+                    first_name=first_name,
+                    link_verificacao=verify_link
+                )
 
-                Obrigado por se registrar no T-Lux! 
-                Para ativar sua conta, clique no link abaixo:
+                text_body = f"""
+                Hello {first_name},
 
-                {link_verificacao}
+                Thank you for registering with T-Lux Unlock Systems!
+                To activate your account, please click the link below:
 
-                Este link expira em 48 horas.
+                {verify_link}
 
-                Equipe T-Lux
+                Or enter the 8-digit code we sent to your email in the verification page.
+
+                This link and code expire in 10 minutes.
+
+                — T-Lux Systems Team
                 """
 
-                body_html = f"""
-                <html>
-                  <body style="font-family: Arial, sans-serif; color: #333;">
-                    <h2 style="color:#d4af37;">Bem-vindo ao T-Lux, {first_name}!</h2>
-                    <p>Obrigado por se registrar. Para ativar sua conta, clique no botão abaixo:</p>
-                    <p style="text-align:center; margin:20px 0;">
-                      <a href="{link_verificacao}" 
-                         style="background-color:#d4af37;color:#fff;padding:12px 20px;
-                                text-decoration:none;border-radius:8px;font-weight:bold;">
-                        Ativar Conta
-                      </a>
-                    </p>
-                    <p>Se o botão não funcionar, copie e cole este link no navegador:</p>
-                    <p>{link_verificacao}</p>
-                    <p style="margin-top:20px;font-size:12px;color:#777;">Este link expira em 48 horas.</p>
-                  </body>
-                </html>
-                """
+                send_email(
+                    to_email=email,
+                    subject="🔐 Verify your email — T-Lux Unlock Systems",
+                    body_text=text_body,
+                    body_html=html_body
+                )
 
-                send_email(email, "Verifique seu e-mail - T-Lux", body_text, body_html)
             except Exception as e:
-                flash("Conta criada, mas houve falha ao enviar o e-mail de verificação.", "warning")
-                print(f"[EMAIL] Falha ao enviar verificação: {e}")
+                flash("Account created, but failed to send verification email.", "warning")
+                app.logger.error(f"[EMAIL ERROR] Verification failed: {e}")
 
-            # 🔟 Registrar tentativa de sucesso
+            # 🔟 Register success
             register_login_attempt(email, ip, "success", conn=conn)
+            registrar_evento(user["id"], "Account created (pending verification)")
 
-            # 1️⃣1️⃣ Registrar log
-            registrar_evento(user["id"], "Conta criada com sucesso")
-
-            # 1️⃣2️⃣ Sessão criada mas marcada como não verificada
+            # 1️⃣1️⃣ Create unverified session
             session.clear()
             session["user_id"] = user["id"]
             session["email"] = email
             session["is_admin"] = bool(user["is_admin"])
             session["email_verified"] = False
 
-            # 1️⃣3️⃣ Redireciona para página de aviso
-            flash("Conta criada! Verifique seu e-mail para ativar a conta.", "info")
+            # 1️⃣2️⃣ Redirect to check-email page
+            flash("✅ Account created! Please check your inbox for the verification link or code.", "info")
             return redirect(url_for("check_email"))
 
         except sqlite3.IntegrityError as e:
@@ -1933,60 +2526,223 @@ def register():
             register_login_attempt(email, ip, "failed", conn=conn)
 
             if "users.username" in str(e).lower():
-                flash("Nome de usuário já cadastrado.", "danger")
+                flash("Username already taken.", "danger")
             elif "users.email" in str(e).lower():
-                flash("Email já cadastrado.", "danger")
+                flash("Email already registered.", "danger")
             else:
-                flash("Erro ao cadastrar. Tente novamente.", "danger")
+                flash("Registration error. Please try again.", "danger")
 
             if failed_attempts(email, ip) >= MAX_FAILED_ATTEMPTS:
                 block_user(email, ip)
-                flash(f"Muitas tentativas falhadas. Registro bloqueado por {BLOCK_TIME_MINUTES} minutos.", "danger")
+                flash(f"Too many failed attempts. Registration blocked for {BLOCK_TIME_MINUTES} minutes.", "danger")
 
         finally:
-            conn.close()
+            if conn:
+                try:
+                    # conn.close() — fechado automaticamente pelo teardown
+                    pass
+                except Exception:
+                    pass
 
-    # GET
+    # GET request
     return render_template("register.html", countries=COUNTRIES, languages=LANGUAGES)
 
-
-@app.route("/verify_email/<token>")
-def verify_email_route(token):
-    ok, msg = verify_email_token(token)
-
-    if ok:
+# --------------------------
+# 💌 Email Verification (Link + OTP)
+# --------------------------
+@app.route("/email_verificacao/<token>", methods=["GET", "POST"])
+@app.route("/verify_email", methods=["GET", "POST"])
+def verify_email_route(token=None):
+    """
+    Verifica o email do usuário — aceita tanto link (com token) quanto código OTP manual.
+    """
+    conn = None
+    try:
         conn = get_db()
         c = conn.cursor()
-        c.execute("""
-            SELECT u.id, u.first_name, u.email, u.is_admin 
-            FROM users u
-            JOIN email_verifications ev ON ev.user_id = u.id
-            WHERE ev.token=?
-        """, (token,))
+
+        # -------------------------------------------
+        # 1️⃣ Verificação via LINK (token)
+        # -------------------------------------------
+        if token and token != "none":
+            c.execute("SELECT user_id, expires_at, used FROM email_tokens WHERE token=?", (token,))
+            token_row = c.fetchone()
+
+            if not token_row:
+                flash(_("Invalid or expired verification link."), "danger")
+                return redirect(url_for("verify_step1"))
+
+            if token_row["used"]:
+                flash(_("This link has already been used."), "warning")
+                return redirect(url_for("login"))
+
+            # Verifica validade
+            expires_at = datetime.fromisoformat(token_row["expires_at"])
+            if datetime.now() > expires_at:
+                flash(_("This verification link has expired. Please request a new one."), "danger")
+                return redirect(url_for("verify_step1"))
+
+            # Marca como verificado
+            user_id = token_row["user_id"]
+            c.execute("UPDATE users SET email_verified=1 WHERE id=?", (user_id,))
+            c.execute("UPDATE email_tokens SET used=1 WHERE token=?", (token,))
+            conn.commit()
+
+            registrar_evento(user_id, "Email verified via link")
+            flash(_("✅ Your email has been verified successfully!"), "success")
+            return redirect(url_for("login"))
+
+        # -------------------------------------------
+        # 2️⃣ Verificação via CÓDIGO (OTP manual)
+        # -------------------------------------------
+        if request.method == "POST":
+            email = request.form.get("email", "").strip().lower()
+            code = request.form.get("code", "").strip()
+
+            if not email or not code:
+                flash(_("Please enter both email and code."), "warning")
+                return redirect(url_for("verify_step2"))
+
+            c.execute("""
+                SELECT vc.id, vc.user_id, vc.code, vc.expires_at, vc.used, u.email_verified
+                FROM verification_codes vc
+                JOIN users u ON u.id = vc.user_id
+                WHERE vc.email=? AND vc.code=?
+                ORDER BY vc.id DESC LIMIT 1
+            """, (email, code))
+            vc = c.fetchone()
+
+            if not vc:
+                flash(_("Invalid verification code."), "danger")
+                return redirect(url_for("verify_step2"))
+
+            if vc["used"]:
+                flash(_("This code has already been used."), "warning")
+                return redirect(url_for("login"))
+
+            expires_at = datetime.fromisoformat(vc["expires_at"])
+            if datetime.now() > expires_at:
+                flash(_("This code has expired. Please request a new one."), "danger")
+                return redirect(url_for("verify_step2"))
+
+            # Marca como verificado
+            user_id = vc["user_id"]
+            c.execute("UPDATE users SET email_verified=1 WHERE id=?", (user_id,))
+            c.execute("UPDATE verification_codes SET used=1 WHERE id=?", (vc["id"],))
+            conn.commit()
+
+            registrar_evento(user_id, "Email verified via OTP")
+
+            # ✅ Redireciona dependendo do status de licença
+            c.execute("SELECT license_expiry FROM users WHERE id=?", (user_id,))
+            user = c.fetchone()
+            if user and user["license_expiry"]:
+                exp = datetime.fromisoformat(user["license_expiry"])
+                if exp > datetime.now():
+                    flash(_("✅ Email verified — License active! Redirecting to dashboard..."), "success")
+                    return redirect(url_for("dashboard"))
+
+            flash(_("✅ Email verified! Please activate your access to continue."), "success")
+            return redirect(url_for("choose_package"))
+
+        # -------------------------------------------
+        # 3️⃣ GET padrão — mostra a tela nova
+        # -------------------------------------------
+        # Aqui decide se o usuário está no passo 1 (inserir email) ou passo 2 (inserir código)
+        step = request.args.get("step", "1")
+        if step == "1":
+            return render_template("verify_step1.html")
+        else:
+            return render_template("verify_step2.html")
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        app.logger.error(f"[VERIFY_EMAIL_ERROR] {e}")
+        flash(_("⚠️ Verification failed. Please try again later."), "danger")
+        return redirect(url_for("login"))
+
+    finally:
+        if conn:
+            try:
+                conn.close()
+            except Exception:
+                pass
+
+# ---------------------------
+# STEP 1: Usuário introduz o e-mail
+# ---------------------------
+@app.route("/verify_step1", methods=["GET", "POST"])
+def verify_step1():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+
+        if not email:
+            flash(_("Please enter your email."), "warning")
+            return redirect(url_for("verify_step1"))
+
+        # Cria e envia o código de verificação — válido por 30 segundos
+        if create_verification_code(email=email, length=6, minutes_valid=0.5):
+            flash(_("A 6-digit verification code has been sent to your email."), "info")
+            masked = mask_email(email)
+            return render_template("verify_email_step2.html", email=email, masked_email=masked)
+        else:
+            flash(_("Failed to send verification code. Please try again."), "danger")
+            return redirect(url_for("verify_step1"))
+
+    return render_template("verify_email_step1.html")
+
+# ---------------------------
+# STEP 2: Usuário introduz o código
+# ---------------------------
+@app.route("/verify_step2", methods=["POST"])
+def verify_step2():
+    email = request.form.get("email", "").strip().lower()
+    code = "".join([request.form.get(f"digit{i}", "") for i in range(6)]).strip()
+
+    # Verifica se o código é válido
+    if verify_code(email, code):
+        conn = get_db()
+        c = conn.cursor()
+
+        # Busca o ID do usuário antes de registrar o evento
+        c.execute("SELECT id FROM users WHERE email=?", (email,))
         user = c.fetchone()
 
-        if user:
-            # Marca como verificado
-            c.execute("UPDATE users SET email_verified=1 WHERE id=?", (user["id"],))
-            conn.commit()
-            conn.close()
+        if not user:
+            flash(_("⚠️ User not found."), "danger")
+            return redirect(url_for("verify_step1"))
 
-            # Atualiza sessão
-            session.clear()
-            session["user_id"] = user["id"]
-            session["email"] = user["email"]
-            session["is_admin"] = bool(user["is_admin"])
-            session["email_verified"] = True
+        user_id = user["id"]
 
-            registrar_evento(user["id"], "E-mail verificado com sucesso")
+        # Marca o e-mail como verificado
+        c.execute("UPDATE users SET email_verified=1 WHERE id=?", (user_id,))
+        conn.commit()
 
-            flash("✅ " + msg, "success")
-            return redirect(url_for("dashboard"))
+        registrar_evento(user_id, "Email verified via OTP (2-step)")
 
-    flash("❌ " + msg, "danger")
-    return redirect(url_for("login"))
+        flash(_("✅ Email verified successfully!"), "success")
+        return redirect(url_for("choose_package"))
 
+    # Se falhar a verificação do código
+    else:
+        flash(_("❌ Invalid or expired code."), "danger")
+        masked = mask_email(email)
+        return render_template("verify_email_step2.html", email=email, masked_email=masked)
 
+# ---------------------------
+# Utilitário para mascarar e-mail
+# ---------------------------
+def mask_email(email: str) -> str:
+    try:
+        name, domain = email.split("@")
+        return f"{name[0]}***@{domain[0]}***.{domain.split('.')[-1]}"
+    except Exception:
+        return email
+
+# ----------------------
+# 🔐 LOGIN — T-LUX
+# ----------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -1994,8 +2750,9 @@ def login():
         password = request.form.get("password", "").encode("utf-8")
         ip = request.remote_addr
 
+        # 1️⃣ Check temporary block
         if is_blocked(email, ip):
-            flash("Login bloqueado temporariamente devido a múltiplas tentativas falhadas.", "danger")
+            flash("🚫 Login temporarily blocked due to multiple failed attempts.", "danger")
             return render_template("login.html")
 
         conn = get_db()
@@ -2005,19 +2762,50 @@ def login():
 
         if not user:
             register_login_attempt(email, ip, "failed")
-            flash("Credenciais inválidas.", "danger")
+            flash("❌ Invalid credentials.", "danger")
+            # conn.close() — fechado pelo teardown
             return render_template("login.html")
 
         stored_pw = user["password_hash"]
         valid = bcrypt.checkpw(password, stored_pw.encode("utf-8"))
 
         if valid:
-            # ✅ Agora exige e-mail verificado
-            if not user["email_verified"]:
-                flash("⚠️ Verifique seu e-mail antes de acessar o painel.", "warning")
-                conn.close()
-                return render_template("login.html")
+            # ✅ Auto-verify admin
+            if email == ADMIN_EMAIL:
+                try:
+                    c.execute("UPDATE users SET email_verified=1 WHERE email=?", (email,))
+                    conn.commit()
+                except Exception as e:
+                    app.logger.warning(f"[ADMIN VERIFY] Failed: {e}")
 
+            # ⚠️ User must verify email first
+            if not user["email_verified"] and email != ADMIN_EMAIL:
+                flash("⚠️ Please verify your email before accessing your account.", "warning")
+                token = gerar_token_verificacao(user["id"])  # new token
+                verify_url = url_for("verify_email_route", token=token, _external=True)
+                create_verification_code(email, user_id=user["id"], length=8, minutes_valid=10)
+
+                # Send verification email again
+                try:
+                    html_body = render_template(
+                        "email_verificacao.html",
+                        first_name=user["first_name"],
+                        link_verificacao=verify_url
+                    )
+                    send_email(
+                        to_email=email,
+                        subject="🔐 Verify your email — T-Lux Unlock Systems",
+                        body_html=html_body
+                    )
+                    flash("📩 A new verification link and code were sent to your email.", "info")
+                except Exception as e:
+                    app.logger.error(f"[EMAIL ERROR] Re-send verification failed: {e}")
+                    flash("⚠️ Account not verified. Failed to send new email. Try again later.", "danger")
+
+                # conn.close() — fechado pelo teardown
+                return redirect(url_for("verify_email_route", token=token))
+
+            # ✅ Success: log in user
             register_login_attempt(email, ip, "success", conn=conn)
 
             session.clear()
@@ -2026,34 +2814,119 @@ def login():
             session["is_admin"] = bool(user["is_admin"])
             session["email_verified"] = True
 
-            registrar_evento(user["id"], "Acessou o painel/dashboard")
+            registrar_evento(user["id"], "User successfully logged in")
 
+            # 🧠 Admin redirect
             if session["is_admin"]:
-                flash("Login efetuado com conta privilegiada!", "success")
-                conn.close()
+                flash("👑 Logged in with privileged access!", "success")
+                # conn.close() — fechado pelo teardown
                 return redirect(url_for("dashboard"))
 
+            # 💳 Check access package
             if not has_active_access(user):
-                flash("Sua conta ainda não tem Chave de Acesso ativa.", "warning")
-                conn.close()
+                flash("⚠️ Your account doesn’t have an active Access Key yet.", "warning")
+                # conn.close() — fechado pelo teardown
                 return redirect(url_for("choose_package"))
 
-            flash("Login efetuado!", "success")
-            conn.close()
+            flash("✅ Login successful!", "success")
+            # conn.close() — fechado pelo teardown
             return redirect(url_for("dashboard"))
 
+        # ❌ Wrong password
         register_login_attempt(email, ip, "failed", conn=conn)
         if failed_attempts(email, ip) >= MAX_FAILED_ATTEMPTS:
             block_user(email, ip)
-            flash(f"Muitas tentativas falhadas. Login bloqueado por {BLOCK_TIME_MINUTES} minutos.", "danger")
+            flash(f"🚫 Too many failed attempts. Login blocked for {BLOCK_TIME_MINUTES} minutes.", "danger")
         else:
-            flash("Credenciais inválidas.", "danger")
+            flash("❌ Invalid email or password.", "danger")
 
-        conn.close()
+        # conn.close() — fechado pelo teardown
 
     return render_template("login.html")
 
+# ----------------------
+# 🔁 RESEND VERIFICATION (link + OTP)
+# ----------------------
+@app.route("/resend_verification_code", methods=["GET", "POST"])
+def resend_verification_code_route():
+    """Reenvia o link e o código de verificação (token + OTP)."""
+    token = "none"  # garante valor padrão em caso de erro
+    email = request.form.get("email", "").strip().lower() if request.method == "POST" else request.args.get("email", "").strip().lower()
 
+    if not email:
+        flash(_("Please enter your email address."), "warning")
+        return redirect(url_for("verify_email_route", token="none"))
+
+    conn = None
+    try:
+        conn = get_db()
+        c = conn.cursor()
+        c.execute("SELECT id, first_name, email_verified FROM users WHERE email=?", (email,))
+        user = c.fetchone()
+
+        if not user:
+            flash(_("No account found with that email."), "danger")
+            return redirect(url_for("verify_email_route", token="none"))
+
+        if user["email_verified"]:
+            flash(_("Your email is already verified. You can log in directly."), "info")
+            return redirect(url_for("login"))
+
+        user_id = user["id"]
+
+        # 🔹 Invalida códigos antigos antes de gerar novos
+        c.execute("UPDATE verification_codes SET used=1 WHERE email=? AND used=0", (email,))
+        conn.commit()
+
+        # 🔹 Gera novo token de link
+        token = gerar_token_verificacao(user_id)
+        verify_link = url_for("verify_email_route", token=token, _external=True)
+
+        # 🔹 Gera novo código numérico (OTP)
+        create_verification_code(email, user_id=user_id, length=8, minutes_valid=10)
+
+        # 🔹 Monta o corpo do e-mail
+        html_body = render_template(
+            "email_verificacao.html",
+            first_name=user["first_name"],
+            link_verificacao=verify_link
+        )
+
+        text_body = (
+            f"Hello {user['first_name']},\n\n"
+            f"A new verification link and code were generated for your T-Lux account.\n\n"
+            f"Link: {verify_link}\n\n"
+            f"This link and code expire in 10 minutes.\n\n"
+            f"— T-Lux Unlock Systems"
+        )
+
+        # 🔹 Envia o e-mail
+        send_email(
+            to_email=email,
+            subject="🔁 New Verification Code — T-Lux Unlock Systems",
+            body_text=text_body,
+            body_html=html_body
+        )
+
+        flash(_("📩 A new verification link and code were sent to your email."), "info")
+        registrar_evento(user_id, "Resent email verification code")
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        app.logger.error(f"[EMAIL ERROR][Resend] {e}")
+        flash(_("⚠️ Failed to send a new verification email. Try again later."), "danger")
+
+    finally:
+        if conn:
+            # o teardown já fecha automaticamente
+            pass
+
+    return redirect(url_for("verify_email_route", token=token))
+
+#-----------------------------------
+# logou route
+#-----------------------------------
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
     user_id = session.get("user_id")
@@ -2074,91 +2947,71 @@ def logout():
     # redireciona para login
     return redirect(url_for("login"))
 
-
-@app.route("/resend_verification", methods=["GET", "POST"])
-def resend_verification():
-    if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
-
-        if not email:
-            flash("Informe o seu e-mail.", "warning")
-            return redirect(url_for("resend_verification"))
-
-        conn = get_db()
-        c = conn.cursor()
-        c.execute("SELECT id, first_name, email_verified FROM users WHERE email=?", (email,))
-        user = c.fetchone()
-
-        if not user:
-            conn.close()
-            flash("E-mail não encontrado.", "danger")
-            return redirect(url_for("resend_verification"))
-
-        if user["email_verified"]:
-            conn.close()
-            flash("Este e-mail já foi verificado. Faça login normalmente.", "info")
-            return redirect(url_for("login"))
-
-        # 🔑 Gera novo token e link
-        token = gerar_token_verificacao(user["id"])
-        link_verificacao = url_for("verify_email_route", token=token, _external=True)
-
-        # 📩 Conteúdo do e-mail
-        body_text = f"""..."""
-        body_html = f"""..."""
-
-        try:
-            send_email(email, "Reenvio de Verificação - T-Lux", body_text, body_html)
-            flash("Novo e-mail de verificação enviado! Verifique sua caixa de entrada.", "success")
-        except Exception as e:
-            flash("Erro ao enviar o e-mail de verificação. Tente novamente mais tarde.", "danger")
-
-        conn.close()
-        return redirect(url_for("login"))
-
-    # GET → mostra formulário simples
-    return render_template("resend_verification.html")
-
+# ----------------------
+# 📩 CHECK EMAIL PAGE — After Registration
+# ----------------------
 @app.route("/check_email")
 def check_email():
-    # se não tiver sessão, volta pro login
-    if not session.get("user_id"):
-        flash("Faça login primeiro.", "warning")
+    """
+    Informs the user that a verification email has been sent,
+    showing options to resend it if needed.
+    """
+    # 1️⃣ Security: ensure there is a valid session
+    if not session.get("user_id") or not session.get("email"):
+        flash("Please log in first.", "warning")
         return redirect(url_for("login"))
 
-    return render_template("check_email.html", email=session.get("email"))
+    email = session.get("email")
+
+    # 2️⃣ Optional: check if already verified
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT email_verified FROM users WHERE email=?", (email,))
+    user = c.fetchone()
+    # conn.close() — fechado pelo teardown
+
+    if user and user["email_verified"]:
+        flash("✅ Your email is already verified. You can now log in.", "success")
+        return redirect(url_for("login"))
+
+    # 3️⃣ Render info page
+    return render_template("check_email.html", email=email)
 
 # -----------------------
 # Verifica se usuário tem licença ativa
 # -----------------------
 def has_active_access(user):
-    """Verifica se o usuário possui uma licença ativa e não expirada."""
+    """
+    Verifica se o usuário tem uma licença ativa / acesso ativo.
+    """
     if not user:
         return False
-    key = user.get("access_key")
-    exp = user.get("access_expiry")
-    if not key or not exp:
-        return False
+
     try:
-        return datetime.strptime(exp, "%Y-%m-%d %H:%M:%S") > datetime.now()
-    except Exception:
+        exp = user["access_expiry"]  # <-- CORRIGIDO
+        if not exp:
+            return False
+
+        if isinstance(exp, str):
+            exp = datetime.fromisoformat(exp)
+
+        return exp > datetime.now()
+    except Exception as e:
+        app.logger.error(f"[ACCESS_CHECK_ERROR] {e}")
         return False
 
-
+#----------------------
+# Dashboard
+#----------------------
 @app.route("/dashboard")
 @login_required
 def dashboard():
     user = current_user()
 
-    # 1️⃣ Verifica se usuário possui licença ativa
     if not has_active_access(user):
         flash("Sua licença expirou ou não está ativa. Escolha um pacote para continuar.", "warning")
         return redirect(url_for("choose_package"))
 
-    # 2️⃣ Registrar log de acesso ao dashboard
-    registrar_evento(user["id"], "Acessou o painel/dashboard")
-
-    # 3️⃣ Buscar dados no banco
     conn = get_db()
     c = conn.cursor()
 
@@ -2177,17 +3030,14 @@ def dashboard():
     except Exception:
         desbloqueios = []
 
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
-    # Saldo do usuário
+    # ✅ Registra o evento após fechar o banco principal
+    registrar_evento(user["id"], "Acessou o painel/dashboard")
+
     saldo = user.get("saldo", 0)
+    licenca_ativa = bool(user.get("access_expiry") and user["access_expiry"] > now_str())
 
-    # Flag de licença ativa
-    licenca_ativa = False
-    if user.get("access_expiry") and user["access_expiry"] > now_str():
-        licenca_ativa = True
-
-    # Renderiza template
     return render_template(
         "dashboard.html",
         user=user,
@@ -2195,75 +3045,68 @@ def dashboard():
         desbloqueios=desbloqueios,
         transacoes=transacoes,
         licenses=licenses,
-        modelos=MODELOS_IPHONE_USD_SINAL,  # 🔧 uso consistente
+        modelos=MODELOS_IPHONE_USD_SINAL,
         licenca_ativa=licenca_ativa
     )
 
-
-@app.route("/todos_modelos")
-@login_required
-def todos_modelos():
-    user = current_user()
-    if not has_active_access(user):
-        flash("Ative sua conta adquirindo um pacote.", "warning")
-        return redirect(url_for("choose_package"))
-
-    # Renderiza template com dicionário de modelos USD
-    return render_template(
-        "todos_modelos.html",
-        user=user,
-        modelos=MODELOS_IPHONE_USD
-    )
-
-
 # -----------------------
-# Fluxo de Pacote (Chave de Acesso primeiro)
+# Fluxo de Pacotes / Chaves de Acesso (Planos T-Lux)
 # -----------------------
 
 @app.route("/choose-package")
 @login_required
 def choose_package():
-    """Tela para escolher e pagar o PACOTE (primeiro pagamento)"""
+    """
+    Exibe os pacotes de acesso disponíveis (Starter, Bronze, Silver, Gold, Premium)
+    para o usuário ativar a conta.
+    """
     user = current_user()
+
     return render_template(
         "choose_package.html",
         user=user,
-        pacotes=PACOTES_USD,
+        pacotes=PACOTES,  # lista de dicionários
         publishable_key=os.getenv("STRIPE_PUBLISHABLE_KEY")
     )
 
+# ---------------------------
+# Fluxo pagamento de pacotes
+# ---------------------------
 @app.route("/pagar_pacote", methods=["POST"])
 @login_required
 def pagar_pacote():
     """
-    Cria pagamento de um pacote (em USD).
-    A licença é emitida posteriormente via webhook Stripe.
+    Inicia o pagamento Stripe de um pacote de licença (em USD).
+    A ativação é confirmada automaticamente via webhook Stripe.
     """
     user = current_user()
-    pacote = request.form.get("pacote", "").strip()
+    pacote_nome = request.form.get("pacote", "").strip()
 
-    if not pacote or pacote not in PACOTES_USD:
-        flash("Pacote inválido.", "danger")
-        app.logger.warning(f"Tentativa de pacote inválido: {pacote}")
+    # 🔒 Procurar o pacote pelo nome
+    pacote = next((p for p in PACOTES if p["nome"] == pacote_nome), None)
+    if not pacote:
+        flash("❌ Invalid package selection.", "danger")
+        app.logger.warning(f"Tentativa de pacote inválido: {pacote_nome}")
         return redirect(url_for("choose_package"))
 
-    amount_usd = PACOTES_USD[pacote]["price"]
+    # 💵 Valor em dólares
+    amount_usd = float(pacote["preco_usd"])
 
-    # Referência única da transação
+    # 🔹 Referência única da transação
     tx_ref = f"TLUXPKG-{user['id']}-{secrets.token_hex(6)}-{int(datetime.now().timestamp())}"
 
-    # URLs de retorno
+    # 🔹 URLs de retorno
     success_url = url_for("dashboard", _external=True) + "?success=1"
     cancel_url = url_for("choose_package", _external=True) + "?canceled=1"
 
     try:
-        # 🔹 Criar sessão Stripe Checkout
+        # ✅ Criar sessão Stripe Checkout
         session_stripe = stripe.checkout.Session.create(
             payment_method_types=["card"],
             line_items=[{
                 "price_data": {
                     "currency": "usd",
-                    "product_data": {"name": f"T-Lux — {pacote}"},
+                    "product_data": {"name": f"T-Lux — {pacote['nome']}"},
                     "unit_amount": int(amount_usd * 100),  # Stripe usa centavos
                 },
                 "quantity": 1,
@@ -2274,12 +3117,13 @@ def pagar_pacote():
             cancel_url=cancel_url,
             metadata={
                 "user_id": user["id"],
-                "pacote": pacote,
+                "pacote": pacote["nome"],
+                "dias": pacote["dias"],
                 "tx_ref": tx_ref
             }
         )
 
-        # 🔹 Registrar transação no banco
+        # 💾 Registrar transação no banco
         conn = get_db()
         c = conn.cursor()
         c.execute("""
@@ -2287,22 +3131,21 @@ def pagar_pacote():
             (user_id, purpose, pacote, modelo, amount, tx_ref, status, stripe_id, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            user["id"], "package", pacote, None, amount_usd,
+            user["id"], "package", pacote["nome"], None, amount_usd,
             tx_ref, "pending", session_stripe.id, now_str()
         ))
         conn.commit()
-        conn.close()
+        # conn.close() — fechado pelo teardown
 
-        print(f"✅ Sessão Stripe criada: {session_stripe.id}")
-        print(f"🔗 Link de checkout: {session_stripe.url}")
+        print(f"✅ Stripe session created: {session_stripe.id}")
+        print(f"🔗 Checkout link: {session_stripe.url}")
 
         return redirect(session_stripe.url, code=303)
 
     except Exception as e:
         app.logger.error(f"[ERRO STRIPE - PACOTE] {e}")
-        flash("Não foi possível iniciar o pagamento no momento. Tente novamente em instantes.", "danger")
+        flash("⚠️ Unable to start payment at the moment. Please try again shortly.", "danger")
         return redirect(url_for("choose_package"))
-
 # -----------------------
 # Detectar modelo a partir da serial/IMEI (simplificado)
 # -----------------------
@@ -2443,11 +3286,11 @@ def token_required(f):
         if not token:
             return jsonify({"error": "Token ausente"}), 401
 
-        conn = sqlite3.connect("t-lux.db")
+        conn = get_db()
         c = conn.cursor()
         c.execute("SELECT expires_at FROM tokens WHERE token = ?", (token,))
         result = c.fetchone()
-        conn.close()
+        # conn.close() — fechado pelo teardown
 
         if not result:
             return jsonify({"error": "Token inválido"}), 401
@@ -2485,7 +3328,6 @@ def consulta_imei(numero):
         app.logger.error(f"Erro ao consultar IMEI.info: {e}")
         return None
 
-
 # -----------------------
 # Verificação de Serial / Envio para iRemoval
 # -----------------------
@@ -2506,6 +3348,9 @@ def verificar_serial():
         flash("Ative sua conta adquirindo um pacote.", "warning")
         return redirect(url_for("choose_package"))
 
+    # 🧠 Dicionário unificado (Signal + No-Signal)
+    MODELOS_IPHONE = {**MODELOS_IPHONE_USD_SINAL, **MODELOS_IPHONE_USD_NO_SIGNAL}
+
     if request.method == "POST":
         modelo = request.form.get("modelo", "").strip()
         serial = request.form.get("serial", "").strip().upper()  # normalizado
@@ -2514,8 +3359,9 @@ def verificar_serial():
             flash("Escolha um modelo e digite a serial/IMEI.", "danger")
             return redirect(url_for("verificar_serial"))
 
-        preco_cliente = MODELOS_IPHONE_USD.get(modelo)
-        preco_fornecedor = PRECO_IREMOVAL_USD.get(modelo, 0.0)  # com fallback
+        # 💰 Busca preços
+        preco_cliente = MODELOS_IPHONE.get(modelo)
+        preco_fornecedor = PRECO_IREMOVAL_USD.get(modelo, 0.0)
 
         if not preco_cliente:
             flash(f"Modelo {modelo} não está disponível para desbloqueio.", "warning")
@@ -2537,10 +3383,11 @@ def verificar_serial():
 
     # GET → renderiza formulário inicial
     return render_template(
-        "verificar_serial.html",
-        user=user,
-        modelos=MODELOS_IPHONE_USD.keys
-    )
+    "verificar_serial.html",
+    user=user,
+    MODELOS_IPHONE_USD_SINAL=MODELOS_IPHONE_USD_SINAL,
+    MODELOS_IPHONE_SEM_SINAL_USD=MODELOS_IPHONE_SEM_SINAL_USD
+)
 
 #-----------------------
 # Pagar Desbloqueio
@@ -2616,7 +3463,7 @@ def pagar_desbloqueio():
             tx_ref, "pending", session_stripe.id, now_str()
         ))
         conn.commit()
-        conn.close()
+        # conn.close() — fechado pelo teardown
 
         print(f"✅ Sessão Stripe criada: {session_stripe.id}")
         print(f"🔗 Link de checkout: {session_stripe.url}")
@@ -2637,9 +3484,9 @@ def payment_success():
     # Este endpoint é apenas informativo: a confirmação real vem pelo webhook
     flash("Pagamento realizado. Aguarde confirmação (pode demorar alguns segundos).", "success")
     return redirect(url_for("dashboard"))
-
+    
 # -----------------------
-# Webhook do Stripe (seguro)
+# Webhook do Stripe (seguro e automatizado)
 # -----------------------
 from flask import Response, abort
 
@@ -2649,32 +3496,32 @@ def stripe_webhook():
     sig_header = request.headers.get("Stripe-Signature")
 
     try:
-        # 🔒 Verificação de assinatura do Stripe
+        # 🔒 Verificação de assinatura Stripe
         event = stripe.Webhook.construct_event(
             payload, sig_header, STRIPE_WEBHOOK_SECRET
         )
     except ValueError:
-        app.logger.error("[WEBHOOK] Payload inválido recebido")
+        app.logger.error("[WEBHOOK] ❌ Payload inválido recebido")
         return abort(400)
     except stripe.error.SignatureVerificationError:
-        app.logger.error("[WEBHOOK] Assinatura Stripe inválida")
+        app.logger.error("[WEBHOOK] 🚫 Assinatura Stripe inválida")
         return abort(400)
     except Exception as e:
-        app.logger.error(f"[WEBHOOK] Erro inesperado na verificação: {e}")
+        app.logger.error(f"[WEBHOOK] ⚠️ Erro inesperado na verificação: {e}")
         return abort(400)
 
-    # Processar apenas "checkout.session.completed"
+    # 🎯 Processa apenas evento de pagamento concluído
     if event["type"] == "checkout.session.completed":
         session_obj = event["data"]["object"]
 
-        # Recuperar tx_ref da sessão
+        # Recupera referência única
         tx_ref = (
             session_obj.get("metadata", {}).get("tx_ref")
             or session_obj.get("client_reference_id")
         )
 
         if not tx_ref:
-            app.logger.error("[WEBHOOK] Sessão Stripe recebida sem tx_ref")
+            app.logger.error("[WEBHOOK] Sessão Stripe sem tx_ref detectada")
             return abort(400)
 
         conn = get_db()
@@ -2687,7 +3534,7 @@ def stripe_webhook():
                 app.logger.error(f"[WEBHOOK] Transação não encontrada (tx_ref={tx_ref})")
                 return abort(404)
 
-            # Atualizar transação como concluída
+            # ✅ Atualiza status da transação
             c.execute("""
                 UPDATE transactions
                 SET status=?, stripe_id=?, updated_at=?
@@ -2697,14 +3544,46 @@ def stripe_webhook():
 
             purpose = (tx["purpose"] or "").lower()
 
+            # --------------------------
+            # 🟢 Ativação de Pacote (Licença)
+            # --------------------------
             if purpose == "package":
-                # Emite licença
-                try:
-                    _issue_license_from_tx(tx["id"])
-                    app.logger.info(f"[WEBHOOK] Licença emitida (tx_ref={tx_ref})")
-                except Exception as e:
-                    app.logger.error(f"[WEBHOOK] Erro ao emitir licença (tx_ref={tx_ref}) → {e}")
+                pacote_nome = tx["pacote"]
+                pacote = next((p for p in PACOTES if p["nome"] == pacote_nome), None)
 
+                if not pacote:
+                    app.logger.warning(f"[WEBHOOK] Pacote '{pacote_nome}' não encontrado na lista.")
+                else:
+                    dias = pacote["dias"]
+
+                    try:
+                        # Calcula validade
+                        data_inicio = datetime.now()
+                        data_expira = (
+                            data_inicio + timedelta(days=dias)
+                            if dias < 9999 else None  # permanente
+                        )
+
+                        # Atualiza acesso do usuário
+                        c.execute("""
+                            UPDATE users
+                            SET access_key=?, access_expiry=?
+                            WHERE id=?
+                        """, (
+                            f"KEY-{secrets.token_hex(12)}",
+                            data_expira.isoformat() if data_expira else None,
+                            tx["user_id"]
+                        ))
+                        conn.commit()
+
+                        app.logger.info(f"[WEBHOOK] ✅ Licença '{pacote_nome}' ativada por {dias} dias (tx_ref={tx_ref})")
+
+                    except Exception as e:
+                        app.logger.error(f"[WEBHOOK] Erro ao emitir licença (tx_ref={tx_ref}) → {e}")
+
+            # --------------------------
+            # 🔓 Pedido de desbloqueio automático
+            # --------------------------
             elif purpose == "unlock":
                 try:
                     c.execute("SELECT email FROM users WHERE id=?", (tx["user_id"],))
@@ -2713,153 +3592,63 @@ def stripe_webhook():
 
                     ok = _submit_unlock_order(user_email, tx["modelo"], tx["id"])
                     if ok:
-                        app.logger.info(f"[WEBHOOK] Pedido de desbloqueio submetido (tx_ref={tx_ref})")
+                        app.logger.info(f"[WEBHOOK] 🔓 Pedido de desbloqueio submetido (tx_ref={tx_ref})")
                     else:
-                        app.logger.error(f"[WEBHOOK] Falha ao submeter desbloqueio (tx_ref={tx_ref})")
+                        app.logger.warning(f"[WEBHOOK] Falha ao submeter desbloqueio (tx_ref={tx_ref})")
                 except Exception as e:
                     app.logger.error(f"[WEBHOOK] Erro ao processar desbloqueio (tx_ref={tx_ref}) → {e}")
 
             else:
-                app.logger.warning(f"[WEBHOOK] Propósito desconhecido na transação (tx_ref={tx_ref})")
+                app.logger.warning(f"[WEBHOOK] Propósito desconhecido: {purpose} (tx_ref={tx_ref})")
 
         except Exception as e:
-            app.logger.error(f"[WEBHOOK] Falha ao processar transação (tx_ref={tx_ref}) → {e}")
+            app.logger.error(f"[WEBHOOK] Falha geral ao processar tx_ref={tx_ref} → {e}")
             return abort(500)
         finally:
-            conn.close()
+            try:
+                # conn.close() — fechado pelo teardown automaticamente
+                pass
+            except Exception:
+                pass
 
     return Response(status=200)
 
-# -----------------------
-# Funções auxiliares / banco de dados
-# -----------------------
-
-def get_db():
-    """Retorna uma conexão com o banco de dados SQLite"""
-    conn = sqlite3.connect("t-lux.db")
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
-def registrar_evento(user_id, mensagem):
-    """Registra logs genéricos de auditoria"""
-    try:
-        conn = get_db()
-        c = conn.cursor()
-        c.execute(
-            "INSERT INTO logs_eventos (user_id, mensagem, created_at) VALUES (?, ?, ?)",
-            (user_id, mensagem, now_str())
-        )
-        conn.commit()
-        conn.close()
-        app.logger.info(f"[AUDITORIA] {mensagem} (user_id={user_id})")
-    except Exception as e:
-        app.logger.error(f"[AUDITORIA] Falha ao registrar evento: {e}")
-
-
-def now_str():
-    """Retorna a data e hora atual como string"""
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-
-# 🔹 Função auxiliar: obter dados de uma transação pelo tx_ref
-def obter_transacao(tx_ref):
-    """
-    Busca os dados de uma transação pelo tx_ref no banco de dados.
-    Retorna um dicionário com todos os detalhes necessários.
-    """
-    conn = get_db()
-    c = conn.cursor()
-    c.execute("""
-        SELECT id, user_id, imei, modelo, amount, preco_fornecedor, lucro, status, order_id, created_at, updated_at
-        FROM transactions
-        WHERE tx_ref=?
-    """, (tx_ref,))
-    row = c.fetchone()
-    conn.close()
-
-    if not row:
-        return None
-
-    return {
-        "id": row["id"],
-        "user_id": row["user_id"],
-        "imei": row["imei"],
-        "modelo": row["modelo"],
-        "preco_cliente": row["amount"],
-        "preco_fornecedor": row["preco_fornecedor"],
-        "lucro": row["lucro"],
-        "status": row["status"],
-        "order_id": row["order_id"],
-        "created_at": row["created_at"],
-        "updated_at": row["updated_at"],
-    }
-
-
-# 🔹 Função auxiliar: enviar dados para o iRemoval
-def enviar_para_iremoval(serial, modelo, preco_fornecedor):
-    """
-    Simulação de envio para a API do iRemoval.
-    Aqui você colocaria a integração real.
-    """
-    # Exemplo fictício de resposta
-    return {"status": "ok", "msg": f"{modelo} com serial {serial} desbloqueado!"}
-
-
-# 🔹 Função auxiliar: emitir licença a partir de uma transação
-def _issue_license_from_tx(tx_id: int):
-    """Ativa a licença do usuário com base no pacote comprado"""
+@app.route("/receipt_package/<tx_ref>")
+@login_required
+def receipt_package(tx_ref):
+    """Exibe o recibo de pagamento do pacote de acesso."""
+    user = current_user()
     conn = get_db()
     c = conn.cursor()
 
-    c.execute("SELECT * FROM transactions WHERE id=?", (tx_id,))
+    c.execute("SELECT * FROM transactions WHERE tx_ref=?", (tx_ref,))
     tx = c.fetchone()
+
     if not tx:
-        conn.close()
-        app.logger.error(f"Licença: transação não encontrada (tx_id={tx_id})")
-        return
+        flash("Receipt not found.", "warning")
+        return redirect(url_for("dashboard"))
 
-    pacote = tx["pacote"]
-    user_id = tx["user_id"]
+    dias = 0
+    if tx["pacote"]:
+        pacote = next((p for p in PACOTES if p["nome"] == tx["pacote"]), None)
+        if pacote:
+            dias = pacote["dias"]
 
-    # Verifica se o pacote existe
-    if not pacote or pacote not in PACOTES_USD:
-        app.logger.error(f"Licença: pacote inválido na transação {tx_id}")
-        conn.close()
-        return
+    # Busca chave de acesso atual
+    c.execute("SELECT access_key FROM users WHERE id=?", (user["id"],))
+    user_key = c.fetchone()
 
-    dias = PACOTES_USD[pacote]["duration_days"]
-
-    # Recupera expiração atual
-    c.execute("SELECT access_expiry FROM users WHERE id=?", (user_id,))
-    row = c.fetchone()
-    hoje = datetime.now()
-
-    if row and row["access_expiry"]:
-        try:
-            atual_expiry = datetime.fromisoformat(row["access_expiry"])
-        except Exception:
-            atual_expiry = hoje
-    else:
-        atual_expiry = hoje
-
-    # Nova expiração
-    nova_expiry = max(atual_expiry, hoje) + timedelta(days=dias)
-
-    # Gerar access_key simples (pode ser melhorado depois)
-    new_key = secrets.token_hex(16)
-
-    # Atualiza usuário
-    c.execute("""
-        UPDATE users 
-        SET access_expiry=?, access_key=?, updated_at=?
-        WHERE id=?
-    """, (nova_expiry.strftime("%Y-%m-%d %H:%M:%S"), new_key, now_str(), user_id))
-    conn.commit()
-    conn.close()
-
-    app.logger.info(
-        f"Licença emitida: user {user_id}, pacote {pacote}, expira em {nova_expiry}, key={new_key}"
+    return render_template(
+        "receipt_package.html",
+        user=user,
+        tx_ref=tx_ref,
+        pacote_nome=tx["pacote"],
+        dias=dias,
+        preco_cliente=tx["preco_cliente"],
+        currency=tx["currency"],
+        access_key=user_key["access_key"] if user_key else None,
+        payment_date=tx["created_at"],
+        now=datetime.now()
     )
 
 # -----------------------
@@ -2892,7 +3681,7 @@ def obter_tecnico():
                 (user['email'], "Solicitação de Acesso Técnico")
             )
             conn.commit()
-            conn.close()
+            # conn.close() — fechado pelo teardown
         except Exception as e:
             app.logger.error(f"Erro ao salvar solicitação técnica: {e}")
 
@@ -2943,7 +3732,7 @@ def painel_tech_requests():
     # Busca todas as solicitações
     c.execute("SELECT * FROM tech_requests ORDER BY criado_em DESC")
     requests_list = c.fetchall()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     return render_template("painel_tech_requests.html", requests=requests_list, user=user)
 
@@ -2983,7 +3772,7 @@ def admin():
     transactions = c.fetchall()
     c.execute("SELECT * FROM licenses ORDER BY issued_at DESC")
     licenses = c.fetchall()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     return render_template("admin.html", users=users, transactions=transactions, licenses=licenses)
 
@@ -2999,14 +3788,14 @@ def admin_tx_approve(tx_id):
     c.execute("UPDATE transactions SET status=?, updated_at=? WHERE id=?",
               ("successful", now_str(), tx_id))
     conn.commit()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     # Se for pacote, emite licença; se for desbloqueio, apenas loga
     conn = get_db()
     c = conn.cursor()
     c.execute("SELECT * FROM transactions WHERE id=?", (tx_id,))
     tx = c.fetchone()
-    conn.close()
+    # conn.close() — fechado pelo teardown
     if tx and (tx["purpose"] or "").lower() == "package":
         _issue_license_from_tx(tx_id)
         flash("Transação (pacote) aprovada e licença emitida.", "success")
@@ -3026,7 +3815,7 @@ def admin_tx_fail(tx_id):
     c.execute("UPDATE transactions SET status=?, updated_at=? WHERE id=?",
               ("failed", now_str(), tx_id))
     conn.commit()
-    conn.close()
+    # conn.close() — fechado pelo teardown
     flash("Transação marcada como falhada.", "warning")
     return redirect(url_for("admin"))
 
@@ -3042,7 +3831,7 @@ def admin_license_revoke(lic_id):
     c.execute("SELECT user_id, license_key FROM licenses WHERE id=?", (lic_id,))
     row = c.fetchone()
     if not row:
-        conn.close()
+        # conn.close() — fechado pelo teardown
         flash("Licença não encontrada.", "danger")
         return redirect(url_for("admin"))
     user_id = row["user_id"]
@@ -3050,7 +3839,7 @@ def admin_license_revoke(lic_id):
     c.execute("DELETE FROM licenses WHERE id=?", (lic_id,))
     c.execute("UPDATE users SET access_key=NULL, access_expiry=NULL WHERE id=? AND access_key=?", (user_id, lic_key))
     conn.commit()
-    conn.close()
+    # conn.close() — fechado pelo teardown
     flash("Licença revogada.", "info")
     return redirect(url_for("admin"))
 
@@ -3069,7 +3858,7 @@ def admin_logs():
     c = conn.cursor()
     c.execute("SELECT * FROM logs ORDER BY created_at DESC LIMIT 100")
     logs = c.fetchall()
-    conn.close()
+    # conn.close() — fechado pelo teardown
     return render_template("admin_logs.html", logs=logs)
 
 @app.route("/admin/overview")
@@ -3096,7 +3885,7 @@ def admin_overview():
     total_licenses = c.fetchone()["total_licenses"]
     c.execute("SELECT COUNT(*) as expired_licenses FROM licenses WHERE expires_at < ?", (now_str(),))
     expired_licenses = c.fetchone()["expired_licenses"]
-    conn.close()
+    # conn.close() — fechado pelo teardown
     
     overview = {
         "total_users": total_users,
@@ -3142,7 +3931,7 @@ def admin_transactions():
         ORDER BY t.created_at DESC
     """)
     rows = c.fetchall()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     return render_template("admin_transactions.html", transactions=rows)
 
@@ -3164,7 +3953,7 @@ def painel_unlocks():
         (user_id,)
     )
     rows = c.fetchall()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     desbloqueios = []
     for tx in rows:
@@ -3204,7 +3993,7 @@ def painel_unlocks_status():
             (user_id,)
         )
         rows = c.fetchall()
-        conn.close()
+        # conn.close() — fechado pelo teardown
     except Exception as e:
         log("ERROR", f"Erro ao buscar desbloqueios do usuário {user_id}: {e}")
         return {"desbloqueios": []}, 500
@@ -3238,6 +4027,26 @@ def painel_unlocks_status():
         })
 
     return {"desbloqueios": desbloqueios}
+    
+# -----------------------------
+# 🔍 Função para obter transação pelo tx_ref
+# -----------------------------
+def obter_transacao(tx_ref: str):
+    """
+    Retorna os detalhes de uma transação a partir do tx_ref.
+    Usado no painel e no processamento do desbloqueio.
+    """
+    try:
+        conn = get_db()
+        c = conn.cursor()
+        c.execute("""
+            SELECT * FROM transactions WHERE tx_ref = ?
+        """, (tx_ref,))
+        row = c.fetchone()
+        return dict(row) if row else None
+    except Exception as e:
+        app.logger.error(f"[DB] Erro ao buscar transação {tx_ref}: {e}")
+        return None
 
 # -----------------------
 # Processar unlock após pagamento
@@ -3259,7 +4068,7 @@ def process_unlock(tx_ref):
         flash("Transação não encontrada.", "danger")
         return redirect(url_for("painel_unlocks"))
 
-    imei = unlock_info["serial"]  # no DB o campo é "imei"
+    imei = unlock_info.get("serial") or unlock_info.get("imei")
     modelo = unlock_info["modelo"]
     preco_fornecedor = unlock_info.get("preco_fornecedor", 0.0)
     lucro = unlock_info.get("lucro", 0.0)
@@ -3288,7 +4097,7 @@ def process_unlock(tx_ref):
         WHERE tx_ref=?
     """, (order_id, status, now_str(), tx_ref))
     conn.commit()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     return render_template(
         "resultado_desbloqueio.html",
@@ -3356,7 +4165,11 @@ def status_unlock(tx_ref):
         app.logger.error(f"[UNLOCK STATUS] Erro ao atualizar transação no BD (tx_ref={tx_ref}) → {e}")
         flash("Erro interno ao atualizar status no banco.", "danger")
     finally:
-        conn.close()
+        try:
+            # conn.close() — fechado automaticamente pelo teardown
+            pass
+        except Exception:
+            pass
 
     # 🔹 Renderizar resultado
     return render_template(
@@ -3393,7 +4206,7 @@ def painel_unlocks_status_v2():
         ORDER BY created_at DESC
     """, (user["id"],))
     rows = c.fetchall()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     desbloqueios = []
     for row in rows:
@@ -3486,7 +4299,7 @@ def admin_unlocks():
     """)
     historico = [dict(r) for r in c.fetchall()]
 
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     return render_template(
         "admin_unlocks.html",
@@ -3521,7 +4334,7 @@ def admin_unlocks_status():
         ORDER BY t.created_at DESC
     """)
     rows = c.fetchall()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     desbloqueios = []
     for row in rows:
@@ -3568,14 +4381,14 @@ def admin_forcar_status(tx_id):
     c.execute("SELECT id, order_id, tx_ref, modelo, imei FROM transactions WHERE id=?", (tx_id,))
     row = c.fetchone()
     if not row:
-        conn.close()
+        # conn.close() — fechado pelo teardown
         flash("Transação não encontrada.", "danger")
         return redirect(url_for("admin_unlocks"))
 
     order_id = row["order_id"]
 
     if not order_id:
-        conn.close()
+        # conn.close() — fechado pelo teardown
         flash("Order ID não encontrado. Verifique se o processamento (/process_unlock) já foi executado.", "warning")
         return redirect(url_for("admin_unlocks"))
 
@@ -3583,7 +4396,7 @@ def admin_forcar_status(tx_id):
     try:
         result = consultar_status(order_id)
     except Exception as e:
-        conn.close()
+        # conn.close() — fechado pelo teardown
         flash(f"Erro ao contactar iRemoval: {e}", "danger")
         return redirect(url_for("admin_unlocks"))
 
@@ -3601,7 +4414,7 @@ def admin_forcar_status(tx_id):
         (new_status, now_str(), tx_id)
     )
     conn.commit()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     flash(f"Status atualizado para '{new_status}'. {message}", "info")
     return redirect(url_for("admin_unlocks"))
@@ -3689,7 +4502,7 @@ def admin_dashboard():
         """)
         ultimos_logs = c.fetchall()
 
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     return render_template(
         "admin_dashboard.html",
@@ -3734,13 +4547,13 @@ def create_checkout_session():
         if purpose == "package":
             pacote_info = PACOTES_USD.get(pacote)
             if not pacote_info:
-                conn.close()
+                # conn.close() — fechado pelo teardown
                 return jsonify({"error": "Pacote inválido"}), 400
             amount = int(pacote_info["price"] * 100)  # Stripe espera em centavos
             description = f"Pacote {pacote}"
         else:  # desbloqueio
             if not modelo:
-                conn.close()
+                # conn.close() — fechado pelo teardown
                 return jsonify({"error": "Modelo obrigatório para unlock"}), 400
             preco_unlock = UNLOCK_PRECOS.get(modelo, 99.99)  # fallback
             amount = int(preco_unlock * 100)
@@ -3756,7 +4569,7 @@ def create_checkout_session():
         """, (tx_ref, user_id, pacote, modelo, amount/100, "pending", purpose, now_str()))
         conn.commit()
         tx_id = c.lastrowid
-        conn.close()
+        # conn.close() — fechado pelo teardown
 
         # Cria sessão Stripe
         checkout_session = stripe.checkout.Session.create(
@@ -3819,7 +4632,7 @@ def services():
     c = conn.cursor()
     c.execute("SELECT * FROM services ORDER BY group_name, nome")
     servicos = c.fetchall()
-    conn.close()
+    # conn.close() — fechado pelo teardown
     return render_template("services.html", servicos=servicos)
 
 @app.route("/comprar_servico/<int:service_id>", methods=["GET", "POST"])
@@ -3832,7 +4645,7 @@ def comprar_servico(service_id):
     c = conn.cursor()
     c.execute("SELECT * FROM services WHERE id = ?", (service_id,))
     servico = c.fetchone()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     if not servico:
         flash("❌ Serviço não encontrado.", "danger")
@@ -3892,7 +4705,7 @@ def comprar_servico(service_id):
                     "PROCESSING"
                 ))
                 conn.commit()
-                conn.close()
+                # conn.close() — fechado pelo teardown
 
         except Exception as e:
             flash("⚠️ Erro ao criar pedido: " + str(e), "danger")
@@ -3909,7 +4722,7 @@ def orders():
     c = conn.cursor()
     c.execute("SELECT * FROM orders WHERE user_email = ? ORDER BY created_at DESC", (user["email"],))
     pedidos = c.fetchall()
-    conn.close()
+    # conn.close() — fechado pelo teardown
     return render_template("orders.html", pedidos=pedidos)
 
 
@@ -3927,7 +4740,7 @@ def order_status(order_ref):
         c = conn.cursor()
         c.execute("UPDATE orders SET status = ? WHERE order_ref = ?", (status, order_ref))
         conn.commit()
-        conn.close()
+        # conn.close() — fechado pelo teardown
 
         flash(f"📌 Status do pedido {order_ref}: {status}", "info")
 
@@ -3948,17 +4761,168 @@ def admin_orders():
     c = conn.cursor()
     c.execute("SELECT * FROM orders ORDER BY created_at DESC")
     pedidos = c.fetchall()
-    conn.close()
+    # conn.close() — fechado pelo teardown
 
     return render_template("admin_orders.html", pedidos=pedidos)
+
+@app.route("/pricing")
+def pricing():
+    return render_template("pricing.html")
+
+@app.route("/support")
+def support():
+    return render_template("support.html")
+    
+    
+@app.route("/admin/sync-services", methods=["POST"])
+@login_required
+def admin_sync_services():
+    if not session.get("is_admin"):
+        flash("Unauthorized", "danger")
+        return redirect(url_for("dashboard"))
+    # importa e executa script sync_services.py (ou função)
+    import sync_services
+    sync_services.main()
+    flash("Services synchronized.", "success")
+    return redirect(url_for("admin_dashboard"))
+
+import re, json, sqlite3, requests, os
+from flask import request, render_template, redirect, url_for, flash
+from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
+DB_PATH = os.getenv("DB_PATH", "t-lux.db")
+DHRU_API_URL = os.getenv("DHRU_API_URL")
+DHRU_API_KEY = os.getenv("DHRU_API_KEY")
+DHRU_USERNAME = os.getenv("DHRU_USERNAME", "T-Lux")
+
+def is_imei(s): return bool(re.fullmatch(r"\d{15}", s))
+
+def dhru_check_imei(imei):
+    """Consulta o serviço Apple GSX (ID 212) — retorna dados públicos, sem expor sensíveis"""
+    payload = {
+        "api_key": DHRU_API_KEY,
+        "username": DHRU_USERNAME,
+        "action": "place_order",
+        "service_id": "212",
+        "imei": imei
+    }
+    r = requests.post(DHRU_API_URL, data=payload, timeout=30)
+    r.raise_for_status()
+    return r.json()
+
+def classify_device(imei_or_sn, check_info=None):
+    s = imei_or_sn.strip().upper()
+    cond = {}
+    family = "Unknown"
+
+    if is_imei(s):
+        family = "iPhone_or_iPad"
+        if check_info:
+            txt = json.dumps(check_info).lower()
+            cond["fmi_on"] = "fmi on" in txt
+            cond["mdm"] = "mdm" in txt
+            cond["cellular"] = True
+    else:
+        family = "Mac_or_Watch"
+        cond["cellular"] = False
+        if s.startswith("C") or s.startswith("F"):
+            cond["chip"] = "T2"
+    return family, cond
+
+def find_rule_and_service(family, cond):
+    conn = get_db()
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM diagnosis_rules WHERE active=1 ORDER BY priority ASC")
+    rules = c.fetchall()
+
+    def match(rule):
+        try:
+            r = json.loads(rule["condition_json"])
+        except:
+            return False
+        for k, v in r.items():
+            if cond.get(k) != v:
+                return False
+        if r.get("device_family") and r["device_family"] != family:
+            return False
+        return True
+
+    chosen = next((r for r in rules if match(r)), None)
+    svc = None
+    if chosen:
+        c.execute("""
+            SELECT * FROM services WHERE provider=? AND service_id=? AND available=1
+        """, (chosen["provider"], chosen["recommended_service_id"]))
+        svc = c.fetchone()
+    # conn.close() — fechado pelo teardown
+    return chosen, svc
+
+#Diagnostico
+@app.route("/diagnose", methods=["GET", "POST"])
+def diagnose():
+    if request.method == "GET":
+        return render_template("diagnose.html")
+
+    s = request.form.get("id", "").strip()
+    if not s:
+        flash("Insira um IMEI ou Serial.", "warning")
+        return redirect(url_for("diagnose"))
+
+    check_info = None
+    if is_imei(s):
+        try:
+            check_info = dhru_check_imei(s)
+        except Exception:
+            check_info = None
+
+    family, cond = classify_device(s, check_info)
+    rule, service = find_rule_and_service(family, cond)
+
+    if not service:
+        flash("Não foi possível determinar automaticamente. Escolha manualmente.", "info")
+        return redirect(url_for("services"))
+
+    return render_template("diagnose_result.html",
+                           input_value=s,
+                           device_family=family,
+                           conditions=cond,
+                           rule=rule,
+                           service=service)
+
+from flask_babel import gettext as _
+
+@app.route("/teste_i18n")
+def teste_i18n():
+    return _("Welcome to T-Lux Unlock System")
+
+# -----------------------
+# Error Handlers
+# -----------------------
+@app.errorhandler(404)
+def not_found(e):
+    return render_template("error.html", message="The page you’re looking for was not found."), 404
+
+@app.errorhandler(500)
+def internal_error(e):
+    return render_template("error.html", message="Internal server error. Please try again later."), 500
+
+@app.route("/admin/clean_codes")
+@admin_required
+def admin_clean_codes():
+    clean_expired_codes()
+    flash("🧹 Old verification codes cleaned.", "info")
+    return redirect(url_for("admin_dashboard"))
 
 # -----------------------
 # Bootstrap
 # -----------------------
-with app.app_context():
-    init_db()
-
 if __name__ == "__main__":
     with app.app_context():
-        init_db()   # garante que todas as tabelas existem
+        init_db()
+        ensure_database_schema()  # ✅ garante estrutura do banco
     app.run(host="0.0.0.0", port=5000)
+
+

@@ -9,7 +9,7 @@ click==8.2.1
 dnspython==2.8.0
 email_validator==2.1.1
 Flask==3.0.3
-flask-babel==3.1.0
+flask-babel==4.0.0
 Flask-Cors==4.0.1
 Flask-Login==0.6.3
 Flask-Mail==0.9.1

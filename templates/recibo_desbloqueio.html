@@ -1,0 +1,86 @@
+<!-- templates/recibo_desbloqueio.html -->
+{% extends "base.html" %}
+{% block title %}✅ Recibo de Pagamento — T-Lux{% endblock %}
+
+<!-- templates/receipt_unlock.html -->
+{% extends "base.html" %}
+{% block title %}✅ Payment Receipt — T-Lux{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10 col-lg-7">
+      <div class="card card-tlux p-4 shadow-lg border-0 text-center">
+
+        <!-- Header -->
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="T-Lux Logo" height="55" class="mb-2">
+        <h3 class="gold-text fw-bold">✅ Payment Confirmed</h3>
+        <p class="text-muted mb-4">Your unlock order has been received and is now being processed.</p>
+
+        <!-- Status -->
+        <div class="alert alert-success fw-semibold mb-4 shadow-sm">
+          💳 Status: {{ status|default("Paid")|capitalize }}
+        </div>
+
+        <!-- Order Summary -->
+        <div class="table-responsive mb-4">
+          <table class="table table-striped align-middle border">
+            <tbody>
+              <tr>
+                <th class="bg-light text-start text-primary">📱 Serial / IMEI</th>
+                <td class="text-end fw-bold">{{ serial }}</td>
+              </tr>
+              <tr>
+                <th class="bg-light text-start text-primary">📲 Detected Model</th>
+                <td class="text-end fw-bold">{{ modelo }}</td>
+              </tr>
+              <tr>
+                <th class="bg-light text-start text-primary">💰 Amount Paid</th>
+                <td class="text-end text-success fw-bold">{{ preco_cliente }} {{ currency }}</td>
+              </tr>
+              <tr>
+                <th class="bg-light text-start text-primary">🧾 Transaction ID</th>
+                <td class="text-end fw-bold">{{ order_id|default("—") }}</td>
+              </tr>
+              <tr>
+                <th class="bg-light text-start text-primary">👤 Customer</th>
+                <td class="text-end">{{ user.email }}</td>
+              </tr>
+              <tr>
+                <th class="bg-light text-start text-primary">📅 Date</th>
+                <td class="text-end">{{ data|default(now().strftime('%Y-%m-%d %H:%M')) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Info -->
+        <div class="alert alert-info small text-start">
+          <strong>ℹ️ Note:</strong> Unlock processing may take a few minutes. 
+          You’ll receive an email notification once the service is completed.
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex justify-content-center gap-3 mt-4">
+          <a href="{{ url_for('orders') }}" class="btn btn-tlux fw-bold px-4">
+            📋 View My Orders
+          </a>
+          <a href="{{ url_for('dashboard') }}" class="btn btn-outline-gold fw-bold px-4">
+            🏠 Back to Dashboard
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Animation -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".alert-success").forEach(el => {
+    el.classList.add("animate__animated", "animate__fadeInDown");
+  });
+});
+</script>
+{% endblock %}

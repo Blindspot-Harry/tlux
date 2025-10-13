@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}🧠 {{ _("Resultado do Diagnóstico") }}{% endblock %}
+{% block content %}
+
+<section class="container py-5 animate__animated animate__fadeInUp">
+
+  <h2 class="fw-bold text-center mb-4 gold-text">🧠 {{ _("Resultado do Diagnóstico") }}</h2>
+
+  <div class="card card-tlux mx-auto" style="max-width:640px;">
+    <div class="card-body">
+
+      <h5 class="mb-3">📱 {{ _("Dispositivo") }}:</h5>
+      <p class="fw-semibold">{{ input_value }}</p>
+      <p class="text-muted small mb-4">
+        {{ _("Tipo detectado") }}: <strong>{{ device_family }}</strong>
+      </p>
+
+      <h5 class="mb-3">🔎 {{ _("Condições detectadas") }}:</h5>
+      <ul>
+        {% for k,v in conditions.items() %}
+          <li>{{ k }} → <strong>{{ v }}</strong></li>
+        {% endfor %}
+      </ul>
+
+      {% if service %}
+      <hr class="my-4">
+      <h5 class="mb-2">💡 {{ _("Serviço Recomendado") }}:</h5>
+      <p class="fw-semibold">{{ service['name'] }}</p>
+      <p class="text-success fw-bold">
+        💰 {{ _("Preço estimado") }}: {{ service['credit'] }} USD
+      </p>
+
+      <a href="{{ url_for('unlock_page') }}" class="btn btn-tlux mt-3 px-4">
+        {{ _("Iniciar Desbloqueio") }}
+      </a>
+      {% endif %}
+
+      {% if not service %}
+      <hr class="my-4">
+      <div class="alert alert-warning">
+        {{ _("Não foi possível determinar automaticamente. Escolha manualmente um serviço compatível.") }}
+      </div>
+      <a href="{{ url_for('services') }}" class="btn btn-outline-gold">
+        {{ _("Ver Serviços") }}
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="text-center small-muted mt-4">
+    ⚡ {{ _("Análise automática com base em IMEI/Serial e regras internas de diagnóstico.") }}
+  </div>
+
+</section>
+
+{% endblock %}

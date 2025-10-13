@@ -3,14 +3,17 @@
 {% block title %}🔓 Confirmar Desbloqueio — T-Lux{% endblock %}
 
 {% block content %}
-<div class="container my-4">
+<div class="container my-5">
   <div class="row justify-content-center">
     <div class="col-md-10 col-lg-8">
-      <div class="card card-tlux p-4 shadow-sm">
-        
+      <div class="card card-tlux p-4 shadow-lg border-0">
+
         <!-- Cabeçalho -->
-        <h3 class="gold-text mb-3 text-center">🔓 Confirmação do Pedido de Desbloqueio</h3>
-        <p class="text-muted text-center mb-4">Revise os detalhes abaixo antes de prosseguir com o pagamento.</p>
+        <div class="text-center mb-4">
+          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="T-Lux Logo" height="50" class="mb-2">
+          <h3 class="gold-text fw-bold">🔓 Confirmação do Desbloqueio</h3>
+          <p class="text-muted mb-0">Revise os detalhes abaixo antes de prosseguir com o pagamento.</p>
+        </div>
 
         <!-- Mensagens de feedback -->
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -26,62 +29,63 @@
           {% endif %}
         {% endwith %}
 
-        <!-- Resumo do desbloqueio -->
-        <div class="table-responsive mb-3">
-          <table class="table table-bordered align-middle">
+        <!-- Resumo -->
+        <div class="table-responsive mb-4">
+          <table class="table table-hover align-middle border">
             <tbody>
               <tr>
-                <th class="bg-light">📱 Serial / IMEI</th>
-                <td>{{ serial }}</td>
+                <th class="bg-light fw-semibold text-primary">📱 Serial / IMEI</th>
+                <td class="fw-bold">{{ serial }}</td>
               </tr>
               <tr>
-                <th class="bg-light">📲 Modelo Detectado</th>
-                <td>{{ modelo }}</td>
+                <th class="bg-light fw-semibold text-primary">📲 Modelo Detectado</th>
+                <td class="fw-bold">{{ modelo }}</td>
               </tr>
               <tr>
-                <th class="bg-light">💵 Preço</th>
+                <th class="bg-light fw-semibold text-primary">💰 Preço Total</th>
                 <td>
-                  <span class="fw-bold text-gold">{{ preco_cliente }} {{ currency }}</span>
+                  <span class="fw-bold text-success fs-5">{{ preco_cliente }} {{ currency }}</span><br>
                   {% if preco_fornecedor %}
-                    <br><small class="text-muted">Fornecedor: {{ preco_fornecedor }} {{ currency }}</small>
+                    <small class="text-muted">Fornecedor: {{ preco_fornecedor }} {{ currency }}</small>
                   {% endif %}
                 </td>
               </tr>
               <tr>
-                <th class="bg-light">📈 Lucro Estimado</th>
-                <td class="text-success fw-bold">
-                  {{ lucro }} {{ currency }}
+                <th class="bg-light fw-semibold text-primary">📈 Lucro Estimado</th>
+                <td>
+                  <span class="fw-bold text-gold">{{ lucro }} {{ currency }}</span>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <!-- Detalhes adicionais da API -->
+        <!-- Detalhes técnicos (API) -->
         {% if detalhes_api %}
-          <hr>
-          <h5 class="gold-text">📋 Detalhes Técnicos (API)</h5>
-          <ul class="list-group list-group-flush mb-3">
-            {% for chave, valor in detalhes_api.items() %}
-              <li class="list-group-item d-flex justify-content-between">
-                <span>{{ chave }}</span>
-                <span class="fw-bold">{{ valor }}</span>
-              </li>
-            {% endfor %}
-          </ul>
+          <div class="border rounded-3 p-3 bg-light mb-4">
+            <h6 class="fw-bold text-primary mb-2">📋 Detalhes Técnicos</h6>
+            <ul class="list-unstyled mb-0 small">
+              {% for chave, valor in detalhes_api.items() %}
+                <li class="d-flex justify-content-between py-1 border-bottom">
+                  <span>{{ chave }}</span>
+                  <span class="fw-semibold">{{ valor }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
         {% endif %}
 
-        <!-- Ações -->
-        <form method="POST" action="{{ url_for('pagar_desbloqueio') }}" class="mt-3">
+        <!-- Botões de ação -->
+        <form method="POST" action="{{ url_for('pagar_desbloqueio') }}">
           <input type="hidden" name="serial" value="{{ serial }}">
           <input type="hidden" name="modelo" value="{{ modelo }}">
-          <button type="submit" class="btn btn-brighton w-100 fw-bold">
+          <button type="submit" class="btn btn-tlux w-100 fw-bold py-2 fs-5">
             💳 Confirmar e Pagar Agora
           </button>
         </form>
 
         <div class="text-center mt-3">
-          <a href="{{ url_for('verificar_serial') }}" class="btn btn-outline-gold">
+          <a href="{{ url_for('verificar_serial') }}" class="btn btn-outline-gold px-4">
             ⬅ Voltar e Corrigir
           </a>
         </div>
@@ -90,4 +94,16 @@
     </div>
   </div>
 </div>
+
+<!-- Pequeno efeito visual -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("form");
+  form.addEventListener("submit", () => {
+    const btn = form.querySelector("button[type='submit']");
+    btn.innerHTML = "⏳ Processando pagamento...";
+    btn.disabled = true;
+  });
+});
+</script>
 {% endblock %}

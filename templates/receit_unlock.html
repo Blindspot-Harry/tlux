@@ -1,0 +1,99 @@
+<!-- templates/receipt_package.html -->
+{% extends "base.html" %}
+{% block title %}🎫 Access Receipt — T-Lux{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+      <div class="card card-tlux p-4 shadow-lg border-0">
+        
+        <!-- Header -->
+        <div class="text-center mb-4">
+          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="T-Lux Logo" height="60" class="mb-2">
+          <h3 class="gold-text fw-bold">🎫 Access Package Receipt</h3>
+          <p class="text-muted">Your T-Lux Access Plan Has Been Activated</p>
+        </div>
+
+        <hr class="my-3">
+
+        <!-- Transaction Info -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <p>
+              <strong>Customer:</strong><br>
+              {{ user.first_name }} {{ user.last_name }}<br>
+              {{ user.email }}
+            </p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <p>
+              <strong>Receipt ID:</strong> {{ tx_ref or receipt_id }}<br>
+              <strong>Date:</strong> {{ payment_date or now.strftime('%Y-%m-%d %H:%M:%S') }}<br>
+              <strong>Status:</strong> <span class="text-success fw-bold">Paid</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Access Details -->
+        <div class="table-responsive mb-4">
+          <table class="table table-bordered align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Package</th>
+                <th>Validity</th>
+                <th>Access Key</th>
+                <th>Amount</th>
+                <th>Currency</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="fw-bold text-gold">{{ pacote_nome or "Access License" }}</td>
+                <td>{{ dias or "Unlimited" }} days</td>
+                <td>{{ access_key or "—" }}</td>
+                <td class="text-success fw-bold">{{ preco_cliente or "—" }}</td>
+                <td>{{ currency or "USD" }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Notes -->
+        <div class="alert alert-info small text-start">
+          <strong>Note:</strong> This receipt confirms your access to T-Lux Unlock Platform.
+          You can now unlock devices or purchase additional services from your dashboard.
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-4">
+          <h6 class="text-muted mb-1">T-Lux — Global Unlock Platform</h6>
+          <small>
+            support@t-lux.tech | https://t-lux.tech  
+            <br>© {{ now.year }} T-Lux. All rights reserved.
+          </small>
+        </div>
+
+        <!-- Print Button -->
+        <div class="text-center mt-4">
+          <button class="btn btn-outline-gold fw-bold px-4" onclick="window.print()">
+            🖨️ Print Receipt
+          </button>
+          <a href="{{ url_for('dashboard') }}" class="btn btn-brighton fw-bold px-4 ms-2">
+            🏠 Back to Dashboard
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Animation -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const card = document.querySelector(".card-tlux");
+  if (card) card.classList.add("animate__animated", "animate__fadeInUp");
+});
+</script>
+{% endblock %}

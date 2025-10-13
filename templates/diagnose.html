@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}🔍 {{ _("Diagnóstico Inteligente") }}{% endblock %}
+{% block content %}
+
+<section class="text-center py-5 animate__animated animate__fadeInUp">
+  <h1 class="fw-bold gold-text mb-3">🔍 {{ _("Diagnóstico Inteligente T-Lux") }}</h1>
+  <p class="lead text-secondary mb-4">
+    {{ _("Insira o IMEI ou número de série do dispositivo Apple para detectar automaticamente o tipo e o serviço mais adequado.") }}
+  </p>
+
+  <form method="POST" class="mx-auto" style="max-width:480px;">
+    <div class="input-group input-group-lg shadow-sm mb-4">
+      <input type="text" name="id" class="form-control text-center border-2"
+             placeholder="{{ _('Digite o IMEI ou Serial...') }}" required>
+      <button type="submit" class="btn btn-tlux px-4">
+        {{ _("Diagnosticar") }}
+      </button>
+    </div>
+  </form>
+
+  <div class="mt-4 small-muted">
+    ⚡ {{ _("Alta confiabilidade – sem expor informações sensíveis.") }}
+  </div>
+</section>
+
+{% endblock %}
