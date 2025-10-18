@@ -12,6 +12,7 @@ import bcrypt
 from dotenv import load_dotenv
 import stripe
 from functools import wraps
+from t_lux_unlock_api import enviar_desbloqueio
 import requests
 
 # =======================================
@@ -4915,7 +4916,138 @@ def admin_clean_codes():
     clean_expired_codes()
     flash("🧹 Old verification codes cleaned.", "info")
     return redirect(url_for("admin_dashboard"))
+    
+# -----------------------
+# 🔓 Integração com iRemoval Tools (Dhru API)
+# -----------------------
+import os
+import sqlite3
+import requests
+from flask import request, jsonify
+from requests.adapters import HTTPAdapter, Retry
 
+# Lê variáveis de ambiente do .env
+IREMOVAL_ENDPOINT = os.getenv("IREMOVAL_ENDPOINT", "https://bulk.iremove.tools/api/dhru/api/index.php")
+IREMOVAL_USER = os.getenv("IREMOVAL_USER")
+IREMOVAL_API = os.getenv("IREMOVAL_API")
+DB_PATH = "t-lux.db"
+
+# Garante que o endpoint termina corretamente
+if not IREMOVAL_ENDPOINT.endswith("/api/index.php"):
+    IREMOVAL_ENDPOINT = IREMOVAL_ENDPOINT.rstrip("/") + "/api/index.php"
+
+# Sessão dedicada ao iRemoval Tools (evita conflito com Flask.session)
+iremove_session = requests.Session()
+retries = Retry(total=3, backoff_factor=0.6, status_forcelist=[429, 500, 502, 503, 504])
+iremove_session.mount("https://", HTTPAdapter(max_retries=retries))
+
+def iremoval_post(action, parameters="", requestformat="json"):
+    """Faz POST para o endpoint Dhru com os dados necessários"""
+    data = {
+        "username": IREMOVAL_USER,
+        "apiaccesskey": IREMOVAL_API,
+        "action": action,
+        "requestformat": requestformat,
+    }
+    if parameters:
+        data["parameters"] = parameters
+
+    try:
+        r = iremove_session.post(IREMOVAL_ENDPOINT, data=data, timeout=20)
+        try:
+            j = r.json()
+        except ValueError:
+            j = None
+        return {"ok": r.status_code == 200, "json": j, "text": r.text, "status": r.status_code}
+    except requests.RequestException as e:
+        return {"ok": False, "error": str(e)}
+
+# -----------------------
+# 🧾 Listar serviços disponíveis
+# -----------------------
+@app.route("/iremoval/list_services", methods=["GET"])
+def list_iremoval_services():
+    res = iremoval_post("imeiservicelist")
+    if not res.get("ok"):
+        return jsonify({"ok": False, "error": "provider_error", "detail": res.get("error", res.get("text"))}), 502
+    return jsonify(res.get("json"))
+
+# -----------------------
+# 🔓 Enviar pedido de desbloqueio (iRemoval Tools)
+# -----------------------
+import requests
+iremove_session = requests.Session()
+
+@app.route("/iremoval/place_order", methods=["POST"])
+def place_iremoval_order():
+    """
+    Envia um pedido de desbloqueio para o servidor Dhru (iRemoval Tools)
+    usando o IMEI/SN e o ID do serviço.
+    """
+    payload = request.get_json(force=True)
+    imei = payload.get("imei")
+    serviceid = payload.get("serviceid")
+
+    # ⚠️ Validação básica
+    if not imei or not serviceid:
+        return jsonify({"ok": False, "error": "missing imei/serviceid"}), 400
+
+    # Formato XML exigido pelo Dhru
+    parameters = f"""
+    <request>
+        <imei>{imei}</imei>
+        <serviceid>{serviceid}</serviceid>
+    </request>
+    """.strip()
+
+    # Faz o POST
+    res = iremoval_post("placeimeiorder", parameters=parameters)
+    raw = res.get("text", "")
+    j = res.get("json")
+
+    provider_order_id = None
+    status = "failed"
+
+    if isinstance(j, dict):
+        if "SUCCESS" in j:
+            try:
+                entry = j["SUCCESS"][0]
+                provider_order_id = entry.get("ORDERID") or entry.get("ID")
+                status = entry.get("STATUS") or entry.get("MESSAGE", "success")
+            except Exception:
+                status = "parsed_error"
+        elif "ERROR" in j:
+            status = j["ERROR"][0].get("MESSAGE", "error")
+
+    # Salva no banco local
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS iremoval_orders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                imei TEXT,
+                serviceid INTEGER,
+                provider_order_id TEXT,
+                status TEXT,
+                response TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        c.execute("""
+            INSERT INTO iremoval_orders (imei, serviceid, provider_order_id, status, response)
+            VALUES (?, ?, ?, ?, ?)
+        """, (imei, serviceid, provider_order_id, status, raw))
+        conn.commit()
+
+    # Retorna resposta estruturada
+    return jsonify({
+        "ok": True,
+        "imei": imei,
+        "serviceid": serviceid,
+        "provider_order_id": provider_order_id,
+        "status": status,
+        "provider_response": j
+    })
 # -----------------------
 # Bootstrap
 # -----------------------

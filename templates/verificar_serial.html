@@ -2,18 +2,21 @@
 {% block title %}📱 Verificar Serial / IMEI — T-Lux{% endblock %}
 
 {% block content %}
-<div class="container my-4">
+<div class="container my-5">
   <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
-      <div class="card card-tlux p-4 shadow-sm">
+      <div class="card card-tlux p-4 shadow-lg border-0 animate__animated animate__fadeIn">
         
-        <!-- Cabeçalho -->
-        <h3 class="gold-text mb-3 text-center">📱 Verificar Serial / IMEI</h3>
-        <p class="text-muted text-center mb-4">
-          Digite abaixo o número de série ou IMEI do dispositivo para identificar o modelo e prosseguir com o desbloqueio.
-        </p>
+        <!-- 🟡 Cabeçalho -->
+        <div class="text-center mb-4">
+          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="T-Lux Logo" height="55" class="mb-3">
+          <h3 class="gold-text fw-bold">📱 Verificar Serial / IMEI</h3>
+          <p class="text-muted small mb-0">
+            Digite o número de série ou IMEI do dispositivo Apple para identificar o modelo e prosseguir com o desbloqueio.
+          </p>
+        </div>
 
-        <!-- Mensagens -->
+        <!-- Mensagens flash -->
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             <div class="mb-3">
@@ -27,36 +30,38 @@
           {% endif %}
         {% endwith %}
 
-        <!-- Formulário -->
-        <form method="POST" action="{{ url_for('verificar_serial') }}">
-          <div class="mb-3">
-            <label for="serial" class="form-label fw-bold">🔑 Serial / IMEI</label>
+        <!-- 🧩 Formulário -->
+        <form method="POST" action="{{ url_for('verificar_serial') }}" autocomplete="off">
+          
+          <!-- Serial / IMEI -->
+          <div class="mb-4">
+            <label for="serial" class="form-label fw-semibold text-tlux">🔑 Serial / IMEI</label>
             <input 
               id="serial" 
               name="serial" 
               type="text" 
-              class="form-control" 
+              class="form-control text-center shadow-sm" 
               placeholder="Ex: F2LTXUOTHX9F ou 353915101234567" 
-              required 
-            />
+              maxlength="20"
+              required
+            >
             <small class="form-text text-muted">
               Digite a serial ou IMEI do dispositivo Apple que deseja verificar.
             </small>
           </div>
 
-          <div class="mb-3">
-            <label for="modelo" class="form-label fw-bold">📲 Modelo (opcional)</label>
-            <select id="modelo" name="modelo" class="form-select">
+          <!-- Modelo -->
+          <div class="mb-4">
+            <label for="modelo" class="form-label fw-semibold text-tlux">📲 Modelo (opcional)</label>
+            <select id="modelo" name="modelo" class="form-select text-center shadow-sm">
               <option value="">— Detectar automaticamente —</option>
 
-              <!-- Grupo com SINAL -->
               <optgroup label="📶 iPhone (With Signal)">
                 {% for modelo, preco in MODELOS_IPHONE_USD_SINAL.items() %}
                   <option value="{{ modelo }}">{{ modelo }} — {{ preco }} USD</option>
                 {% endfor %}
               </optgroup>
 
-              <!-- Grupo sem SINAL -->
               <optgroup label="🚫 iPhone (No Signal)">
                 {% for modelo, preco in MODELOS_IPHONE_SEM_SINAL_USD.items() %}
                   <option value="{{ modelo }}">{{ modelo }} — {{ preco }} USD</option>
@@ -68,16 +73,42 @@
             </small>
           </div>
 
-          <button class="btn btn-brighton w-100 fw-bold" type="submit">🚀 Verificar e Continuar</button>
+          <!-- Botão principal -->
+          <div class="d-grid mt-3">
+            <button type="submit" class="btn btn-tlux fw-bold py-2">
+              🚀 Verificar e Continuar
+            </button>
+          </div>
         </form>
 
         <!-- Voltar -->
-        <div class="text-center mt-3">
-          <a href="{{ url_for('dashboard') }}" class="btn btn-outline-gold">⬅ Voltar ao Dashboard</a>
+        <div class="text-center mt-4">
+          <a href="{{ url_for('dashboard') }}" class="btn btn-outline-gold fw-semibold px-4 py-2">
+            ⬅ Voltar ao Dashboard
+          </a>
         </div>
 
       </div>
     </div>
   </div>
 </div>
+
+<!-- 🔹 Responsividade Mobile -->
+<style>
+@media (max-width: 480px) {
+  .card-tlux {
+    padding: 1.2rem !important;
+  }
+  h3.gold-text {
+    font-size: 1.25rem !important;
+  }
+  input, select {
+    font-size: 0.95rem !important;
+  }
+  .btn-tlux, .btn-outline-gold {
+    font-size: 0.95rem !important;
+    padding: 0.55rem 0.8rem !important;
+  }
+}
+</style>
 {% endblock %}

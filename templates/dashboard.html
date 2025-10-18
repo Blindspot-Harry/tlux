@@ -20,22 +20,24 @@
         <h3 class="text-gold mb-2">👋 Welcome, {{ user["first_name"] or user["email"] }}</h3>
         <p class="small-muted mb-1">📧 Account: <strong>{{ user["email"] }}</strong></p>
 
-        {% if user["access_key"] %}
-          {% if user["access_expiry"] %}
-            {% if licenca_ativa %}
-              <p class="small-muted mb-1">🕒 License active until:
-                <span class="badge bg-success">{{ user["access_expiry"] }}</span>
-              </p>
-            {% else %}
-              <p class="small-muted mb-1">🕒 License expired on:
-                <span class="badge bg-danger">{{ user["access_expiry"] }}</span>
-              </p>
-            {% endif %}
+        {% if user["access_expiry"] %}
+          {% if user["access_expiry"].startswith("2099") %}
+            <p class="small-muted mb-1">
+              ♾️ <span class="badge bg-gold text-dark fw-semibold">Lifetime License — Unlimited Access</span>
+            </p>
+          {% elif licenca_ativa %}
+            <p class="small-muted mb-1">
+              🕒 License active until:
+              <span class="badge bg-success">{{ user["access_expiry"] }}</span>
+            </p>
           {% else %}
-            <p class="small-muted mb-1">♾️ Lifetime License — Permanent Access</p>
+            <p class="small-muted mb-1">
+              ❌ License expired on:
+              <span class="badge bg-danger">{{ user["access_expiry"] }}</span>
+            </p>
           {% endif %}
         {% else %}
-          <p class="small-muted mb-1 text-warning">⚠️ No active license. Please activate your access package.</p>
+          <p class="small-muted mb-1 text-warning">⚠️ No active license. Please activate your package.</p>
         {% endif %}
 
         <p class="small-muted">💰 Available Balance:
@@ -49,7 +51,6 @@
           <a class="btn btn-outline-gold" href="{{ url_for('obter_tecnico') }}">👨‍💻 Technical Support</a>
           <a class="btn btn-outline-gold" href="{{ url_for('services') }}">🔑 Services</a>
           <a class="btn btn-outline-gold" href="{{ url_for('orders') }}">📦 My Orders</a>
-          <a class="btn btn-outline-gold" href="{{ url_for('obter_tecnico') }}">⚡ Become a T-Lux Technician</a>
         </div>
       </div>
     </div>
@@ -61,7 +62,6 @@
         <div class="d-grid gap-2">
           <a class="btn btn-brighton" href="{{ url_for('verificar_serial') }}">📱 Detect Model / IMEI</a>
           <a class="btn btn-outline-gold" href="{{ url_for('choose_package') }}">💰 Renew Access</a>
-          <a class="btn btn-outline-gold" href="{{ url_for('obter_tecnico') }}">🛠️ Technician Access</a>
           <a class="btn btn-outline-gold" href="{{ url_for('services') }}">🔑 Services</a>
           <a class="btn btn-outline-gold" href="{{ url_for('orders') }}">📦 My Orders</a>
         </div>
@@ -115,6 +115,7 @@
 
     <!-- Histórico / transações -->
     <div class="col-lg-6 mb-4">
+
       <!-- Histórico de desbloqueios -->
       <div class="card card-tlux p-4 mb-3 shadow-sm">
         <h5 class="text-gold mb-3">📜 Unlock History</h5>
@@ -187,4 +188,30 @@
     </div>
   </div>
 </div>
+
+<style>
+  .text-gold { color: #d4af37; }
+  .bg-gold { background-color: #d4af37 !important; }
+  .btn-brighton {
+    background-color: #0d6efd;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    transition: 0.3s;
+  }
+  .btn-brighton:hover { background-color: #084298; color: #fff; }
+  .btn-outline-gold {
+    border: 1px solid #d4af37;
+    color: #d4af37;
+    font-weight: 600;
+  }
+  .btn-outline-gold:hover {
+    background-color: #d4af37;
+    color: #fff;
+  }
+  .small-muted {
+    font-size: 0.9rem;
+    color: #777;
+  }
+</style>
 {% endblock %}
