@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS blocked_users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT,
+    ip TEXT,
+    reason TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
