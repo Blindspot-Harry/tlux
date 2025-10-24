@@ -3065,35 +3065,28 @@ def check_email():
 # -----------------------
 def has_active_access(user):
     """
-    Verifica se o usuário tem uma licença ativa / acesso ativo.
-    Considera aprovação, chave, expiração e modo demo.
+    Verifica se o usuário tem licença ativa OU é um usuário demo.
     """
-    try:
-        # ✅ Modo demo dá acesso, mas pode ser limitado
-        if session.get("demo_access"):
-            return True
-
-        if not user:
-            return False
-
-        # Se estiver aprovado manualmente
-        if user.get("approved") == 1:
-            return True
-
-        # Se tiver chave e estiver dentro do prazo
-        exp = user.get("access_expiry")
-        if user.get("access_key"):
-            if exp:
-                if isinstance(exp, str):
-                    exp = datetime.fromisoformat(exp)
-                return exp > datetime.now()
-            return True
-
+    if not user:
         return False
 
+    # ✅ Permite acesso livre ao modo demo
+    if user.get("email") == "demo@tlux-unlock.com":
+        return True
+
+    try:
+        exp = user.get("access_expiry")
+        if not exp:
+            return False
+
+        if isinstance(exp, str):
+            exp = datetime.fromisoformat(exp)
+
+        return exp > datetime.now()
     except Exception as e:
         app.logger.error(f"[ACCESS_CHECK_ERROR] {e}")
         return False
+
 #----------------------
 # Dashboard
 #----------------------
