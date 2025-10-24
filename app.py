@@ -476,21 +476,34 @@ def processar_desbloqueio(modelo, imei, metodo_pagamento, email):
 #------------------------
 #Maddleware protecao
 #------------------------
+# ------------------------
+# Middleware de proteção
+# ------------------------
 @app.before_request
 def verificar_email_global():
-    # rotas públicas permitidas (adicione outras se necessário)
-    public_endpoints = ("login", "logout", "choose_package", "static", "home", "index", "verify_email_route")
-    if request.endpoint is None or request.endpoint in public_endpoints:
+    """
+    Redireciona usuários não verificados para /check_email,
+    exceto em rotas públicas ou relacionadas à verificação.
+    """
+
+    # Ignorar verificações de saúde, estáticos e páginas abertas
+    rota = request.endpoint or ""
+    rotas_livres = [
+        "static", "home", "login", "register", "logout",
+        "check_email", "verify_step1", "verify_step2",
+        "resend_verification", "health", "language_switch"
+    ]
+
+    # Se a rota for livre, não aplica restrições
+    if rota in rotas_livres:
         return
 
-    # demo: força acesso apenas a choose_package
-    if session.get("email") == "demo@tlux.store":
-        if request.endpoint != "choose_package":
-            return redirect(url_for("choose_package"))
-        return  # permite abrir choose_package
+    # Evitar erro quando a sessão ainda não existe
+    if not session.get("user_id"):
+        return
 
-    # resto da lógica normal para outros usuários
-    if not session.get("email_verified"):
+    # Redireciona usuários com email não verificado
+    if not session.get("email_verified", False):
         return redirect(url_for("check_email"))
 
 @app.before_request
