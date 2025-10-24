@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}💬 Chat — {{ target.email }}{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="card card-tlux shadow-sm p-3">
+    <h4 class="gold-text">💬 Chat com {{ target.email }}</h4>
+
+    <!-- 💬 Histórico -->
+    <div id="chat-box"
+         style="max-height: 400px; overflow-y: auto; background: #f8f9fa; border-radius: 8px; padding: 10px;">
+      <!-- As mensagens serão carregadas dinamicamente -->
+    </div>
+
+    <!-- Campo para enviar -->
+    <form id="chat-form" method="POST" class="mt-3 d-flex gap-2">
+      <input type="text" id="chat-input" name="body" class="form-control" placeholder="Escreva uma mensagem..." required>
+      <button class="btn btn-tlux">Enviar</button>
+    </form>
+  </div>
+</div>
+
+<script>
+const chatBox = document.getElementById("chat-box");
+const chatForm = document.getElementById("chat-form");
+const chatInput = document.getElementById("chat-input");
+
+async function loadMessages() {
+  const res = await fetch(window.location.href + "?json=1");
+  const data = await res.json();
+  chatBox.innerHTML = "";
+
+  data.forEach(m => {
+    const msgDiv = document.createElement("div");
+    msgDiv.className = "mb-2 " + (m.from_me ? "text-end" : "text-start");
+    msgDiv.innerHTML = `
+      <div class="d-inline-block px-3 py-2 rounded ${m.from_me ? 'bg-primary text-white' : 'bg-light'}">
+        ${m.body}
+      </div>
+      <div class="small text-muted">${m.created_at}</div>
+    `;
+    chatBox.appendChild(msgDiv);
+  });
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+chatForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const msg = chatInput.value.trim();
+  if (!msg) return;
+  await fetch(window.location.href, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: "body=" + encodeURIComponent(msg)
+  });
+  chatInput.value = "";
+  loadMessages();
+});
+
+setInterval(loadMessages, 2000); // Atualiza a cada 2 segundos
+loadMessages();
+</script>
+{% endblock %}

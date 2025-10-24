@@ -1,63 +1,91 @@
 {% extends "base.html" %}
-{% block title %}{{ _("T-Lux Unlock Systems — Global Automated Unlock Platform") }}{% endblock %}
+{% block title %}T-Lux Unlock Systems — Global Automated Unlock Platform{% endblock %}
 
 {% block content %}
+
 <!-- =========================
      HERO SECTION
 ========================= -->
-<section class="text-center py-5 bg-light">
+<section class="text-center py-5" style="background-color:#f8f9fa;">
   <div class="container animate__animated animate__fadeInDown">
     <img src="{{ url_for('static', filename='img/logo.png') }}" alt="T-Lux Logo"
-         class="img-fluid mb-3" style="max-height:110px;">
-    <h1 class="display-5 fw-bold gold-text mb-2">⚡ {{ _("Welcome to T-Lux Unlock Systems") }}</h1>
+         class="img-fluid mb-3" style="max-height:120px;">
+    <h1 class="display-5 fw-bold" style="color:#ffb81c;">⚡ Welcome to T-Lux Unlock Systems</h1>
     <p class="lead text-muted mb-4">
-      {{ _("Next-generation automated unlock platform for iPhone, iPad & Mac — fast, secure, and globally connected.") }}
+      The next-generation automated unlock platform for iPhone, iPad, and Mac.  
+      T-Lux combines automation, verified APIs, and global payments — ensuring instant, secure, and professional Apple device unlocking.
     </p>
 
     <div class="d-flex justify-content-center gap-3 flex-wrap">
-      <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg px-4 fw-bold shadow-sm">
-        🔓 {{ _("Enter Dashboard") }}
-      </a>
-      <a href="{{ url_for('register') }}" class="btn btn-tlux btn-lg px-4 fw-bold shadow-sm">
-        ✨ {{ _("Create Account") }}
-      </a>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg px-4 fw-bold shadow-sm">🔓 Enter Dashboard</a>
+      <a href="{{ url_for('register') }}" class="btn btn-tlux btn-lg px-4 fw-bold shadow-sm">✨ Create Account</a>
     </div>
+
+    <p class="small text-muted mt-3">
+      Experience the future of Apple unlocking — fully automated, globally accessible, and powered by intelligent systems.
+    </p>
+
+    <img src="{{ url_for('static', filename='img/tlux_promo_banner.png') }}"
+         alt="T-Lux Promo Banner"
+         class="img-fluid rounded shadow mt-4"
+         style="max-height:420px;">
+    <p class="small text-muted mt-2">Our global automation banner — representing a unified network of technicians and resellers worldwide.</p>
   </div>
 </section>
 
 <!-- =========================
-     FEATURE CARDS
+     CORE FEATURES
 ========================= -->
 <section class="container my-5">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold" style="color:#ffb81c;">💠 Core Features</h2>
+    <p class="lead text-muted">What makes T-Lux the world’s most trusted Apple unlock automation system.</p>
+  </div>
+
   <div class="row text-center g-4">
     <div class="col-md-4">
-      <div class="card card-tlux border-0 shadow-sm h-100 animate__animated animate__fadeInUp">
+      <div class="card h-100 border-0 shadow-lg">
         <div class="card-body">
-          <h5 class="fw-bold text-primary">🔁 {{ _("Automated Unlocks") }}</h5>
+          <h5 class="fw-bold text-primary">🔁 Automated Unlocks</h5>
           <p class="text-muted small">
-            {{ _("Instant unlocking for Apple devices — fully integrated with iRemoval Tools API and verified in real time.") }}
+            Every unlock request is processed by the T-Lux engine in real time, minimizing delay and eliminating manual errors.
+          </p>
+          <img src="{{ url_for('static', filename='img/tlux_connect_device.png') }}"
+               alt="Automated Unlocks" class="img-fluid rounded shadow-sm mt-3">
+          <p class="text-muted small mt-2">
+            Above: device connection interface — the point where your iPhone or iPad securely communicates with T-Lux servers via encrypted protocols.
           </p>
         </div>
       </div>
     </div>
 
     <div class="col-md-4">
-      <div class="card card-tlux border-0 shadow-sm h-100 animate__animated animate__fadeInUp" style="animation-delay:0.1s;">
+      <div class="card h-100 border-0 shadow-lg">
         <div class="card-body">
-          <h5 class="fw-bold text-primary">🌍 {{ _("Global Reach") }}</h5>
+          <h5 class="fw-bold text-primary">🌍 Global Network</h5>
           <p class="text-muted small">
-            {{ _("Available in over 192 countries — serving technicians and resellers worldwide with a single, unified platform.") }}
+            T-Lux serves technicians and resellers across 192+ countries, synchronized with our secure central infrastructure.
+          </p>
+          <img src="{{ url_for('static', filename='img/tlux_hello_screens.png') }}"
+               alt="Global Reach" class="img-fluid rounded shadow-sm mt-3">
+          <p class="text-muted small mt-2">
+            Above: a visual of T-Lux’s multi-device ecosystem — each screen represents simultaneous unlock requests from different continents.
           </p>
         </div>
       </div>
     </div>
 
     <div class="col-md-4">
-      <div class="card card-tlux border-0 shadow-sm h-100 animate__animated animate__fadeInUp" style="animation-delay:0.2s;">
+      <div class="card h-100 border-0 shadow-lg">
         <div class="card-body">
-          <h5 class="fw-bold text-primary">💳 {{ _("Secure Payments") }}</h5>
+          <h5 class="fw-bold text-primary">💳 Secure Payments</h5>
           <p class="text-muted small">
-            {{ _("Pay safely via Stripe or Flutterwave — all transactions are encrypted and instantly confirmed.") }}
+            Payments are instantly processed through Stripe and Flutterwave, ensuring multi-currency support and end-to-end encryption.
+          </p>
+          <img src="{{ url_for('static', filename='img/how_tlux_works.png') }}"
+               alt="Payment Gateway" class="img-fluid rounded shadow-sm mt-3">
+          <p class="text-muted small mt-2">
+            Above: system diagram showing secure communication between users, T-Lux, and payment providers.
           </p>
         </div>
       </div>
@@ -66,19 +94,20 @@
 </section>
 
 <!-- =========================
-     FULL SIGNAL NOTICE
+     IMPORTANT SERVICE NOTICE
 ========================= -->
 <section class="container my-5">
-  <div class="alert alert-warning shadow-lg border-0 rounded-4 p-4 animate__animated animate__fadeInUp">
-    <h4 class="fw-bold gold-text mb-3">⚠️ {{ _("Important Notice — Full Signal Bypass Availability") }}</h4>
+  <div class="alert alert-warning shadow-lg border-0 rounded-4 p-4">
+    <h4 class="fw-bold mb-3" style="color:#ffb81c;">⚠️ Important Notice — Full-Signal Bypass</h4>
     <p class="text-dark mb-2">
-      {{ _("The Full Signal Bypass service is temporarily unavailable for new or never-linked devices. Only the No-Signal Bypass is currently supported for those units.") }}
+      The <strong>Full-Signal Bypass</strong> service is temporarily paused for new devices.
+      Currently, only <strong>No-Signal Bypass</strong> is supported for newly registered units.
     </p>
     <p class="text-dark mb-2">
-      {{ _("Full Signal remains available only for devices previously linked to iRemoval Tools before August 22, 2024.") }}
+      Devices previously registered under T-Lux or iRemoval Tools before <strong>August 22, 2024</strong> remain eligible for full-signal services.
     </p>
     <p class="text-muted small mb-0">
-      {{ _("This limitation comes directly from iRemoval Tools. T-Lux will notify all users as soon as Full Signal support is restored.") }}
+      Updates are issued automatically through your dashboard once the service is restored.
     </p>
   </div>
 </section>
@@ -86,74 +115,34 @@
 <!-- =========================
      ACCOUNT ACTIVATION FLOW
 ========================= -->
-<section class="py-5 bg-light" id="activation-flow">
+<section class="py-5" style="background-color:#f8f9fa;">
   <div class="container text-center">
-    <h2 class="fw-bold gold-text mb-4 animate__animated animate__fadeInDown">
-      🔄 {{ _("T-Lux Account Activation Flow") }}
-    </h2>
+    <h2 class="fw-bold mb-4" style="color:#ffb81c;">🔄 Account Activation Flow</h2>
     <p class="text-muted lead mb-5">
-      {{ _("Follow these four simple steps to unlock your full T-Lux experience.") }}
+      Activate your T-Lux account in four simple steps — designed for speed, accuracy, and automation.
     </p>
 
     <div class="row justify-content-center g-4">
-
-      <!-- Step 1 -->
+      {% for step in [
+        {"icon":"🔐","title":"1. Register or Login","text":"Create your T-Lux account or log in securely."},
+        {"icon":"✉️","title":"2. Email Verification","text":"Confirm your identity using an 8-digit verification code."},
+        {"icon":"💳","title":"3. License Activation","text":"Select your plan and complete payment instantly."},
+        {"icon":"🧭","title":"4. Dashboard Access","text":"Manage unlocks, IMEI checks, and transactions in real time."}
+      ] %}
       <div class="col-md-3">
-        <div class="card border-0 shadow-lg rounded-4 p-4 h-100 animate__animated animate__fadeInUp">
+        <div class="card border-0 shadow-lg rounded-4 p-4 h-100">
           <div class="card-body">
-            <div class="fs-1 mb-3">🔐</div>
-            <h5 class="fw-bold mb-2">{{ _("1. Register or Login") }}</h5>
-            <p class="text-muted small">
-              {{ _("Create an account or sign in securely to start using T-Lux Unlock Systems.") }}
-            </p>
+            <div class="fs-1 mb-3">{{ step.icon }}</div>
+            <h5 class="fw-bold mb-2">{{ step.title }}</h5>
+            <p class="text-muted small">{{ step.text }}</p>
           </div>
         </div>
       </div>
-
-      <!-- Step 2 -->
-      <div class="col-md-3">
-        <div class="card border-0 shadow-lg rounded-4 p-4 h-100 animate__animated animate__fadeInUp" style="animation-delay:0.1s;">
-          <div class="card-body">
-            <div class="fs-1 mb-3">✉️</div>
-            <h5 class="fw-bold mb-2">{{ _("2. Verify Your Email") }}</h5>
-            <p class="text-muted small">
-              {{ _("Click the verification link or enter your 8-digit code to activate your account.") }}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 3 -->
-      <div class="col-md-3">
-        <div class="card border-0 shadow-lg rounded-4 p-4 h-100 animate__animated animate__fadeInUp" style="animation-delay:0.2s;">
-          <div class="card-body">
-            <div class="fs-1 mb-3">💳</div>
-            <h5 class="fw-bold mb-2">{{ _("3. Activate Your License") }}</h5>
-            <p class="text-muted small">
-              {{ _("Select your license package and complete payment via Stripe or Flutterwave.") }}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 4 -->
-      <div class="col-md-3">
-        <div class="card border-0 shadow-lg rounded-4 p-4 h-100 animate__animated animate__fadeInUp" style="animation-delay:0.3s;">
-          <div class="card-body">
-            <div class="fs-1 mb-3">🧭</div>
-            <h5 class="fw-bold mb-2">{{ _("4. Access Your Dashboard") }}</h5>
-            <p class="text-muted small">
-              {{ _("Enjoy full unlocking control, real-time tracking, and secure account management.") }}
-            </p>
-          </div>
-        </div>
-      </div>
+      {% endfor %}
     </div>
 
     <div class="mt-5">
-      <a href="{{ url_for('register') }}" class="btn btn-tlux btn-lg px-5 shadow-sm">
-        🚀 {{ _("Get Started Now") }}
-      </a>
+      <a href="{{ url_for('register') }}" class="btn btn-tlux btn-lg px-5 shadow-sm">🚀 Start Now</a>
     </div>
   </div>
 </section>
@@ -163,104 +152,433 @@
 ========================= -->
 <section class="container py-5">
   <div class="text-center mb-5">
-    <h2 class="fw-bold gold-text">🧭 {{ _("How T-Lux Works") }}</h2>
+    <h2 class="fw-bold" style="color:#ffb81c;">🧠 How T-Lux Works</h2>
     <p class="text-muted lead">
-      {{ _("T-Lux automates professional unlock services for Apple devices — combining automation, reliability, and global scalability.") }}
+      T-Lux automates every unlock operation through advanced API protocols, SSL encryption, and smart verification systems.
     </p>
   </div>
 
   <div class="row g-4 align-items-center justify-content-center">
-    <!-- Text -->
     <div class="col-md-5">
       <ul class="list-group list-group-flush text-start">
-        <li class="list-group-item border-0">
-          <h5>📱 {{ _("Signal & No-Signal Unlocks") }}</h5>
-          <p class="text-muted small">
-            {{ _("Supports both signal and no-signal iPhone bypass — allowing full restoration and safe reuse.") }}
-          </p>
-        </li>
-        <li class="list-group-item border-0">
-          <h5>🧠 {{ _("Smart Automation") }}</h5>
-          <p class="text-muted small">
-            {{ _("Every request is automatically verified, processed, and completed via secure server connection.") }}
-          </p>
-        </li>
-        <li class="list-group-item border-0">
-          <h5>🔐 {{ _("Security & Reliability") }}</h5>
-          <p class="text-muted small">
-            {{ _("All data is encrypted, validated, and handled under strict protection standards.") }}
-          </p>
-        </li>
-        <li class="list-group-item border-0">
-          <h5>💼 {{ _("Multi-Service Platform") }}</h5>
-          <p class="text-muted small">
-            {{ _("Unlock iPhone, iPad, Mac EFI, and MDM — all from one secure T-Lux account.") }}
-          </p>
-        </li>
+        <li class="list-group-item border-0"><h5>📱 Multi-Device Support</h5><p class="text-muted small">Supports iPhone, iPad, Mac EFI, and MDM unlocks in one centralized account.</p></li>
+        <li class="list-group-item border-0"><h5>🔐 Security Architecture</h5><p class="text-muted small">All connections are protected by TLS 1.3 and verified SSL certificates.</p></li>
+        <li class="list-group-item border-0"><h5>⚙️ Smart Automation</h5><p class="text-muted small">Instantly detects model, iOS version, and service type before sending API requests.</p></li>
+        <li class="list-group-item border-0"><h5>📊 Profit Analytics</h5><p class="text-muted small">Real-time reports for technicians and distributors, showing costs, sales, and margins.</p></li>
       </ul>
     </div>
 
-    <!-- Image -->
     <div class="col-md-6 text-center">
-      <img src="{{ url_for('static', filename='img/how_tlux_works.png') }}"
-           alt="How T-Lux Works"
-           class="img-fluid rounded shadow-lg animate__animated animate__fadeInUp"
-           style="max-height:350px;">
+      <img src="{{ url_for('static', filename='img/tlux_iphones_activation.png') }}"
+           alt="iPhone Unlocking Process" class="img-fluid rounded shadow-lg">
+      <p class="text-muted small mt-2">Above: T-Lux automation in action — the system verifying and executing iPhone unlock orders through verified APIs.</p>
+    </div>
+  </div>
+</section>
+
+<!-- =========================
+     OFFICIAL UNLOCK PRICE COMPARISON
+========================= -->
+<section class="container my-5">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold gold-text">📱 Official T-Lux Unlock Price Comparison</h2>
+    <p class="lead text-muted">
+      Below are the official unlock prices for T-Lux customers.  
+      All values are in <strong>USD</strong> and reflect final retail pricing with full automation and instant processing.
+    </p>
+  </div>
+
+  <!-- CATEGORY 1: iCloud Bypass A12+ -->
+  <h4 class="fw-bold text-primary mb-3">🔓 iCloud Bypass A12+ (All Models)</h4>
+  <p class="text-muted small mb-2">Fully automated unlock for all A12 and newer Apple devices via T-Lux API.</p>
+  <div class="table-responsive mb-4">
+    <table class="table table-bordered text-center align-middle">
+      <thead class="table-warning text-dark">
+        <tr><th>Service</th><th>Initial</th><th>Bronze</th><th>Silver</th><th>Gold</th><th>Platinum</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>iCloud Bypass A12+ [All Models]</td><td>$22</td><td>$21</td><td>$19</td><td>$18</td><td>$15</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CATEGORY 2: FMI OFF -->
+  <h4 class="fw-bold text-primary mb-3">🔐 FMI OFF / Clean Menu Unlock</h4>
+  <p class="text-muted small mb-2">Menu activation and FMI OFF services for clean devices.</p>
+  <table class="table table-bordered text-center align-middle mb-4">
+    <thead class="table-warning text-dark">
+      <tr><th>Service</th><th>Initial</th><th>Bronze</th><th>Silver</th><th>Gold</th><th>Platinum</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>FMI OFF — Open Menu</td><td>$22</td><td>$15</td><td>$22</td><td>$5</td><td>$4</td></tr>
+    </tbody>
+  </table>
+
+  <!-- CATEGORY 3: A7+ iCloud (Signal) -->
+  <h4 class="fw-bold text-primary mb-3">📶 A7+ iCloud Bypass [Signal Devices]</h4>
+  <p class="text-muted small">Supports iPhone 5S–X models with GSM signal after unlock (Windows + macOS).</p>
+  <div class="table-responsive mb-4">
+    <table class="table table-bordered text-center">
+      <thead class="table-warning text-dark">
+        <tr><th>Model / Service</th><th>Initial</th><th>Bronze</th><th>Silver</th><th>Gold</th><th>Platinum</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>iPhone 5S</td><td>$15</td><td>$12</td><td>$8</td><td>$5</td><td>$4</td></tr>
+        <tr><td>iPhone 6 / 6+</td><td>$22</td><td>$16</td><td>$12</td><td>$9</td><td>$8</td></tr>
+        <tr><td>iPhone 7 / 7+</td><td>$36</td><td>$30</td><td>$26</td><td>$23</td><td>$22</td></tr>
+        <tr><td>iPhone 8 / 8+</td><td>$50</td><td>$36</td><td>$32</td><td>$29</td><td>$28</td></tr>
+        <tr><td>iPhone SE / 6S / 6S+</td><td>$29</td><td>$22</td><td>$17</td><td>$15</td><td>$14</td></tr>
+        <tr><td>iPhone X</td><td>$58</td><td>$46</td><td>$42</td><td>$39</td><td>$38</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CATEGORY 4: iPad Unlocks -->
+  <h4 class="fw-bold text-primary mb-3">📲 iCloud Bypass for iPads (Signal + Wi-Fi)</h4>
+  <p class="text-muted small">Supports all iPad Cellular and Wi-Fi variants from 2017 and earlier.</p>
+  <div class="table-responsive mb-4">
+    <table class="table table-bordered text-center">
+      <thead class="table-warning text-dark">
+        <tr><th>Model / Service</th><th>Initial</th><th>Bronze</th><th>Silver</th><th>Gold</th><th>Platinum</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>iPad 2017 (Cellular)</td><td>$50</td><td>$32</td><td>$28</td><td>$25</td><td>$24</td></tr>
+        <tr><td>iPad 2017 (Wi-Fi)</td><td>$36</td><td>$32</td><td>$28</td><td>$25</td><td>$24</td></tr>
+        <tr><td>Older iPads (Cellular)</td><td>$36</td><td>$23</td><td>$19</td><td>$16</td><td>$15</td></tr>
+        <tr><td>Older iPads (Wi-Fi)</td><td>$22</td><td>$21</td><td>$19</td><td>$16</td><td>$15</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+ <!-- CATEGORY 6: Mac EFI & MDM -->
+<section class="container my-5">
+  <div class="row align-items-center justify-content-center g-4">
+    
+    <!-- 🖥️ IMAGEM DO LADO ESQUERDO -->
+    <div class="col-md-6 text-center">
+      <img src="{{ url_for('static', filename='img/tlux_macs_activation.png') }}"
+           alt="T-Lux Mac EFI / MDM Activation"
+           class="img-fluid rounded shadow-lg"
+           style="max-height:400px;">
+      <p class="text-muted small mt-2">
+        Realistic activation process captured from the T-Lux EFI & MDM module —  
+        showing real-time unlocking verification and completion status.
+      </p>
+    </div>
+
+    <!-- 📄 DESCRIÇÃO DO LADO DIREITO -->
+    <div class="col-md-6">
+      <h4 class="fw-bold text-primary mb-3">💻 Mac EFI / MDM Unlock Services</h4>
+      <p class="text-muted mb-3">
+        The <strong>T-Lux Mac Unlock Suite</strong> provides a secure, automated solution for unlocking EFI and MDM-protected Apple computers.
+        Every operation is executed through encrypted communication with verified T-Lux servers.
+      </p>
+
+      <ul class="list-group list-group-flush text-start">
+        <li class="list-group-item border-0">
+          <strong>🧠 Smart EFI Detection:</strong> Automatically identifies chip generation (T1, T2, M1, M2, M3, M4).
+        </li>
+        <li class="list-group-item border-0">
+          <strong>🔒 Dual Unlock Modes:</strong> Supports both <em>Data Erased</em> and <em>Data Saved</em> operations for maximum flexibility.
+        </li>
+        <li class="list-group-item border-0">
+          <strong>⚙️ Automation Engine:</strong> Executes bypass and re-activation commands instantly via T-Lux Tools.
+        </li>
+        <li class="list-group-item border-0">
+          <strong>🧾 Trace & Verification:</strong> All logs are securely stored under your dashboard for transparency and auditing.
+        </li>
+      </ul>
+
+      <div class="mt-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-tlux btn-lg fw-bold shadow-sm">💳 Order Now</a>
+      </div>
     </div>
   </div>
 
-  <div class="text-center mt-5">
-    <a href="{{ url_for('register') }}" class="btn btn-tlux btn-lg px-5 fw-bold shadow-sm">
-      🚀 {{ _("Start Unlocking Smarter") }}
-    </a>
+  <!-- 🔽 TABELA DE PREÇOS MAC EFI -->
+  <div class="table-responsive mt-5">
+    <table class="table table-bordered text-center">
+      <thead class="table-warning text-dark">
+        <tr>
+          <th>Service</th>
+          <th>Initial</th>
+          <th>Bronze</th>
+          <th>Silver</th>
+          <th>Gold</th>
+          <th>Platinum</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>EFI Unlock (Data Erased)</td><td>$144</td><td>$65</td><td>$58</td><td>$52</td><td>$44</td></tr>
+        <tr><td>EFI Unlock (Data Saved)</td><td>$144</td><td>$80</td><td>$73</td><td>$65</td><td>$58</td></tr>
+        <tr><td>T2 Intel Mac Bypass</td><td>$73</td><td>$68</td><td>$65</td><td>$58</td><td>$51</td></tr>
+        <tr><td>Mac MDM Bypass (M1–M4)</td><td>$44</td><td>$36</td><td>$29</td><td>$26</td><td>$22</td></tr>
+        <tr><td>Permanent MDM Removal (T2)</td><td>$116</td><td>$116</td><td>$73</td><td>$44</td><td>$36</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alert alert-info mt-3">
+    <strong>Note:</strong> For all Mac unlock operations, please ensure the device is connected via USB-C and  
+    running the latest version of <strong>T-Lux Tools</strong> to prevent activation errors.
+  </div>
+</section>
+
+  <!-- CATEGORY 6: Mac EFI & MDM -->
+<section class="container my-5">
+  <div class="text-center mb-5">
+    <h4 class="fw-bold text-primary mb-3">💻 Mac EFI / MDM Unlock Services</h4>
+    <p class="lead text-muted mb-4">
+      The <strong>T-Lux Mac Unlock Suite</strong> provides a complete, secure and automated solution  
+      for unlocking EFI and MDM-protected Apple computers, including all Intel and Apple Silicon chips.
+    </p>
+  </div>
+
+  <!-- DESCRIÇÃO DETALHADA -->
+  <div class="row justify-content-center mb-4">
+    <div class="col-md-10">
+      <ul class="list-group list-group-flush text-start">
+        <li class="list-group-item border-0">
+          <strong>🧠 Smart EFI Detection:</strong> Automatically identifies chip generation (T1, T2, M1, M2, M3, M4) and device model.
+        </li>
+        <li class="list-group-item border-0">
+          <strong>🔒 Dual Unlock Modes:</strong> Supports <em>Data Erased</em> and <em>Data Saved</em> operations for full flexibility.
+        </li>
+        <li class="list-group-item border-0">
+          <strong>⚙️ Automated Commands:</strong> Executes EFI and MDM bypass commands instantly through T-Lux Tools.
+        </li>
+        <li class="list-group-item border-0">
+          <strong>🧾 Secure Logging:</strong> Every unlock operation is logged and visible in your T-Lux dashboard.
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="text-center mb-5">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-tlux btn-lg fw-bold shadow-sm px-5">💳 Order Now</a>
+  </div>
+
+  <!-- TABELA DE PREÇOS -->
+  <div class="table-responsive">
+    <table class="table table-bordered text-center">
+      <thead class="table-warning text-dark">
+        <tr>
+          <th>Service</th>
+          <th>Initial</th>
+          <th>Bronze</th>
+          <th>Silver</th>
+          <th>Gold</th>
+          <th>Platinum</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>EFI Unlock (Data Erased)</td><td>$144</td><td>$65</td><td>$58</td><td>$52</td><td>$44</td></tr>
+        <tr><td>EFI Unlock (Data Saved)</td><td>$144</td><td>$80</td><td>$73</td><td>$65</td><td>$58</td></tr>
+        <tr><td>T2 Intel Mac Bypass</td><td>$73</td><td>$68</td><td>$65</td><td>$58</td><td>$51</td></tr>
+        <tr><td>Mac MDM Bypass (M1–M4)</td><td>$44</td><td>$36</td><td>$29</td><td>$26</td><td>$22</td></tr>
+        <tr><td>Permanent MDM Removal (T2)</td><td>$116</td><td>$116</td><td>$73</td><td>$44</td><td>$36</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alert alert-info mt-3">
+    <strong>Note:</strong> For all Mac unlock operations, ensure the device is connected via USB-C  
+    and the latest version of <strong>T-Lux Tools</strong> is installed to prevent activation errors.
+  </div>
+</section>
+
+  <!-- CATEGORY 7: Remote FMI OFF -->
+  <h4 class="fw-bold text-primary mb-3">🌐 Remote FMI OFF (Clean SN Services)</h4>
+  <p class="text-muted small">Long-term iCloud unlock requests for clean devices, processed through verified regional servers.</p>
+  <div class="table-responsive mb-4">
+    <table class="table table-bordered text-center">
+      <thead class="table-warning text-dark">
+        <tr><th>Region / Model</th><th>Initial</th><th>Bronze</th><th>Silver</th><th>Gold</th><th>Platinum</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>iPad (EU)</td><td>$218</td><td>$210</td><td>$203</td><td>$196</td><td>$189</td></tr>
+        <tr><td>iPad (USA)</td><td>$203</td><td>$196</td><td>$189</td><td>$182</td><td>$174</td></tr>
+        <tr><td>iPhone (EU)</td><td>$218</td><td>$210</td><td>$203</td><td>$196</td><td>$189</td></tr>
+        <tr><td>iPhone (AT&T)</td><td>$218</td><td>$213</td><td>$210</td><td>$206</td><td>$203</td></tr>
+        <tr><td>iPhone (T-Mobile)</td><td>$218</td><td>$214</td><td>$210</td><td>$207</td><td>$203</td></tr>
+        <tr><td>MacBook (EU)</td><td>$218</td><td>$210</td><td>$203</td><td>$196</td><td>$189</td></tr>
+        <tr><td>MacBook (USA)</td><td>$218</td><td>$210</td><td>$203</td><td>$196</td><td>$189</td></tr>
+        <tr><td>Apple Watch (USA)</td><td>$203</td><td>$196</td><td>$189</td><td>$182</td><td>$174</td></tr>
+        <tr><td>Apple Watch (EU)</td><td>$218</td><td>$210</td><td>$203</td><td>$196</td><td>$189</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CATEGORY 8: IMEI / GSX -->
+  <h4 class="fw-bold text-primary mb-3">🧾 IMEI & GSX Verification</h4>
+  <p class="text-muted small">Instant Apple GSX professional data checks for iPhone serials and IMEIs.</p>
+  <div class="table-responsive mb-4">
+    <table class="table table-bordered text-center">
+      <thead class="table-warning text-dark">
+        <tr><th>Service</th><th>Initial</th><th>Bronze</th><th>Silver</th><th>Gold</th><th>Platinum</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Apple GSX Check (Pro Info)</td><td>$4</td><td>$4</td><td>$3.6</td><td>$3.5</td><td>$3.4</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alert alert-info mt-4">
+    <strong>Note:</strong> All services are executed automatically through secure T-Lux servers.  
+    Ensure stable internet and the latest version of <strong>T-Lux Tools</strong> for accurate processing.
   </div>
 </section>
 
 <!-- =========================
-     CTA
+     PRICING PLANS
 ========================= -->
-<section class="py-5 text-center bg-dark text-white">
+<section class="py-5 text-center" style="background-color:#f8f9fa;">
   <div class="container">
-    <h3 class="fw-bold mb-3">🌍 {{ _("Trusted by Technicians Worldwide") }}</h3>
-    <p class="mb-4">{{ _("Join the T-Lux network — manage all your unlock services in one secure global platform.") }}</p>
-    <a href="{{ url_for('register') }}" class="btn btn-tlux btn-lg fw-bold shadow-sm">
-      💎 {{ _("Create Your Account Now") }}
-    </a>
+    <h2 class="fw-bold mb-4" style="color:#ffb81c;">💎 License Packages</h2>
+    <p class="text-muted lead">Choose the best plan for your unlocking business. Each license grants access to all T-Lux features.</p>
+
+    <div class="row justify-content-center g-4 mt-4">
+      {% for plan in [
+        {"name":"Bronze","price":"$25","desc":"Basic access for new technicians.","color":"#cd7f32"},
+        {"name":"Silver","price":"$50","desc":"Ideal for small resellers and local shops.","color":"#c0c0c0"},
+        {"name":"Gold","price":"$100","desc":"Advanced tools and priority support.","color":"#ffd700"},
+        {"name":"Platinum","price":"$200","desc":"Unlimited access and best margins.","color":"#e5e4e2"}
+      ] %}
+      <div class="col-md-3">
+        <div class="card border-0 shadow-lg h-100 rounded-4">
+          <div class="card-body">
+            <h5 class="fw-bold mb-3" style="color:{{ plan.color }};">{{ plan.name }}</h5>
+            <h3 class="fw-bold">{{ plan.price }}</h3>
+            <p class="text-muted small">{{ plan.desc }}</p>
+            <a href="{{ url_for('register') }}" class="btn btn-tlux btn-sm mt-2">Activate Now</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
   </div>
 </section>
 
 <!-- =========================
-     STYLES
+     INTERFACE PREVIEW
 ========================= -->
-<style>
-  .gold-text { color: #d4af37; }
-  .btn-tlux {
-    background-color: #d4af37;
-    color: #fff;
-    border: none;
-    transition: all 0.3s ease;
-  }
-  .btn-tlux:hover {
-    background-color: #0d6efd;
-    color: #fff;
-    transform: translateY(-2px);
-  }
-  .card-tlux {
-    border-radius: 12px;
-    background: #fff;
-    transition: all 0.2s;
-  }
-  .card-tlux:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(13,110,253,0.1);
-  }
-  .alert-warning {
-    border-left: 6px solid #d4af37;
-    background-color: #fffbea;
-  }
-  .animate__animated.animate__fadeInUp,
-  .animate__animated.animate__fadeInDown {
-    animation-duration: 0.8s;
-  }
-</style>
+<section class="container my-5 text-center">
+  <h3 class="fw-bold text-primary mb-4">🧰 The T-Lux Dashboard</h3>
+  <p class="text-muted mb-4">Your command center for automation, IMEI management, and service tracking.</p>
+  <img src="{{ url_for('static', filename='img/tlux_ipads_activation.png') }}"
+       alt="Dashboard Interface" class="img-fluid rounded shadow-lg">
+  <p class="text-muted small mt-2">
+    Above: technician dashboard — displays unlock orders, payments, device IMEI logs, and profit analytics in real time.
+  </p>
+</section>
+
+<!-- =========================
+     TESTIMONIALS
+========================= -->
+<section class="py-5" style="background-color:#003a80;color:#fff;">
+  <div class="container text-center">
+    <h2 class="fw-bold mb-4" style="color:#ffb81c;">💬 What Technicians Say</h2>
+    <div class="row g-4">
+      <div class="col-md-4"><div class="card bg-transparent border-0"><div class="card-body"><p>“T-Lux changed the way I manage unlocks. Real-time automation saves me hours daily.”</p><strong>- Alex R., USA</strong></div></div></div>
+      <div class="col-md-4"><div class="card bg-transparent border-0"><div class="card-body"><p>“Fastest bypass services ever. Payments are instant, and the interface is clean and intuitive.”</p><strong>- Maria L., Spain</strong></div></div></div>
+      <div class="col-md-4"><div class="card bg-transparent border-0"><div class="card-body"><p>“As a distributor, I can track profit and clients with total transparency. Blindspot nailed it.”</p><strong>- Arjun P., India</strong></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================
+     SECURITY AND RELIABILITY
+========================= -->
+<section class="py-5 text-center" style="background-color:#f8f9fa;">
+  <div class="container">
+    <h3 class="fw-bold mb-3 text-primary">🔐 Security & Compliance</h3>
+    <p class="text-muted mb-4">
+      Every operation is protected under enterprise-grade encryption, verified SSL certificates, and GDPR-ready policies.
+    </p>
+    <div class="d-flex justify-content-center gap-4 flex-wrap">
+      <span class="badge bg-success p-3 shadow-sm">✅ SSL Certified</span>
+      <span class="badge bg-primary p-3 shadow-sm">💳 Stripe Verified</span>
+      <span class="badge bg-secondary p-3 shadow-sm">🌐 GDPR Compliant</span>
+      <span class="badge bg-warning text-dark p-3 shadow-sm">⚙️ Automated Logs</span>
+    </div>
+  </div>
+</section>
+
+<!-- =========================
+     CONTACT / SUPPORT (UPDATED)
+========================= -->
+<section class="container my-5 text-center">
+  <h3 class="fw-bold mb-3 text-primary">📞 Contact & Support</h3>
+  <p class="text-muted mb-3">
+    Official T-Lux support channels. Available for order assistance, technical help and reseller inquiries.
+  </p>
+
+  <div class="row justify-content-center g-3">
+    <div class="col-md-4">
+      <div class="card h-100 border-0 shadow-sm p-3">
+        <div class="card-body">
+          <h5 class="fw-bold">WhatsApp</h5>
+          <p class="mb-2">Quick chat for orders and support</p>
+          <a class="btn btn-success" href="https://wa.me/27633218341?text=Hello%20T-Lux%20Support" target="_blank" rel="noopener">
+            💬 +27 63 321 8341
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 border-0 shadow-sm p-3">
+        <div class="card-body">
+          <h5 class="fw-bold">Email</h5>
+          <p class="mb-2">Send invoices, logs or detailed requests</p>
+          <a class="btn btn-outline-primary" href="mailto:tluxunlock@t-lux.store">
+            ✉️ tluxunlock@t-lux.store
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 border-0 shadow-sm p-3">
+        <div class="card-body">
+          <h5 class="fw-bold">Social</h5>
+          <p class="mb-2">Follow for updates & announcements</p>
+          <div class="d-flex flex-column gap-2">
+            <a class="btn btn-outline-dark" href="https://www.instagram.com/tlux.unlock/" target="_blank" rel="noopener">📸 Instagram — @tlux.unlock</a>
+            <span class="btn btn-light text-dark">📘 Facebook — T-Lux Unlock Systems</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-muted small mt-4">
+    For fast response, use WhatsApp for short requests and email for logs or attachments.  
+    Support hours are visible on your dashboard.
+  </p>
+</section>
+
+<!-- =========================
+     FOOTER (UPDATED)
+========================= -->
+<footer class="text-center py-4" style="background-color:#001f4d;color:#fff;">
+  <div class="container">
+    <div class="d-flex justify-content-center align-items-center gap-3 mb-2 flex-wrap">
+      <a href="https://www.instagram.com/tlux.unlock/" target="_blank" rel="noopener" class="text-white text-decoration-none small">
+        <i class="bi bi-instagram"></i> Instagram
+      </a>
+      <a href="mailto:tluxunlock@t-lux.store" class="text-white text-decoration-none small">
+        <i class="bi bi-envelope"></i> Email
+      </a>
+      <a href="https://wa.me/27633218341?text=Hello%20T-Lux%20Support" target="_blank" rel="noopener" class="text-white text-decoration-none small">
+        <i class="bi bi-whatsapp"></i> WhatsApp
+      </a>
+      <span class="text-white small">📘 Facebook — T-Lux Unlock Systems</span>
+    </div>
+
+    <p class="mb-1">© 2025 T-Lux Unlock Systems — All Rights Reserved.</p>
+    <p class="small text-muted">Automated Unlock Intelligence — Developed by <strong>Blindspot</strong>.</p>
+  </div>
+</footer>
+
 {% endblock %}

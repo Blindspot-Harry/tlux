@@ -1,58 +1,131 @@
 {% extends "base.html" %}
-{% block title %}Admin — Visão Geral{% endblock %}
+{% block title %}📊 System Overview — T-Lux{% endblock %}
 
 {% block content %}
-<div class="row">
-  <div class="col-12">
-    <h2 class="gold-text mb-4">Visão Geral do Sistema</h2>
+<div class="container my-4">
+
+  <!-- ===== HEADER ===== -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-gold fw-bold">📊 System Overview — T-Lux Admin</h2>
+    <a href="{{ url_for('admin') }}" class="btn btn-outline-light">← Back to Dashboard</a>
   </div>
 
-  <div class="col-md-4 mb-3">
-    <div class="card card-tlux p-3 text-center">
-      <h4>{{ overview.total_users }}</h4>
-      <p class="small-muted">Usuários</p>
+  <!-- ===== GLOBAL STATS ===== -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card card-tlux text-center p-3 shadow-sm">
+        <h1>👥</h1><h3 class="fw-bold">{{ total_users or 0 }}</h3>
+        <p class="small-muted">Total Users</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card card-tlux text-center p-3 shadow-sm">
+        <h1>🧑‍🔧</h1><h3 class="fw-bold">{{ total_techs or 0 }}</h3>
+        <p class="small-muted">Technicians</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card card-tlux text-center p-3 shadow-sm">
+        <h1>💳</h1><h3 class="fw-bold">${{ "%.2f"|format(total_revenue or 0) }}</h3>
+        <p class="small-muted">Total Revenue (USD)</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card card-tlux text-center p-3 shadow-sm">
+        <h1>🧾</h1><h3 class="fw-bold">{{ total_licenses or 0 }}</h3>
+        <p class="small-muted">Licenses Issued</p>
+      </div>
     </div>
   </div>
 
-  <div class="col-md-4 mb-3">
-    <div class="card card-tlux p-3 text-center">
-      <h4>{{ overview.total_tx }}</h4>
-      <p class="small-muted">Transações</p>
-    </div>
+  <!-- ===== MODULE STATUS ===== -->
+  <div class="card card-tlux p-4 mb-5 shadow-sm">
+    <h5 class="text-gold mb-3">🧠 System Modules Status</h5>
+    <table class="table table-sm align-middle">
+      <thead class="table-light">
+        <tr><th>Module</th><th>Status</th><th>Details</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Stripe API</td>
+          <td>
+            {% if stripe_ok %}<span class="badge bg-success">✅ Active</span>
+            {% else %}<span class="badge bg-danger">❌ Not Configured</span>{% endif %}
+          </td>
+          <td>Public key: {{ stripe_public or 'N/A' }}</td>
+        </tr>
+        <tr>
+          <td>iRemoval API</td>
+          <td>
+            {% if iremoval_ok %}<span class="badge bg-success">✅ Connected</span>
+            {% else %}<span class="badge bg-danger">❌ Not Connected</span>{% endif %}
+          </td>
+          <td>User: {{ iremoval_user or 'N/A' }}</td>
+        </tr>
+        <tr>
+          <td>SMTP Mail</td>
+          <td>
+            {% if mail_ok %}<span class="badge bg-success">✅ Active</span>
+            {% else %}<span class="badge bg-danger">❌ Offline</span>{% endif %}
+          </td>
+          <td>Sender: {{ mail_sender or 'N/A' }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
-  <div class="col-md-4 mb-3">
-    <div class="card card-tlux p-3 text-center">
-      <h4>{{ overview.total_licenses }}</h4>
-      <p class="small-muted">Licenças Emitidas</p>
+  <!-- ===== PERFORMANCE CHART ===== -->
+  <div class="card card-tlux p-4 mb-5 shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="text-gold mb-0">📈 Performance Chart (7 Days)</h5>
+      <small class="text-muted">Revenue vs Transactions</small>
     </div>
+    <canvas id="overviewChart" height="100"></canvas>
   </div>
 
-  <div class="col-md-6 mb-3">
-    <div class="card card-tlux p-3 text-center">
-      <h4>{{ overview.pending_tx }}</h4>
-      <p class="small-muted">Pendentes</p>
-    </div>
-  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+  async function loadOverviewChart() {
+    const res = await fetch("/admin/chart_data");
+    const data = await res.json();
+    const labels = data.map(d => d.day).reverse();
+    const revenue = data.map(d => d.total_revenue).reverse();
+    const txs = data.map(d => d.total_transactions).reverse();
 
-  <div class="col-md-6 mb-3">
-    <div class="card card-tlux p-3 text-center">
-      <h4>{{ overview.successful_tx }}</h4>
-      <p class="small-muted">Concluídas</p>
-    </div>
-  </div>
+    new Chart(document.getElementById("overviewChart"), {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [
+          { label: "Revenue ($)", data: revenue, backgroundColor: "rgba(255,215,0,0.6)" },
+          { label: "Transactions", data: txs, backgroundColor: "rgba(0,123,255,0.4)" }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true, title: { display: true, text: "Amount / Count" } },
+          x: { title: { display: true, text: "Date" } }
+        },
+        plugins: {
+          legend: { position: "top" },
+          tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}` } }
+        }
+      }
+    });
+  }
+  loadOverviewChart();
+  </script>
 
-  <div class="col-md-6 mb-3">
-    <div class="card card-tlux p-3 text-center">
-      <h4>{{ overview.failed_tx }}</h4>
-      <p class="small-muted">Falhadas</p>
-    </div>
-  </div>
-
-  <div class="col-md-6 mb-3">
-    <div class="card card-tlux p-3 text-center">
-      <h4>{{ overview.expired_licenses }}</h4>
-      <p class="small-muted">Licenças Expiradas</p>
+  <!-- ===== QUICK ACTIONS ===== -->
+  <div class="card card-tlux p-4 shadow-sm">
+    <h5 class="text-gold mb-3">⚡ Quick Actions</h5>
+    <div class="d-flex flex-wrap gap-3 justify-content-center">
+      <a href="{{ url_for('admin_transactions') }}" class="btn btn-outline-primary px-4">💳 View Transactions</a>
+      <a href="{{ url_for('admin_unlocks') }}" class="btn btn-outline-success px-4">🔓 Manage Unlocks</a>
+      <a href="{{ url_for('update_services') }}" class="btn btn-outline-warning px-4">🔁 Update Services</a>
+      <a href="{{ url_for('settings') }}" class="btn btn-outline-dark px-4">⚙️ System Settings</a>
+      <a href="{{ url_for('admin_logs') }}" class="btn btn-outline-secondary px-4">📋 View Logs</a>
     </div>
   </div>
 </div>

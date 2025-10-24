@@ -18,7 +18,22 @@ import requests
 # =======================================
 # T-LUX Flask App — inicialização principal (única)
 # =======================================
-app = Flask(__name__)
+# -----------------------
+# iRemoval Tools (Dhru API)
+# -----------------------
+# -----------------------
+# iRemoval Tools (Dhru API)
+# -----------------------
+USERNAME = os.getenv("IREMOVAL_USER")
+API_KEY = os.getenv("IREMOVAL_API")
+API_URL = os.getenv("IREMOVAL_ENDPOINT", "https://bulk.iremove.tools/api/dhru/api/index.php")
+
+if USERNAME and API_KEY:
+    print(f"✅ iRemoval API configurada para o usuário {USERNAME}")
+else:
+    print("⚠️ iRemoval API não configurada — verifique o arquivo .env")
+
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.secret_key = os.getenv("APP_SECRET", "chave-super-secreta")
 
 # ⚠️ DEV ONLY: empurra um contexto global para evitar o erro enquanto limpamos o arquivo
@@ -219,7 +234,6 @@ def consultar_status(order_ref):
         return resp.json()
     except Exception as e:
         return {"error": str(e)}
-
 # -----------------------
 # Decorator: login_required
 # -----------------------
@@ -464,27 +478,42 @@ def processar_desbloqueio(modelo, imei, metodo_pagamento, email):
 #------------------------
 @app.before_request
 def verificar_email_global():
-    """
-    Middleware: antes de cada requisição, verifica se o usuário está logado
-    e se o e-mail foi verificado.
-    Exceções: login, registro, verificação de e-mail e páginas públicas.
-    """
-    rotas_publicas = {
-        "login", "register", "logout",
-        "verify_email_route", "resend_verification",
-        "check_email", "static"
-    }
+    # ignora rotas públicas
+    if request.endpoint in ["login", "logout", "choose_package", "static"]:
+        return
 
-    if "user_id" in session:
-        # Se usuário existe mas ainda não confirmou o e-mail
-        if not session.get("email_verified", False):
-            # Pega rota atual
-            rota_atual = request.endpoint
+    # se for demo, libera apenas choose_package
+    if session.get("demo_access"):
+        if request.endpoint != "choose_package":
+            return redirect(url_for("choose_package"))
+        return  # deixa abrir choose_package
 
-            # Se tentar acessar rota protegida → redireciona
-            if rota_atual not in rotas_publicas:
-                flash("⚠️ Você precisa verificar seu e-mail para continuar.", "warning")
-                return redirect(url_for("check_email"))
+    # resto da lógica normal para outros usuários
+    if not session.get("email_verified"):
+        return redirect(url_for("check_email"))
+
+
+@app.before_request
+def hard_guards():
+    public_endpoints = {"login","register","logout","static","home","check_email","verify_email_route","resend_verification"}
+    if request.endpoint in public_endpoints:
+        return
+
+    if session.get("user_id"):
+        user = current_user()
+        if not user:
+            session.clear()
+            return redirect(url_for("login"))
+
+        if user.get("blocked"):
+            flash("🚫 Your account is blocked. Contact support.", "danger")
+            session.clear()
+            return redirect(url_for("login"))
+
+        # Manual approval gate: Only admins or approved users pass
+        if not user.get("approved") and not session.get("is_admin"):
+            flash("🛑 Your account is awaiting manual approval by an administrator.", "warning")
+            return redirect(url_for("dashboard"))
 
 # ------------------------------
 # Página pública (Landing Page)
@@ -1149,8 +1178,10 @@ UNLOCK_PRECOS = {}
 # -----------------------
 # Banco de Dados (SQLite) + Inicialização
 # -----------------------
-from datetime import timezone
-UTC = timezone.utc
+from flask import g
+import sqlite3, os
+
+DB_FILE = os.getenv("DB_FILE", os.path.join(os.path.dirname(__file__), "t-lux.db"))
 
 def get_db():
     """Abre conexão SQLite com suporte a múltiplas threads e WAL ativo"""
@@ -1162,9 +1193,8 @@ def get_db():
     return g.db
 
 @app.teardown_appcontext
-def close_db(exception):
-    """Fecha conexão ativa ao encerrar contexto Flask"""
-    db = g.pop("db", None)
+def close_connection(exception):
+    db = g.pop('db', None)
     if db is not None:
         db.close()
 
@@ -1469,17 +1499,22 @@ def now_str():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 def current_user():
-    """Retorna o usuário logado como dicionário ou None"""
-    if "user_id" not in session:
+    """Retorna o utilizador logado com base na sessão."""
+    user_id = session.get("user_id")
+    if not user_id:
         return None
+
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT * FROM users WHERE id=?", (session["user_id"],))
+    c.execute("SELECT * FROM users WHERE id = ?", (user_id,))
     row = c.fetchone()
+
     if not row:
         return None
-    # Converte sqlite3.Row para dict
-    return {k: row[k] for k in row.keys()}
+
+    user = dict(row)
+    # ✅ NÃO fecha conn aqui (Flask gerencia automaticamente)
+    return user
 
 def _issue_license_from_tx(tx_id):
     """
@@ -2397,6 +2432,26 @@ def convert_local_to_usd(local_amount, currency_code):
 # -----------------------
 # Rotas principais
 # -----------------------
+# ---- Roles
+ROLE_ORDER = {"user": 0, "tech": 1, "admin": 2}
+
+def require_role(min_role="admin"):
+    def deco(f):
+        @wraps(f)
+        def inner(*args, **kwargs):
+            if "user_id" not in session:
+                flash("⚠️ Please log in first.", "warning")
+                return redirect(url_for("login"))
+            user = current_user()
+            if not user:
+                return redirect(url_for("login"))
+            if ROLE_ORDER.get(user.get("role", "user"), 0) < ROLE_ORDER[min_role]:
+                flash("⛔ Administrators only.", "danger")
+                return redirect(url_for("dashboard"))
+            return f(*args, **kwargs)
+        return inner
+    return deco
+
 #--------------------
 # Rota Registacao
 #--------------------
@@ -2751,7 +2806,7 @@ def login():
         password = request.form.get("password", "").encode("utf-8")
         ip = request.remote_addr
 
-        # 1️⃣ Check temporary block
+        # 1️⃣ Temporary lock after repeated failures
         if is_blocked(email, ip):
             flash("🚫 Login temporarily blocked due to multiple failed attempts.", "danger")
             return render_template("login.html")
@@ -2763,85 +2818,95 @@ def login():
 
         if not user:
             register_login_attempt(email, ip, "failed")
-            flash("❌ Invalid credentials.", "danger")
-            # conn.close() — fechado pelo teardown
+            flash("❌ Invalid email or password.", "danger")
             return render_template("login.html")
 
+        # 2️⃣ Password validation
         stored_pw = user["password_hash"]
-        valid = bcrypt.checkpw(password, stored_pw.encode("utf-8"))
+        if not bcrypt.checkpw(password, stored_pw.encode("utf-8")):
+            register_login_attempt(email, ip, "failed", conn=conn)
+            if failed_attempts(email, ip) >= MAX_FAILED_ATTEMPTS:
+                block_user(email, ip)
+                flash(f"🚫 Too many failed attempts. Login blocked for {BLOCK_TIME_MINUTES} minutes.", "danger")
+            else:
+                flash("❌ Invalid email or password.", "danger")
+            return render_template("login.html")
 
-        if valid:
-            # ✅ Auto-verify admin
-            if email == ADMIN_EMAIL:
-                try:
-                    c.execute("UPDATE users SET email_verified=1 WHERE email=?", (email,))
-                    conn.commit()
-                except Exception as e:
-                    app.logger.warning(f"[ADMIN VERIFY] Failed: {e}")
+        # 3️⃣ Blocked or unapproved users
+        if "blocked" in user.keys() and user["blocked"]:
+            flash("🚫 Your account is currently blocked. Contact support.", "danger")
+            return render_template("login.html")
 
-            # ⚠️ User must verify email first
-            if not user["email_verified"] and email != ADMIN_EMAIL:
-                flash("⚠️ Please verify your email before accessing your account.", "warning")
-                token = gerar_token_verificacao(user["id"])  # new token
-                verify_url = url_for("verify_email_route", token=token, _external=True)
-                create_verification_code(email, user_id=user["id"], length=8, minutes_valid=10)
+        if ("approved" in user.keys() and not user["approved"]) and not ("is_admin" in user.keys() and user["is_admin"]):
+            flash("🛑 Your account is awaiting manual approval by an administrator.", "warning")
+            return render_template("login.html")
 
-                # Send verification email again
-                try:
-                    html_body = render_template(
-                        "email_verificacao.html",
-                        first_name=user["first_name"],
-                        link_verificacao=verify_url
-                    )
-                    send_email(
-                        to_email=email,
-                        subject="🔐 Verify your email — T-Lux Unlock Systems",
-                        body_html=html_body
-                    )
-                    flash("📩 A new verification link and code were sent to your email.", "info")
-                except Exception as e:
-                    app.logger.error(f"[EMAIL ERROR] Re-send verification failed: {e}")
-                    flash("⚠️ Account not verified. Failed to send new email. Try again later.", "danger")
+        # 4️⃣ Auto-verify admin
+        if email == ADMIN_EMAIL:
+            try:
+                c.execute("UPDATE users SET email_verified=1 WHERE email=?", (email,))
+                conn.commit()
+            except Exception as e:
+                app.logger.warning(f"[ADMIN VERIFY] Failed: {e}")
 
-                # conn.close() — fechado pelo teardown
-                return redirect(url_for("verify_email_route", token=token))
+        # 5️⃣ Email verification
+        if "email_verified" in user.keys() and not user["email_verified"] and email != ADMIN_EMAIL:
+            flash("⚠️ Please verify your email before accessing your account.", "warning")
+            token = gerar_token_verificacao(user["id"])
+            verify_url = url_for("verify_email_route", token=token, _external=True)
+            create_verification_code(email, user_id=user["id"], length=8, minutes_valid=10)
 
-            # ✅ Success: log in user
-            register_login_attempt(email, ip, "success", conn=conn)
+            try:
+                html_body = render_template(
+                    "email_verificacao.html",
+                    first_name=user["first_name"],
+                    link_verificacao=verify_url
+                )
+                send_email(
+                    to_email=email,
+                    subject="🔐 Verify your email — T-Lux Unlock Systems",
+                    body_html=html_body
+                )
+                flash("📩 A new verification link and code were sent to your email.", "info")
+            except Exception as e:
+                app.logger.error(f"[EMAIL ERROR] Re-send verification failed: {e}")
+                flash("⚠️ Could not send new verification email. Try again later.", "danger")
 
-            session.clear()
-            session["user_id"] = user["id"]
-            session["email"] = user["email"]
-            session["is_admin"] = bool(user["is_admin"])
-            session["email_verified"] = True
+            return redirect(url_for("verify_email_route", token=token))
 
-            registrar_evento(user["id"], "User successfully logged in")
+        # 6️⃣ Successful login
+        register_login_attempt(email, ip, "success", conn=conn)
+        session.clear()
+        session["user_id"] = user["id"]
+        session["email"] = user["email"]
+        session["role"] = user["role"] if "role" in user.keys() else "user"
+        session["is_admin"] = bool(user["is_admin"]) if "is_admin" in user.keys() else False
+        session["email_verified"] = True
 
-            # 🧠 Admin redirect
-            if session["is_admin"]:
-                flash("👑 Logged in with privileged access!", "success")
-                # conn.close() — fechado pelo teardown
-                return redirect(url_for("dashboard"))
+        registrar_evento(user["id"], "User successfully logged in")
 
-            # 💳 Check access package
-            if not has_active_access(user):
-                flash("⚠️ Your account doesn’t have an active Access Key yet.", "warning")
-                # conn.close() — fechado pelo teardown
-                return redirect(url_for("choose_package"))
+        # 🟢 6.1 Verificação de conta demo
+        if email == "demo@tlux.store":
+            session["demo_access"] = True
+            flash("👋 You are in DEMO mode — only package view is available.", "info")
+            return redirect(url_for("choose_package"))
 
-            flash("✅ Login successful!", "success")
-            # conn.close() — fechado pelo teardown
+        # 7️⃣ Redirects by role
+        if session["is_admin"]:
+            flash("👑 Logged in with Administrator privileges!", "success")
+            return redirect(url_for("admin_home"))
+
+        if "role" in user.keys() and user["role"] == "tech":
+            flash("🧰 Welcome back, Technician!", "success")
             return redirect(url_for("dashboard"))
 
-        # ❌ Wrong password
-        register_login_attempt(email, ip, "failed", conn=conn)
-        if failed_attempts(email, ip) >= MAX_FAILED_ATTEMPTS:
-            block_user(email, ip)
-            flash(f"🚫 Too many failed attempts. Login blocked for {BLOCK_TIME_MINUTES} minutes.", "danger")
-        else:
-            flash("❌ Invalid email or password.", "danger")
+        # 8️⃣ Check Access Key (license)
+        if not has_active_access(user):
+            flash("⚠️ You don’t have an active Access Key yet.", "warning")
+            return redirect(url_for("choose_package"))
 
-        # conn.close() — fechado pelo teardown
+        flash("✅ Login successful!", "success")
+        return redirect(url_for("dashboard"))
 
     return render_template("login.html")
 
@@ -2984,23 +3049,34 @@ def check_email():
 def has_active_access(user):
     """
     Verifica se o usuário tem uma licença ativa / acesso ativo.
+    Considera aprovação, chave, expiração e modo demo.
     """
-    if not user:
-        return False
-
     try:
-        exp = user["access_expiry"]  # <-- CORRIGIDO
-        if not exp:
+        # ✅ Modo demo dá acesso, mas pode ser limitado
+        if session.get("demo_access"):
+            return True
+
+        if not user:
             return False
 
-        if isinstance(exp, str):
-            exp = datetime.fromisoformat(exp)
+        # Se estiver aprovado manualmente
+        if user.get("approved") == 1:
+            return True
 
-        return exp > datetime.now()
+        # Se tiver chave e estiver dentro do prazo
+        exp = user.get("access_expiry")
+        if user.get("access_key"):
+            if exp:
+                if isinstance(exp, str):
+                    exp = datetime.fromisoformat(exp)
+                return exp > datetime.now()
+            return True
+
+        return False
+
     except Exception as e:
         app.logger.error(f"[ACCESS_CHECK_ERROR] {e}")
         return False
-
 #----------------------
 # Dashboard
 #----------------------
@@ -3053,20 +3129,25 @@ def dashboard():
 # -----------------------
 # Fluxo de Pacotes / Chaves de Acesso (Planos T-Lux)
 # -----------------------
-
 @app.route("/choose-package")
 @login_required
 def choose_package():
     """
     Exibe os pacotes de acesso disponíveis (Starter, Bronze, Silver, Gold, Premium)
-    para o usuário ativar a conta.
+    para o usuário ativar a conta, a menos que já tenha acesso ativo.
     """
     user = current_user()
 
+    # Se o usuário já tiver uma licença ativa, redireciona para o dashboard
+    if has_active_access(user):
+        flash("✅ Você já possui acesso ativo à plataforma.", "success")
+        return redirect(url_for("dashboard"))
+
+    # Caso contrário, mostra os pacotes disponíveis
     return render_template(
         "choose_package.html",
         user=user,
-        pacotes=PACOTES,  # lista de dicionários
+        pacotes=PACOTES,
         publishable_key=os.getenv("STRIPE_PUBLISHABLE_KEY")
     )
 
@@ -3760,22 +3841,98 @@ def desbloquear():
 @app.route("/admin")
 @login_required
 def admin():
+    """
+    🧑‍💻 Admin Control Center
+    Main admin panel: shows users, transactions, licenses, and quick shortcuts.
+    """
     u = current_user()
-    if not u or not u["is_admin"]:
-        flash("Acesso negado.", "danger")
+    if not u or not u.get("is_admin"):
+        flash("Access denied.", "danger")
         return redirect(url_for("dashboard"))
 
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT * FROM users ORDER BY created_at DESC")
-    users = c.fetchall()
-    c.execute("SELECT * FROM transactions ORDER BY created_at DESC")
-    transactions = c.fetchall()
-    c.execute("SELECT * FROM licenses ORDER BY issued_at DESC")
-    licenses = c.fetchall()
-    # conn.close() — fechado pelo teardown
 
-    return render_template("admin.html", users=users, transactions=transactions, licenses=licenses)
+    # Users
+    c.execute("SELECT * FROM users ORDER BY created_at DESC")
+    users = [dict(row) for row in c.fetchall()]
+
+    # Transactions
+    c.execute("SELECT * FROM transactions ORDER BY created_at DESC")
+    transactions = [dict(row) for row in c.fetchall()]
+
+    # Licenses
+    c.execute("SELECT * FROM licenses ORDER BY issued_at DESC")
+    licenses = [dict(row) for row in c.fetchall()]
+
+    # Count unread messages to admin
+    try:
+        c.execute("SELECT COUNT(*) AS unread_count FROM messages WHERE seen=0 AND to_user_id=0")
+        unread_count = c.fetchone()["unread_count"]
+    except Exception:
+        unread_count = 0  # Safe fallback in case messages table not ready yet
+
+    # Quick stats
+    total_users = len(users)
+    total_transactions = len(transactions)
+    total_revenue = sum(
+        [float(t.get("amount") or 0) for t in transactions if t.get("status") in ("success", "successful")]
+    )
+    total_licenses = len(licenses)
+
+    # Render admin dashboard (correct path)
+    return render_template(
+        "admin_dashboard.html",
+        users=users,
+        transactions=transactions,
+        licenses=licenses,
+        total_users=total_users,
+        total_transactions=total_transactions,
+        total_revenue=total_revenue,
+        total_licenses=total_licenses,
+        unread_count=unread_count
+    )
+
+@app.route("/admin/licenses")
+@login_required
+def admin_licenses():
+    """🧾 License management screen"""
+    u = current_user()
+    if not u or not u.get("is_admin"):
+        flash("Access denied.", "danger")
+        return redirect(url_for("dashboard"))
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("""
+        SELECT l.*, u.email AS user_email
+        FROM licenses l
+        LEFT JOIN users u ON u.id = l.user_id
+        ORDER BY l.issued_at DESC
+    """)
+    licenses = [dict(row) for row in c.fetchall()]
+
+    return render_template("admin/licenses.html", licenses=licenses)
+
+@app.get("/admin/chart_data")
+@require_role("admin")
+def admin_chart_data():
+    conn = get_db(); c = conn.cursor()
+    # Agrupa receitas, custos e lucros por dia
+    c.execute("""
+        SELECT 
+            strftime('%Y-%m-%d', created_at) AS day,
+            SUM(amount) AS total_revenue,
+            SUM(preco_fornecedor) AS total_cost,
+            SUM(lucro) AS profit
+        FROM transactions
+        WHERE status='successful'
+        GROUP BY day
+        ORDER BY day DESC
+        LIMIT 14
+    """)
+    data = [dict(row) for row in c.fetchall()]
+    return jsonify(data)
 
 @app.route("/admin/tx/<int:tx_id>/approve", methods=["POST"])
 @login_required
@@ -3843,98 +4000,436 @@ def admin_license_revoke(lic_id):
     # conn.close() — fechado pelo teardown
     flash("Licença revogada.", "info")
     return redirect(url_for("admin"))
+    
+# ===============================================
+# ⚙️  ADMIN PANEL — T-LUX UNLOCK SYSTEM
+# ===============================================
+from flask import request, redirect, url_for, flash, render_template, session
+from datetime import datetime
 
 # -----------------------
-# Logs e Overview
+# LOGS & OVERVIEW
 # -----------------------
+
 @app.route("/admin/logs")
 @login_required
 def admin_logs():
     u = current_user()
     if not u or not u["is_admin"]:
-        flash("Acesso negado.", "danger")
+        flash("🚫 Access denied.", "danger")
         return redirect(url_for("dashboard"))
     
     conn = get_db()
     c = conn.cursor()
     c.execute("SELECT * FROM logs ORDER BY created_at DESC LIMIT 100")
     logs = c.fetchall()
-    # conn.close() — fechado pelo teardown
     return render_template("admin_logs.html", logs=logs)
+
+from datetime import datetime
+import os
 
 @app.route("/admin/overview")
 @login_required
 def admin_overview():
+    """📊 Admin System Overview — visão completa do sistema"""
     u = current_user()
-    if not u or not u["is_admin"]:
-        flash("Acesso negado.", "danger")
+    if not u or not u.get("is_admin"):
+        flash("🚫 Access denied.", "danger")
         return redirect(url_for("dashboard"))
-    
+
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT COUNT(*) as total_users FROM users")
-    total_users = c.fetchone()["total_users"]
-    c.execute("SELECT COUNT(*) as total_tx FROM transactions")
-    total_tx = c.fetchone()["total_tx"]
-    c.execute("SELECT COUNT(*) as pending_tx FROM transactions WHERE status='pending'")
-    pending_tx = c.fetchone()["pending_tx"]
-    c.execute("SELECT COUNT(*) as successful_tx FROM transactions WHERE status='successful'")
-    successful_tx = c.fetchone()["successful_tx"]
-    c.execute("SELECT COUNT(*) as failed_tx FROM transactions WHERE status='failed'")
-    failed_tx = c.fetchone()["failed_tx"]
-    c.execute("SELECT COUNT(*) as total_licenses FROM licenses")
-    total_licenses = c.fetchone()["total_licenses"]
-    c.execute("SELECT COUNT(*) as expired_licenses FROM licenses WHERE expires_at < ?", (now_str(),))
-    expired_licenses = c.fetchone()["expired_licenses"]
-    # conn.close() — fechado pelo teardown
-    
+
+    # --- Funções auxiliares internas ---
+    def count(query, params=()):
+        c.execute(query, params)
+        result = c.fetchone()
+        return result[0] if result else 0
+
+    def sum_amount(query, params=()):
+        c.execute(query, params)
+        result = c.fetchone()
+        return float(result[0] or 0)
+
+    # --- Tempo atual (para checar licenças expiradas) ---
+    now = datetime.utcnow().isoformat()
+
+    # --- Estatísticas gerais ---
     overview = {
-        "total_users": total_users,
-        "total_tx": total_tx,
-        "pending_tx": pending_tx,
-        "successful_tx": successful_tx,
-        "failed_tx": failed_tx,
-        "total_licenses": total_licenses,
-        "expired_licenses": expired_licenses
+        "total_users": count("SELECT COUNT(*) FROM users"),
+        "tech_users": count("SELECT COUNT(*) FROM users WHERE role='tech'"),
+        "admin_users": count("SELECT COUNT(*) FROM users WHERE role='admin'"),
+        "total_tx": count("SELECT COUNT(*) FROM transactions"),
+        "pending_tx": count("SELECT COUNT(*) FROM transactions WHERE status='pending'"),
+        "successful_tx": count("SELECT COUNT(*) FROM transactions WHERE status IN ('success','successful')"),
+        "failed_tx": count("SELECT COUNT(*) FROM transactions WHERE status='failed'"),
+        "total_licenses": count("SELECT COUNT(*) FROM licenses"),
+        "expired_licenses": count("SELECT COUNT(*) FROM licenses WHERE expires_at < ?", (now,)),
+        "total_revenue": sum_amount("SELECT SUM(amount) FROM transactions WHERE status IN ('success','successful')"),
+        "supplier_cost": sum_amount("SELECT SUM(cost_price) FROM transactions WHERE status IN ('success','successful')"),
     }
-    return render_template("admin_overview.html", overview=overview)
+
+    # --- Módulos / APIs ---
+    stripe_ok = bool(os.getenv("STRIPE_SECRET_KEY"))
+    stripe_public = os.getenv("STRIPE_PUBLIC_KEY", "not_set")
+
+    iremoval_ok = bool(os.getenv("IREMOVAL_API") or os.getenv("IREMOVAL_KEY"))
+    iremoval_user = os.getenv("IREMOVAL_USER", "not_set")
+
+    mail_ok = bool(os.getenv("MAIL_SERVER"))
+    mail_sender = os.getenv("MAIL_DEFAULT_SENDER", "support@t-lux.store")
+
+    # --- Cálculo de lucro ---
+    overview["profit"] = overview["total_revenue"] - overview["supplier_cost"]
+
+    # --- Fechamento do cursor (boa prática) ---
+    conn.commit()
+    conn.close()
+
+    return render_template(
+        "admin_overview.html",
+        overview=overview,
+        stripe_ok=stripe_ok,
+        stripe_public=stripe_public,
+        iremoval_ok=iremoval_ok,
+        iremoval_user=iremoval_user,
+        mail_ok=mail_ok,
+        mail_sender=mail_sender,
+    )
+
+# -----------------------
+# SERVICES & TRANSACTIONS
+# -----------------------
 
 @app.route("/admin/update_services")
 @login_required
 def update_services():
     user = current_user()
     if not user["is_admin"]:
-        flash("Acesso negado!", "danger")
+        flash("🚫 Access denied!", "danger")
         return redirect(url_for("dashboard"))
 
     if atualizar_servicos():
-        flash("✅ Lista de serviços atualizada com sucesso!", "success")
+        flash("✅ Services list successfully updated!", "success")
     else:
-        flash("❌ Falha ao atualizar serviços.", "danger")
+        flash("❌ Failed to update service list.", "danger")
     return redirect(url_for("services"))
 
-@app.route("/admin/transactions")
-@login_required
-def admin_transactions():
-    # Garante que só admin acessa
-    if not session.get("is_admin"):
-        flash("Acesso negado. Apenas administradores podem visualizar transações.", "danger")
-        return redirect(url_for("dashboard"))
 
+@app.route("/admin/transactions")
+@require_role("admin")
+def admin_transactions():
     conn = get_db()
     c = conn.cursor()
     c.execute("""
-        SELECT t.id, u.email, t.modelo, t.imei, t.sem_sinal, 
-               t.amount AS preco_venda, t.preco_fornecedor, t.lucro, 
-               t.status, t.order_id, t.created_at
+        SELECT t.id, u.email, t.modelo, t.imei, t.amount AS sale_price,
+               t.preco_fornecedor, t.lucro, t.status, t.order_id, t.created_at
         FROM transactions t
         LEFT JOIN users u ON t.user_id = u.id
         ORDER BY t.created_at DESC
     """)
     rows = c.fetchall()
-    # conn.close() — fechado pelo teardown
-
     return render_template("admin_transactions.html", transactions=rows)
+
+
+# -----------------------
+# ADMIN DASHBOARD
+# -----------------------
+
+@app.route("/admin", methods=["GET"])
+@require_role("admin")
+def admin_home():
+    conn = get_db()
+    c = conn.cursor()
+
+    # Users list
+    c.execute("""
+        SELECT id, email, first_name, last_name, role, balance, blocked, approved, created_at
+        FROM users ORDER BY created_at DESC
+    """)
+    users = [dict(row) for row in c.fetchall()]
+
+    # Recent unlock transactions (show supplier price)
+    c.execute("""
+        SELECT id, user_id, modelo, imei, amount, preco_fornecedor, lucro, status, order_id, created_at
+        FROM transactions
+        WHERE purpose='unlock'
+        ORDER BY created_at DESC
+        LIMIT 50
+    """)
+    tx = [dict(row) for row in c.fetchall()]
+
+    return render_template("admin/dashboard.html", users=users, tx=tx)
+
+
+# -----------------------
+# USER MANAGEMENT ACTIONS
+# -----------------------
+
+@app.post("/admin/users/<int:user_id>/approve")
+@require_role("admin")
+def admin_approve_user(user_id):
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("UPDATE users SET approved=1 WHERE id=?", (user_id,))
+    conn.commit()
+    registrar_evento(session["user_id"], f"Approved user ID {user_id}")
+    flash("✅ User approved successfully.", "success")
+    return redirect(url_for("admin_home"))
+
+@app.post("/admin/licenses")
+@require_role("admin")
+def admin_add_license():
+    user_id = request.form.get("user_id")
+    pacote = request.form.get("pacote")
+    valid_days = int(request.form.get("valid_days", 30))
+
+    if not user_id or not pacote:
+        flash("All fields are required.", "danger")
+        return redirect(url_for("admin_licenses"))
+
+    import secrets, datetime
+    key = "TLX-" + secrets.token_hex(8).upper()
+    issued_at = datetime.datetime.utcnow()
+    expires_at = issued_at + datetime.timedelta(days=valid_days)
+
+    conn = get_db()
+    c = conn.cursor()
+
+    # Get user email for notification
+    c.execute("SELECT email, first_name FROM users WHERE id=?", (user_id,))
+    user = c.fetchone()
+
+    if not user:
+        flash("❌ User not found.", "danger")
+        return redirect(url_for("admin_licenses"))
+
+    # Save license
+    c.execute("""
+        INSERT INTO licenses (user_id, pacote, license_key, issued_at, expires_at)
+        VALUES (?, ?, ?, ?, ?)
+    """, (user_id, pacote, key, issued_at.isoformat(), expires_at.isoformat()))
+    conn.commit()
+
+    # Send email notification
+    try:
+        html_body = render_template(
+            "email_nova_licenca.html",
+            first_name=user["first_name"] or user["email"].split("@")[0],
+            pacote=pacote,
+            license_key=key,
+            expires_at=expires_at.strftime("%Y-%m-%d"),
+            valid_days=valid_days
+        )
+        send_email(
+            to_email=user["email"],
+            subject=f"🔑 Your New {pacote} License — T-Lux Unlock System",
+            body_html=html_body
+        )
+        flash(f"✅ License {pacote} created and email sent to {user['email']}.", "success")
+    except Exception as e:
+        app.logger.error(f"[EMAIL ERROR][LICENSE] Failed to send license email: {e}")
+        flash(f"⚠️ License created but failed to send email to {user['email']}.", "warning")
+
+    return redirect(url_for("admin_licenses"))
+
+@app.post("/admin/users/<int:user_id>/block")
+@require_role("admin")
+def admin_block_user(user_id):
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("UPDATE users SET blocked=1 WHERE id=?", (user_id,))
+    conn.commit()
+    registrar_evento(session["user_id"], f"Blocked user ID {user_id}")
+    flash("⛔ User blocked.", "warning")
+    return redirect(url_for("admin_home"))
+
+
+@app.post("/admin/users/<int:user_id>/unblock")
+@require_role("admin")
+def admin_unblock_user(user_id):
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("UPDATE users SET blocked=0 WHERE id=?", (user_id,))
+    conn.commit()
+    registrar_evento(session["user_id"], f"Unblocked user ID {user_id}")
+    flash("✅ User unblocked.", "success")
+    return redirect(url_for("admin_home"))
+
+
+@app.post("/admin/users/<int:user_id>/role")
+@require_role("admin")
+def admin_change_role(user_id):
+    new_role = request.form.get("role", "user")
+    valid_roles = ["user", "tech", "admin"]
+
+    if new_role not in valid_roles:
+        flash("❌ Invalid role.", "danger")
+        return redirect(url_for("admin_home"))
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("UPDATE users SET role=? WHERE id=?", (new_role, user_id))
+    conn.commit()
+    registrar_evento(session["user_id"], f"Changed role of user {user_id} to {new_role}")
+    flash(f"🔄 Role changed to {new_role.capitalize()}.", "info")
+    return redirect(url_for("admin_home"))
+
+
+@app.post("/admin/users/<int:user_id>/balance")
+@require_role("admin")
+def admin_adjust_balance(user_id):
+    try:
+        amount = float(request.form.get("amount", "0"))
+    except ValueError:
+        flash("⚠️ Invalid amount format.", "warning")
+        return redirect(url_for("admin_home"))
+
+    reason = request.form.get("reason", "Manual balance update")
+    conn = get_db()
+    c = conn.cursor()
+
+    # Update balance and ledger
+    c.execute("UPDATE users SET balance = IFNULL(balance, 0) + ? WHERE id=?", (amount, user_id))
+    c.execute("INSERT INTO balance_ledger (user_id, amount, reason) VALUES (?, ?, ?)", (user_id, amount, reason))
+    conn.commit()
+
+    registrar_evento(session["user_id"], f"Adjusted balance of user {user_id} by ${amount:.2f} ({reason})")
+    flash(f"💰 Balance updated successfully (+${amount:.2f})", "success")
+    return redirect(url_for("admin_home"))
+
+
+# -----------------------
+# MESSAGING SYSTEM
+# -----------------------
+
+@app.get("/admin/inbox")
+@require_role("admin")
+def admin_inbox():
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("""
+        SELECT m.to_user_id AS user_id, u.email,
+               MAX(m.created_at) AS last_msg_at,
+               SUM(CASE WHEN m.seen=0 AND m.to_user_id=0 THEN 1 ELSE 0 END) AS unread
+        FROM messages m
+        LEFT JOIN users u ON u.id = m.from_user_id
+        GROUP BY user_id, u.email
+        ORDER BY last_msg_at DESC
+    """)
+    threads = [dict(row) for row in c.fetchall()]
+    return render_template("admin/inbox.html", threads=threads)
+
+
+@app.get("/admin/inbox/<int:user_id>")
+@require_role("admin")
+def admin_thread(user_id):
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("""
+        SELECT m.*, fu.email AS from_email, tu.email AS to_email
+        FROM messages m
+        LEFT JOIN users fu ON fu.id=m.from_user_id
+        LEFT JOIN users tu ON tu.id=m.to_user_id
+        WHERE (from_user_id=? OR to_user_id=?)
+        ORDER BY created_at ASC
+    """, (user_id, user_id))
+    msgs = [dict(row) for row in c.fetchall()]
+    return render_template("admin/thread.html", msgs=msgs, user_id=user_id)
+
+@app.post("/admin/inbox/<int:user_id>")
+@require_role("admin")
+def admin_reply(user_id):
+    body = request.form.get("body", "").strip()
+    if not body:
+        flash("⚠️ Message cannot be empty.", "danger")
+        return redirect(url_for("admin_thread", user_id=user_id))
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("INSERT INTO messages (from_user_id, to_user_id, body) VALUES (?, ?, ?)",
+              (session["user_id"], user_id, body))
+    conn.commit()
+
+    flash("✅ Reply sent.", "success")
+    registrar_evento(session["user_id"], f"Admin replied to user {user_id}")
+    return redirect(url_for("admin_thread", user_id=user_id))
+
+
+@app.get("/messages")
+@login_required
+def my_messages():
+    conn = get_db()
+    c = conn.cursor()
+    uid = session["user_id"]
+    c.execute("""
+        SELECT m.*, fu.email AS from_email
+        FROM messages m
+        LEFT JOIN users fu ON fu.id=m.from_user_id
+        WHERE to_user_id=? OR from_user_id=?
+        ORDER BY created_at ASC
+    """, (uid, uid))
+    msgs = [dict(row) for row in c.fetchall()]
+    return render_template("messages.html", msgs=msgs)
+
+
+@app.post("/messages")
+@login_required
+def send_message():
+    body = request.form.get("body", "").strip()
+    if not body:
+        flash("⚠️ Message cannot be empty.", "danger")
+        return redirect(url_for("my_messages"))
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT id FROM users WHERE role='admin' OR is_admin=1 LIMIT 1")
+    admin_id = (c.fetchone() or {"id": None})["id"]
+
+    c.execute("INSERT INTO messages (from_user_id, to_user_id, body) VALUES (?, ?, ?)",
+              (session["user_id"], admin_id, body))
+    conn.commit()
+
+    flash("📩 Message sent successfully.", "success")
+    registrar_evento(session["user_id"], f"User {session['user_id']} sent message to admin")
+    return redirect(url_for("my_messages"))
+
+@app.route("/messages/<int:user_id>", methods=["GET", "POST"])
+@login_required
+def chat_with_user(user_id):
+    me = current_user()
+    conn = get_db()
+    c = conn.cursor()
+
+    if request.method == "POST":
+        body = request.form.get("body", "").strip()
+        if body:
+            c.execute("""
+                INSERT INTO messages (from_user_id, to_user_id, body)
+                VALUES (?, ?, ?)
+            """, (me["id"], user_id, body))
+            conn.commit()
+        return jsonify({"status": "ok"})
+
+    if request.args.get("json"):
+        c.execute("""
+            SELECT m.id, m.body, m.created_at, 
+                   (m.from_user_id = ?) as from_me
+            FROM messages m
+            WHERE (from_user_id=? AND to_user_id=?) 
+               OR (from_user_id=? AND to_user_id=?)
+            ORDER BY m.created_at ASC
+        """, (me["id"], me["id"], user_id, user_id, me["id"]))
+        msgs = c.fetchall()
+        return jsonify([dict(m) for m in msgs])
+
+    c.execute("SELECT id, email FROM users WHERE id=?", (user_id,))
+    target = c.fetchone()
+    if not target:
+        flash("Usuário não encontrado.", "danger")
+        return redirect(url_for("my_messages"))
+
+    return render_template("chat.html", target=target, me=me)
 
 # -----------------------
 # Painel: Lista de desbloqueios com status
@@ -3971,6 +4466,83 @@ def painel_unlocks():
         })
 
     return render_template("painel_unlocks.html", desbloqueios=desbloqueios)
+
+@app.route("/admin/balance")
+@login_required
+def admin_balance():
+    """💰 Balance overview page (manual credits and ledger history)"""
+    u = current_user()
+    if not u or not u.get("is_admin"):
+        flash("Access denied.", "danger")
+        return redirect(url_for("dashboard"))
+
+    conn = get_db()
+    c = conn.cursor()
+    # Tabela principal: ledger (histórico de créditos)
+    c.execute("""
+        SELECT b.*, u.email AS user_email
+        FROM balance_ledger b
+        LEFT JOIN users u ON u.id = b.user_id
+        ORDER BY b.created_at DESC
+    """)
+    ledger = [dict(row) for row in c.fetchall()]
+
+    # Resumo total por utilizador
+    c.execute("""
+        SELECT u.email, u.balance
+        FROM users u
+        ORDER BY u.balance DESC
+    """)
+    balances = [dict(row) for row in c.fetchall()]
+
+    return render_template("admin_balance.html", ledger=ledger, balances=balances)
+    
+from datetime import datetime
+
+@app.route("/admin/settings")
+@login_required
+def settings():
+    """⚙️ Painel de Definições do Sistema (somente visualização)"""
+    u = current_user()
+    if not u or not u.get("is_admin"):
+        flash("Acesso negado.", "danger")
+        return redirect(url_for("dashboard"))
+
+    # Configurações principais vindas do .env
+    config = {
+        "version": "1.1.0",
+        "env": os.getenv("FLASK_ENV", "production"),
+        "db_file": os.getenv("DB_FILE", "t-lux.db"),
+
+        # 🔐 iRemoval API
+        "api_url": os.getenv("IREMOVAL_ENDPOINT", "https://bulk.iremove.tools/api/dhru/api/index.php"),
+        "username": os.getenv("IREMOVAL_USER", "—"),
+        "api_key": os.getenv("IREMOVAL_API", "—"),
+
+        # 💳 Stripe
+        "stripe_public": os.getenv("STRIPE_PUBLIC_KEY", "—"),
+        "stripe_secret": os.getenv("STRIPE_SECRET_KEY", "—"),
+        "stripe_webhook": os.getenv("STRIPE_WEBHOOK_SECRET", "—"),
+
+        # 💌 SMTP / Email
+        "smtp_server": os.getenv("MAIL_SERVER", "smtp.zoho.com"),
+        "smtp_port": os.getenv("MAIL_PORT", "465"),
+        "smtp_user": os.getenv("MAIL_DEFAULT_SENDER", "support@t-lux.store"),
+        "smtp_security": "SSL/TLS",
+
+        # 🌍 Flutterwave (futuro)
+        "flutterwave_public": os.getenv("FLUTTERWAVE_PUBLIC_KEY", None),
+        "flutterwave_secret": os.getenv("FLUTTERWAVE_SECRET_KEY", None),
+
+        # 🌐 Internacionalização
+        "language": os.getenv("BABEL_DEFAULT_LOCALE", "en"),
+        "currency": os.getenv("CURRENCY_DEFAULT", "USD"),
+
+        # 🕒 Data e hora atual
+        "current_time": datetime.now().strftime("%d/%m/%Y %H:%M"),
+    }
+
+    return render_template("admin/settings.html", config=config)
 
 # -----------------------
 # Painel: fornece status de desbloqueios em JSON (AJAX)
@@ -4771,7 +5343,7 @@ def pricing():
     return render_template("pricing.html")
 
 @app.route("/support")
-def support():
+def support_page():
     return render_template("support.html")
     
     
@@ -5048,6 +5620,55 @@ def place_iremoval_order():
         "status": status,
         "provider_response": j
     })
+    
+@app.route("/demo")
+def demo_mode():
+    """
+    Ativa o modo DEMO gratuito para testar o sistema.
+    """
+    session["demo_access"] = True
+    flash("🧪 Modo Demo ativado — acesso temporário e limitado.", "info")
+    return redirect(url_for("dashboard"))
+
+# ===============================
+# STATIC PAGES — T-Lux Informational
+# ===============================
+
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+@app.route("/support")
+def support():
+    return render_template("support.html")
+
+@app.route("/affiliate")
+def affiliate():
+    return render_template("affiliate.html")
+
+@app.route("/terms")
+def terms():
+    return render_template("terms.html")
+
+@app.route("/refund")
+def refund():
+    return render_template("refund.html")
+
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+# 🔄 Tornar current_user disponível em todos os templates
+
+@app.context_processor
+def inject_user():
+    """Injeta current_user globalmente nos templates"""
+    try:
+        user = current_user()
+        return dict(current_user=user)
+    except Exception as e:
+        print(f"[WARN] inject_user() error: {e}")
+        return dict(current_user=None)
 # -----------------------
 # Bootstrap
 # -----------------------

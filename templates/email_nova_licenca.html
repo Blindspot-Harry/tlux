@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Your New T-Lux License</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f6fa;
+      color: #333;
+      margin: 0;
+      padding: 30px;
+    }
+    .email-container {
+      background: #fff;
+      border-radius: 12px;
+      max-width: 640px;
+      margin: auto;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #0d6efd, #002855);
+      color: white;
+      text-align: center;
+      padding: 25px;
+    }
+    .header img {
+      width: 120px;
+      margin-bottom: 10px;
+    }
+    .header h2 {
+      margin: 0;
+      font-size: 24px;
+      color: #FFD700;
+      letter-spacing: 1px;
+    }
+    .content {
+      padding: 30px;
+      line-height: 1.6;
+    }
+    .key {
+      background: #f2f2f2;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-align: center;
+      margin: 15px 0;
+      border: 1px solid #ddd;
+    }
+    .btn {
+      display: inline-block;
+      background: #007BFF;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .btn:hover { background: #0056b3; }
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #777;
+      background: #f8f9fa;
+      padding: 15px;
+      border-top: 1px solid #eee;
+    }
+    .signature {
+      margin-top: 25px;
+      text-align: right;
+      font-style: italic;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <img src="https://t-lux.store/static/img/logo.png" alt="T-Lux Logo">
+      <h2>✨ T-Lux Unlock System</h2>
+      <p>Global Automated iCloud Unlock Solutions</p>
+    </div>
+
+    <div class="content">
+      <p>Olá <strong>{{ first_name }}</strong>,</p>
+      <p>A sua nova licença <strong>{{ pacote }}</strong> foi gerada com sucesso e já está ativa!</p>
+
+      <p><strong>🔑 License Key:</strong></p>
+      <div class="key">{{ license_key }}</div>
+
+      <p>Validade: <strong>{{ valid_days }} dias</strong> (até <strong>{{ expires_at }}</strong>).</p>
+
+      <p>Pode agora entrar no seu painel através do botão abaixo:</p>
+      <p style="text-align:center;">
+        <a href="https://t-lux.store" class="btn">🌍 Entrar no Dashboard</a>
+      </p>
+
+      <p>Se precisar de ajuda, entre em contacto com a nossa equipa de suporte.</p>
+
+      <div class="signature">
+        — <strong>Blindspot</strong><br>
+        Founder & CEO — T-Lux Unlock System
+      </div>
+    </div>
+
+    <div class="footer">
+      © {{ now().year }} T-Lux Unlock System. All rights reserved.<br>
+      Powered by <strong>T-Lux Global Network</strong>
+    </div>
+  </div>
+</body>
+</html>

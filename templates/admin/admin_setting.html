@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}⚙️ Settings — T-Lux{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h3 class="text-gold mb-4">⚙️ System Settings</h3>
+
+  <div class="card card-tlux p-3 shadow-sm">
+    <h5 class="text-gold mb-3">🔧 Current Configuration</h5>
+    <div class="table-responsive">
+      <table class="table table-striped table-sm align-middle">
+        <thead class="table-light">
+          <tr><th>Setting</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+          {% for key, value in config.items() %}
+          <tr>
+            <td><strong>{{ key }}</strong></td>
+            <td>
+              {% if value == "not_set" %}
+                <span class="text-danger">⚠️ Not configured</span>
+              {% else %}
+                <code>{{ value }}</code>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-4 text-center">
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-tlux">⬅ Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

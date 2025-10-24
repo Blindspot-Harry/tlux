@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}💬 Chat — {{ target.email }}{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="card card-tlux shadow-sm p-3">
+    <h4 class="gold-text">💬 Chat com {{ target.email }}</h4>
+
+    <!-- Histórico -->
+    <div id="chat-box"
+         style="max-height: 400px; overflow-y: auto; background: #f8f9fa; border-radius: 8px; padding: 10px;">
+      {% for m in chat %}
+        <div class="mb-2 {% if m.from_user_id == me.id %}text-end{% else %}text-start{% endif %}">
+          <div class="d-inline-block px-3 py-2 rounded {% if m.from_user_id == me.id %}bg-primary text-white{% else %}bg-light{% endif %}">
+            {{ m.body }}
+          </div>
+          <div class="small text-muted">{{ m.created_at }}</div>
+        </div>
+      {% else %}
+        <p class="text-center text-muted">💬 Nenhuma mensagem ainda — envie a primeira!</p>
+      {% endfor %}
+    </div>
+
+    <!-- Campo para enviar -->
+    <form method="POST" class="mt-3 d-flex gap-2">
+      <input type="text" name="body" class="form-control" placeholder="Escreva uma mensagem..." required>
+      <button class="btn btn-tlux">Enviar</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}💬 My Messages — T-Lux{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="text-gold mb-3">💬 My Messages</h2>
+
+  <div class="card card-tlux p-3 mb-4" style="max-height:60vh; overflow-y:auto;">
+    {% for m in msgs %}
+      <div class="mb-3 {% if m.from_email == current_user.email %}text-end{% endif %}">
+        <div class="d-inline-block px-3 py-2 rounded-3 {% if m.from_email == current_user.email %}bg-gold text-white{% else %}bg-light{% endif %}">
+          <strong>{{ m.from_email }}</strong><br>
+          {{ m.body }}
+        </div><br>
+        <small class="text-muted">{{ m.created_at }}</small>
+      </div>
+    {% endfor %}
+  </div>
+
+  <form method="POST" class="d-flex gap-2">
+    <input type="text" name="body" class="form-control" placeholder="Write your message..." required>
+    <button class="btn btn-tlux">Send</button>
+  </form>
+</div>
+{% endblock %}

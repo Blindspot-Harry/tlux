@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}🧾 Licenses — Admin{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h3 class="text-gold mb-4">🧾 License Management</h3>
+
+  {% if licenses %}
+    <div class="table-responsive">
+      <table class="table table-striped table-sm align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Package</th>
+            <th>License Key</th>
+            <th>Issued</th>
+            <th>Expires</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lic in licenses %}
+            <tr>
+              <td>#{{ lic.id }}</td>
+              <td>{{ lic.user_email or '—' }}</td>
+              <td>{{ lic.pacote or '—' }}</td>
+              <td><code>{{ lic.license_key }}</code></td>
+              <td>{{ lic.issued_at or '—' }}</td>
+              <td>{{ lic.expires_at or '—' }}</td>
+              <td>
+                <form method="post" action="{{ url_for('admin_license_revoke', lic_id=lic.id) }}">
+                  <button class="btn btn-sm btn-outline-warning">Revoke</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="small-muted">No licenses found.</p>
+  {% endif %}
+
+  <div class="mt-4 text-center">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-tlux">⬅ Back to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

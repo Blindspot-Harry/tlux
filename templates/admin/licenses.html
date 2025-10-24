@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}🧾 License Management — Admin{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="text-gold fw-bold mb-4">🧾 License Management Panel</h2>
+
+  <!-- ✅ ADD LICENSE FORM -->
+  <div class="card card-tlux p-4 mb-4 shadow-sm">
+    <h5 class="text-gold mb-3">➕ Generate New License</h5>
+    <form method="POST" action="{{ url_for('admin_add_license') }}" class="row g-3 align-items-center">
+      <div class="col-md-3">
+        <label class="form-label small">User ID</label>
+        <input type="number" name="user_id" class="form-control" placeholder="User ID" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small">Package</label>
+        <select name="pacote" class="form-select" required>
+          <option value="">Select</option>
+          <option value="Bronze">🥉 Bronze</option>
+          <option value="Silver">🥈 Silver</option>
+          <option value="Gold">🥇 Gold</option>
+          <option value="Platinum">💎 Platinum</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small">Validity (days)</label>
+        <input type="number" name="valid_days" value="30" class="form-control" required>
+      </div>
+      <div class="col-md-3 text-end mt-4">
+        <button class="btn btn-tlux px-4">Generate</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- 🧾 EXISTING LICENSES -->
+  <div class="card card-tlux p-4 shadow-sm">
+    <h5 class="text-gold mb-3">📋 Active Licenses</h5>
+
+    {% if licenses %}
+      <div class="table-responsive">
+        <table class="table table-striped table-sm align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>User</th>
+              <th>Package</th>
+              <th>License Key</th>
+              <th>Issued</th>
+              <th>Expires</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for lic in licenses %}
+              <tr>
+                <td>#{{ lic.id }}</td>
+                <td>{{ lic.user_email or "—" }}</td>
+                <td>{{ lic.pacote or "—" }}</td>
+                <td><code>{{ lic.license_key }}</code></td>
+                <td>{{ lic.issued_at or "—" }}</td>
+                <td>{{ lic.expires_at or "—" }}</td>
+                <td>
+                  {% if lic.expires_at and lic.expires_at < now() %}
+                    <span class="badge bg-danger">Expired</span>
+                  {% else %}
+                    <span class="badge bg-success">Active</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <form method="post" action="{{ url_for('admin_license_revoke', lic_id=lic.id) }}">
+                    <button class="btn btn-sm btn-outline-warning">Revoke</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="small-muted">No licenses found.</p>
+    {% endif %}
+  </div>
+
+  <div class="mt-4 text-center">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-light">⬅ Back to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

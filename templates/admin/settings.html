@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}⚙️ Admin — Definições do Sistema{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="card card-tlux shadow-lg p-4">
+    <h3 class="gold-text text-center mb-4 fw-bold">⚙️ Definições do Sistema — T-Lux Unlock Platform</h3>
+    <p class="text-muted text-center mb-5">
+      Visualize e configure as integrações principais, chaves de API e parâmetros do sistema.
+    </p>
+
+    <!-- =========================
+         SEÇÃO 1 — INFORMAÇÕES GERAIS
+    ========================== -->
+    <h5 class="text-gold mb-3">🌍 Informações Gerais</h5>
+    <table class="table table-striped align-middle mb-5">
+      <tr><th>Nome do Sistema</th><td>T-Lux Unlock System</td></tr>
+      <tr><th>Versão</th><td>{{ config.version or "1.1.0" }}</td></tr>
+      <tr><th>Ambiente</th><td>{{ config.env or "Produção" }}</td></tr>
+      <tr><th>Arquivo de Banco de Dados</th><td>{{ config.db_file or "t-lux.db" }}</td></tr>
+      <tr><th>Data Atual</th><td>{{ config.current_time }}</td></tr>
+    </table>
+
+    <!-- =========================
+         SEÇÃO 2 — IREMOVAL API
+    ========================== -->
+    <h5 class="text-gold mb-3">🔐 Integração iRemoval Tools</h5>
+    <table class="table table-bordered align-middle mb-5">
+      <tr><th>Endpoint</th><td>{{ config.api_url or "https://bulk.iremove.tools/api/dhru/api/index.php" }}</td></tr>
+      <tr><th>Username</th><td>{{ config.username or "—" }}</td></tr>
+      <tr><th>API Key</th><td>
+        {% if config.api_key %}
+          {{ config.api_key[:8] ~ "********" }}
+        {% else %}
+          <span class="text-danger">❌ Não configurado</span>
+        {% endif %}
+      </td></tr>
+      <tr><th>Status</th><td>
+        {% if config.api_key %}<span class="text-success">✅ Conectado</span>{% else %}<span class="text-danger">⚠️ Falta configurar</span>{% endif %}
+      </td></tr>
+    </table>
+
+    <!-- =========================
+         SEÇÃO 3 — STRIPE
+    ========================== -->
+    <h5 class="text-gold mb-3">💳 Integração Stripe</h5>
+    <table class="table table-bordered align-middle mb-5">
+      <tr><th>Public Key</th><td>{{ config.stripe_public or "—" }}</td></tr>
+      <tr><th>Secret Key</th><td>
+        {% if config.stripe_secret %}
+          {{ config.stripe_secret[:8] ~ "********" }}
+        {% else %}
+          <span class="text-danger">❌ Não configurada</span>
+        {% endif %}
+      </td></tr>
+      <tr><th>Webhook Secret</th><td>{{ config.stripe_webhook or "—" }}</td></tr>
+    </table>
+
+    <!-- =========================
+         SEÇÃO 4 — SMTP (E-MAIL)
+    ========================== -->
+    <h5 class="text-gold mb-3">💌 Configuração de E-mail (SMTP)</h5>
+    <table class="table table-bordered align-middle mb-5">
+      <tr><th>Servidor</th><td>{{ config.smtp_server or "smtp.zoho.com" }}</td></tr>
+      <tr><th>Porta</th><td>{{ config.smtp_port or "465" }}</td></tr>
+      <tr><th>Usuário</th><td>{{ config.smtp_user or "support@t-lux.store" }}</td></tr>
+      <tr><th>Segurança</th><td>{{ config.smtp_security or "SSL/TLS" }}</td></tr>
+      <tr><th>Status</th><td><span class="text-success">✅ Ativo</span></td></tr>
+    </table>
+
+    <!-- =========================
+         SEÇÃO 5 — FLUTTERWAVE (FUTURO)
+    ========================== -->
+    <h5 class="text-gold mb-3">🌍 Integração Flutterwave</h5>
+    <table class="table table-bordered align-middle mb-5">
+      <tr><th>Public Key</th><td>{{ config.flutterwave_public or "—" }}</td></tr>
+      <tr><th>Secret Key</th><td>{{ config.flutterwave_secret or "—" }}</td></tr>
+      <tr><th>Status</th><td><span class="text-warning">🕓 Em Desenvolvimento</span></td></tr>
+    </table>
+
+    <!-- =========================
+         SEÇÃO 6 — AÇÕES RÁPIDAS
+    ========================== -->
+    <div class="text-center mt-4">
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-light px-4 mx-2">← Voltar ao Painel</a>
+      <a href="{{ url_for('update_services') }}" class="btn btn-outline-warning px-4 mx-2">🔄 Atualizar Serviços</a>
+      <a href="{{ url_for('logout') }}" class="btn btn-outline-danger px-4 mx-2">🚪 Terminar Sessão</a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,21 +1,34 @@
 {% extends "base.html" %}
-{% block title %}Admin — Logs{% endblock %}
+{% block title %}🧾 System Logs — Admin | T-Lux{% endblock %}
 
 {% block content %}
-<div class="card card-tlux p-3">
-  <h4 class="gold-text mb-3">Logs do Sistema</h4>
+<div class="container my-5">
+  <h2 class="text-gold mb-4">🧾 System Logs</h2>
   {% if logs %}
-    <ul class="list-group list-group-flush">
-      {% for log in logs %}
-        <li class="list-group-item">
-          <div class="fw-bold">{{ log.level }}</div>
-          <div class="small-muted">{{ log.message }}</div>
-          <div class="small-muted">{{ log.created_at }}</div>
-        </li>
-      {% endfor %}
-    </ul>
+    <div class="table-responsive">
+      <table class="table table-striped table-sm align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>User ID</th>
+            <th>Action</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+            <tr>
+              <td>{{ log.id }}</td>
+              <td>{{ log.user_id or "—" }}</td>
+              <td>{{ log.action }}</td>
+              <td class="small-muted">{{ log.created_at }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   {% else %}
-    <p class="small-muted">Nenhum log encontrado.</p>
+    <p class="small-muted">No logs found.</p>
   {% endif %}
 </div>
 {% endblock %}

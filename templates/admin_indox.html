@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}📬 Inbox — T-Lux Admin{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h2 class="gold-text fw-bold mb-4">📬 User Messages</h2>
+
+  <div class="list-group">
+    {% for t in threads %}
+      <a href="{{ url_for('admin_thread', user_id=t.user_id) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        <div>
+          <strong>{{ t.email }}</strong><br>
+          <small class="text-muted">Last message: {{ t.last_msg_at }}</small>
+        </div>
+        {% if t.unread > 0 %}
+          <span class="badge bg-danger rounded-pill">{{ t.unread }}</span>
+        {% endif %}
+      </a>
+    {% else %}
+      <p class="text-muted">No messages yet.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

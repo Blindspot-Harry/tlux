@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}💬 Conversation — T-Lux Admin{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h2 class="gold-text fw-bold mb-4">💬 Conversation with User #{{ user_id }}</h2>
+
+  <div class="card card-tlux mb-3 p-3" style="max-height: 60vh; overflow-y:auto;">
+    {% for m in msgs %}
+      <div class="mb-2 {% if m.from_user_id == session.user_id %}text-end{% endif %}">
+        <div class="p-2 rounded {% if m.from_user_id == session.user_id %}bg-primary text-white{% else %}bg-light{% endif %}">
+          {{ m.body }}
+        </div>
+        <small class="text-muted">{{ m.created_at }}</small>
+      </div>
+    {% endfor %}
+  </div>
+
+  <form method="post" class="d-flex gap-2">
+    <textarea name="body" class="form-control" placeholder="Write a reply..." required></textarea>
+    <button class="btn btn-tlux px-4">Send</button>
+  </form>
+</div>
+{% endblock %}

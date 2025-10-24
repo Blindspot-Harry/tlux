@@ -41,7 +41,7 @@
 
         <!-- Actions -->
         <div class="mt-4 d-flex justify-content-center flex-wrap gap-2">
-          <form action="{{ url_for('resend_verification_code') }}" method="POST">
+          <form action="{{ url_for('resend_verification_code_route') }}" method="POST">
             <input type="hidden" name="email" value="{{ email }}">
             <button type="submit" class="btn btn-tlux fw-bold px-4 py-2">
               🔁 {{ _("Resend Verification Email") }}
