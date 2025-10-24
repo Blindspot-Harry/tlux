@@ -1225,6 +1225,26 @@ def init_db():
     )
     """)
     conn.commit()
+    
+def migrate_blocked_users():
+    import sqlite3
+    conn = sqlite3.connect("t-lux.db")
+    c = conn.cursor()
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS blocked_users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT,
+        ip TEXT,
+        reason TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    conn.commit()
+    conn.close()
+    print("✅ Tabela 'blocked_users' verificada ou criada com sucesso!")
+
 # -----------------------
 # Limpeza automática de códigos expirados
 # -----------------------
@@ -5698,7 +5718,7 @@ def inject_user():
 if __name__ == "__main__":
     with app.app_context():
         init_db()
-        ensure_database_schema()  # ✅ garante estrutura do banco
+        migrate_blocked_users()
     app.run(host="0.0.0.0", port=5000)
 
 
