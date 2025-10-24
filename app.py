@@ -3021,28 +3021,45 @@ def check_email():
     """
     Informs the user that a verification email has been sent,
     showing options to resend it if needed.
+    Also handles Render health checks safely.
     """
-    # 1️⃣ Security: ensure there is a valid session
+
+    # 🧠 1️⃣ Health check (Render, bots, uptime monitors)
+    user_agent = request.headers.get("User-Agent", "")
+    if "Go-http-client" in user_agent or "Render" in user_agent:
+        return "OK", 200  # Evita loop 302 nos logs
+
+    # 🔐 2️⃣ Verifica se há sessão válida
     if not session.get("user_id") or not session.get("email"):
         flash("Please log in first.", "warning")
         return redirect(url_for("login"))
 
     email = session.get("email")
 
-    # 2️⃣ Optional: check if already verified
-    conn = get_db()
-    c = conn.cursor()
-    c.execute("SELECT email_verified FROM users WHERE email=?", (email,))
-    user = c.fetchone()
-    # conn.close() — fechado pelo teardown
+    try:
+        # 📦 3️⃣ Verifica status de verificação no banco
+        conn = get_db()
+        c = conn.cursor()
+        c.execute("SELECT email_verified FROM users WHERE email=?", (email,))
+        user = c.fetchone()
 
-    if user and user["email_verified"]:
-        flash("✅ Your email is already verified. You can now log in.", "success")
+        if user and user["email_verified"]:
+            flash("✅ Your email is already verified. You can now log in.", "success")
+            return redirect(url_for("login"))
+
+        # 📨 4️⃣ Mostra página informativa
+        return render_template("check_email.html", email=email)
+
+    except Exception as e:
+        app.logger.error(f"[CHECK_EMAIL_ERROR] {e}")
+        flash("An unexpected error occurred.", "danger")
         return redirect(url_for("login"))
 
-    # 3️⃣ Render info page
-    return render_template("check_email.html", email=email)
-
+    finally:
+        try:
+            conn.close()
+        except:
+            pass
 # -----------------------
 # Verifica se usuário tem licença ativa
 # -----------------------
