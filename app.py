@@ -1226,25 +1226,28 @@ def init_db():
     """)
     conn.commit()
     
-def migrate_blocked_users():
-    import sqlite3
-    conn = sqlite3.connect("t-lux.db")
+DB_PATH = os.getenv("DB_FILE", os.path.join(os.path.dirname(__file__), "t-lux.db"))
+SQL_FILE = os.path.join(os.path.dirname(__file__), "migrate_all.sql")
+
+def migrate_database():
+    print("🚀 Iniciando migração automática do banco T-Lux...")
+    if not os.path.exists(SQL_FILE):
+        print("❌ Arquivo migrate_all.sql não encontrado.")
+        return
+
+    with open(SQL_FILE, "r", encoding="utf-8") as f:
+        sql_script = f.read()
+
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS blocked_users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT,
-        ip TEXT,
-        reason TEXT,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-
-    conn.commit()
-    conn.close()
-    print("✅ Tabela 'blocked_users' verificada ou criada com sucesso!")
-
+    try:
+        c.executescript(sql_script)
+        conn.commit()
+        print("✅ Migração concluída com sucesso.")
+    except Exception as e:
+        print(f"⚠️ Erro durante a migração: {e}")
+    finally:
+        conn.close()
 # -----------------------
 # Limpeza automática de códigos expirados
 # -----------------------
@@ -1490,9 +1493,7 @@ def registrar_evento(user_id, descricao):
                     "USD", 1, datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 ))
 
-        conn.commit()
-
-        
+        conn.commit()  
 # -----------------------
 # Funções de preços e transações
 # -----------------------
