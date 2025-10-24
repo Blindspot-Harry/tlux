@@ -478,20 +478,20 @@ def processar_desbloqueio(modelo, imei, metodo_pagamento, email):
 #------------------------
 @app.before_request
 def verificar_email_global():
-    # ignora rotas públicas
-    if request.endpoint in ["login", "logout", "choose_package", "static"]:
+    # rotas públicas permitidas (adicione outras se necessário)
+    public_endpoints = ("login", "logout", "choose_package", "static", "home", "index", "verify_email_route")
+    if request.endpoint is None or request.endpoint in public_endpoints:
         return
 
-    # se for demo, libera apenas choose_package
-    if session.get("demo_access"):
+    # demo: força acesso apenas a choose_package
+    if session.get("email") == "demo@tlux.store":
         if request.endpoint != "choose_package":
             return redirect(url_for("choose_package"))
-        return  # deixa abrir choose_package
+        return  # permite abrir choose_package
 
     # resto da lógica normal para outros usuários
     if not session.get("email_verified"):
         return redirect(url_for("check_email"))
-
 
 @app.before_request
 def hard_guards():
